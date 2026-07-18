@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Your Premium Sites — Custom-Built Websites</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2L12 8' stroke='%237b2ff7' stroke-width='1.6'/%3E%3Cpath d='M12 16L12 22' stroke='%2339ff6a' stroke-width='1.6'/%3E%3Cpath d='M2 12L8 12' stroke='%237b2ff7' stroke-width='1.6'/%3E%3Cpath d='M16 12L22 12' stroke='%2339ff6a' stroke-width='1.6'/%3E%3Ccircle cx='12' cy='12' r='3.4' fill='%23000' stroke='%237b2ff7' stroke-width='1.6'/%3E%3C/svg%3E">
 <meta name="description" content="Your Premium Sites builds custom websites from the ground up — no templates, no shortcuts.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -508,24 +509,37 @@
 
   var bitmaps = new Map(), decoding = new Set();
   var B_AHEAD = 18, B_KEEP = 28;
-  var bmpCenter = -999;
+  var DECODE_CONCURRENCY = 12; /* caps in-flight createImageBitmap() calls so erratic/fast
+    scrolling (fast scrollbar drags, flicking) can't queue thousands of decodes at once and
+    lock up the render thread */
+  var ENSURE_THROTTLE_MS = 90; /* the full scan+decode+evict pass is real work (GPU bitmap
+    churn); cap how often it can run so a fast/erratic scroll can't trigger it on every
+    single animation frame (~60/sec) and starve the render thread */
+  var bmpCenter = -999, lastEnsureAt = -1;
   var displayed = 0;
 
   function ensureBitmaps(center){
     if (Math.abs(center - bmpCenter) < 3) return;
+    var now = performance.now();
+    if (lastEnsureAt >= 0 && now - lastEnsureAt < ENSURE_THROTTLE_MS) return;
+    lastEnsureAt = now;
     bmpCenter = center;
     var lo = Math.max(0, center - B_AHEAD), hi = Math.min(FRAME_COUNT-1, center + B_AHEAD);
+    var candidates = [];
     for (var i = lo; i <= hi; i++){
       if (bitmaps.has(i) || decoding.has(i) || !images[i]) continue;
-      decoding.add(i);
-      (function(idx){
-        createImageBitmap(images[idx]).then(function(b){
-          decoding.delete(idx);
-          if (Math.abs(idx - bmpCenter) > B_KEEP){ b.close(); return; }
-          bitmaps.set(idx, b);
-          if (idx === displayed) drawFrame(idx, true);
-        }).catch(function(){ decoding.delete(idx); });
-      })(i);
+      candidates.push(i);
+    }
+    candidates.sort(function(a, b){ return Math.abs(a - center) - Math.abs(b - center); });
+    for (var c = 0; c < candidates.length && decoding.size < DECODE_CONCURRENCY; c++){
+      let idx = candidates[c];
+      decoding.add(idx);
+      createImageBitmap(images[idx]).then(function(b){
+        decoding.delete(idx);
+        if (Math.abs(idx - bmpCenter) > B_KEEP){ b.close(); return; }
+        bitmaps.set(idx, b);
+        if (idx === displayed) drawFrame(idx, true);
+      }).catch(function(){ decoding.delete(idx); });
     }
     for (var k of Array.from(bitmaps.keys())){
       if (k < center - B_KEEP || k > center + B_KEEP){ bitmaps.get(k).close(); bitmaps.delete(k); }
