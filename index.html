@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Your Premium Sites — Custom-Built Websites</title>
+<meta name="description" content="Your Premium Sites builds custom websites from the ground up — no templates, no shortcuts.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&display=swap">
+<style>
+  :root{
+    --black:#05060a;
+    --purple:#7b2ff7;
+    --green:#39ff6a;
+    --violet:#2a0a4a;
+    --ink:#eef0f6;
+    --ink-dim:#9aa0b4;
+    --header-h:76px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{background:var(--black);}
+  body{
+    background:var(--black);
+    color:var(--ink);
+    font-family:'Inter',system-ui,sans-serif;
+    overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.display{
+    font-family:'Clash Display',sans-serif;
+    font-weight:600;
+    letter-spacing:-0.02em;
+    line-height:1.05;
+  }
+  .mono{
+    font-family:'Space Mono',monospace;
+    letter-spacing:0.02em;
+  }
+  a{color:inherit;text-decoration:none;}
+  button{font-family:inherit;cursor:pointer;}
+
+  /* ---------- Header ---------- */
+  header{
+    position:fixed;top:0;left:0;right:0;height:var(--header-h);
+    display:flex;align-items:center;justify-content:space-between;
+    padding:0 clamp(20px,4vw,56px);
+    z-index:100;
+    color:#fff;
+    background:transparent;
+    backdrop-filter:none;
+    transition:color .25s ease,background .35s ease,backdrop-filter .35s ease;
+  }
+  header.on-light{ color:#0a0a0f; }
+  header.in-content{
+    background:rgba(5,6,10,.72);
+    backdrop-filter:blur(10px);
+    -webkit-backdrop-filter:blur(10px);
+  }
+  .logo{display:flex;align-items:center;gap:10px;}
+  .logo svg{width:22px;height:22px;flex:none;}
+  .logo-text{font-family:'Clash Display',sans-serif;font-weight:700;font-size:15px;letter-spacing:0.04em;white-space:nowrap;}
+  nav{display:flex;align-items:center;gap:clamp(18px,3vw,40px);}
+  nav a.nav-link{font-size:13px;font-weight:500;opacity:.85;transition:opacity .2s;}
+  nav a.nav-link:hover{opacity:1;}
+  .nav-cta{
+    font-size:13px;font-weight:600;white-space:nowrap;
+    padding:10px 20px;border-radius:999px;
+    background:linear-gradient(90deg,var(--purple),var(--green));
+    color:#050608;
+  }
+  @media (max-width:720px){
+    nav a.nav-link{display:none;}
+    .nav-cta{font-size:12px;padding:9px 16px;}
+  }
+
+  /* ---------- Film stage ---------- */
+  .film-scroll{
+    position:relative;
+    height:850vh; /* 170vh * 5 chapters */
+  }
+  .film-stage{
+    position:sticky;top:0;left:0;
+    width:100%;height:100vh;
+    overflow:hidden;
+    background:#000;
+  }
+  .film-stage canvas{
+    position:absolute;top:0;left:0;
+    width:100%;height:100%;
+    display:block;
+  }
+  #ambientCanvas{ pointer-events:none; z-index:1; }
+  #grainVignette{
+    position:absolute;inset:0;
+    pointer-events:none;
+    background:radial-gradient(ellipse at center, rgba(0,0,0,0) 45%, rgba(0,0,0,.55) 100%);
+    mix-blend-mode:multiply;
+    z-index:2;
+  }
+  #grainVignette::after{
+    content:'';
+    position:absolute;inset:0;
+    opacity:.05;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  #bottomFade{
+    position:absolute;inset:0;
+    background:var(--seam,#05060a);
+    opacity:0;pointer-events:none;
+    z-index:4;
+  }
+
+  .loader{
+    position:absolute;inset:0;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:16px;background:#000;z-index:5;
+    transition:opacity .5s ease;
+  }
+  .loader.hidden{opacity:0;pointer-events:none;}
+  .loader-bar{width:200px;height:2px;background:rgba(255,255,255,.12);border-radius:2px;overflow:hidden;}
+  .loader-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--purple),var(--green));transition:width .15s ease;}
+  .loader-label{font-size:11px;color:var(--ink-dim);}
+
+  /* ---------- Beat overlays ---------- */
+  .beat{
+    position:absolute;left:0;right:0;
+    padding:0 clamp(24px,7vw,96px);
+    opacity:0;
+    z-index:3;
+    will-change:opacity,transform;
+  }
+  .beat-1{ top:0;height:100%;display:flex;flex-direction:column;justify-content:center;align-items:flex-start; }
+  .beat-1 h1{ font-size:clamp(40px,7.2vw,108px); max-width:14ch; }
+  .beat-1 p{ margin-top:18px;font-size:clamp(14px,1.6vw,19px);color:var(--ink-dim);max-width:34ch; }
+
+  .beat-mid{ top:0;height:100%;display:flex;flex-direction:column;justify-content:flex-end;padding-bottom:16vh; }
+  .beat-mid h2{ font-size:clamp(28px,4.4vw,58px); max-width:16ch; }
+  .beat-mid p{ margin-top:12px;font-size:clamp(13px,1.3vw,16px);color:var(--ink-dim);max-width:36ch; }
+
+  .beat-5{ top:0;height:100%;display:flex;flex-direction:column;justify-content:flex-end;padding-bottom:14vh; }
+  .beat-5 h2{ font-size:clamp(30px,4.8vw,64px);max-width:14ch; }
+  .beat-5 p{ margin-top:14px;font-size:clamp(13px,1.3vw,16px);color:var(--ink-dim);max-width:34ch; }
+  .beat-5 .cta{
+    margin-top:26px;display:inline-block;width:fit-content;
+    padding:14px 28px;border-radius:999px;
+    background:#fff;color:#0a0a0f;font-size:13px;font-weight:600;
+  }
+
+  /* Chapter readout — doubles as build-progress meter */
+  .readout{
+    position:absolute;right:clamp(20px,4vw,56px);top:calc(var(--header-h) + 28px);
+    text-align:right;z-index:3;color:#fff;
+    opacity:0;transition:opacity .3s;
+  }
+  .readout.show{opacity:1;}
+  .readout .chapter-name{font-size:11px;font-weight:700;letter-spacing:.12em;}
+  .readout .chapter-pct{font-size:11px;color:var(--ink-dim);margin-top:4px;}
+  .readout-bar{width:120px;height:2px;background:rgba(255,255,255,.15);margin-top:8px;margin-left:auto;}
+  .readout-bar-fill{height:100%;background:linear-gradient(90deg,var(--purple),var(--green));width:0%;}
+
+  /* ---------- After-film content ---------- */
+  main{ position:relative; background:var(--black); z-index:2; }
+  section{ padding:min(14vh,120px) clamp(20px,6vw,80px); }
+  .section-head{ max-width:820px; margin-bottom:min(7vh,64px); }
+  .eyebrow{
+    font-size:11px;font-weight:700;letter-spacing:.14em;color:var(--green);
+    display:flex;align-items:center;gap:8px;margin-bottom:16px;
+  }
+  .eyebrow::before{content:'';width:16px;height:1px;background:var(--green);}
+  .section-head h2{ font-size:clamp(30px,4.2vw,52px); }
+  .section-head p{ margin-top:18px;font-size:clamp(15px,1.4vw,18px);color:var(--ink-dim);max-width:56ch; }
+
+  /* Services */
+  .services-grid{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1px;
+    background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.08);
+  }
+  .service-card{
+    background:var(--black);padding:36px 28px;
+    display:flex;flex-direction:column;gap:14px;
+    transition:background .25s ease;
+  }
+  .service-card:hover{ background:#0b0d16; }
+  .service-num{ font-family:'Space Mono',monospace;font-size:12px;color:var(--purple); }
+  .service-card h3{ font-size:20px;font-weight:600; }
+  .service-card p{ font-size:14px;color:var(--ink-dim);line-height:1.6; }
+
+  /* Pricing */
+  .pricing-grid{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;
+  }
+  .price-card{
+    border:1px solid rgba(255,255,255,.1);border-radius:16px;
+    padding:36px 30px;display:flex;flex-direction:column;gap:18px;
+    background:linear-gradient(180deg, rgba(255,255,255,.02), transparent);
+  }
+  .price-card.featured{
+    border-color:transparent;
+    background:linear-gradient(180deg, rgba(123,47,247,.14), rgba(57,255,106,.05));
+    position:relative;
+  }
+  .price-card.featured::before{
+    content:'MOST POPULAR';
+    font-family:'Space Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.1em;
+    color:#050608;background:linear-gradient(90deg,var(--purple),var(--green));
+    padding:5px 10px;border-radius:999px;position:absolute;top:-11px;left:30px;
+  }
+  .price-tier{ font-size:13px;color:var(--ink-dim);font-weight:600;letter-spacing:.04em; }
+  .price-amount{ font-family:'Clash Display',sans-serif;font-size:38px;font-weight:600; }
+  .price-amount span{ font-size:14px;color:var(--ink-dim);font-family:'Inter';font-weight:400; }
+  .price-card ul{ list-style:none;display:flex;flex-direction:column;gap:10px; }
+  .price-card li{ font-size:14px;color:var(--ink-dim);display:flex;gap:10px;align-items:flex-start; }
+  .price-card li::before{ content:'—';color:var(--green);flex:none; }
+  .price-btn{
+    margin-top:auto;text-align:center;padding:13px;border-radius:10px;
+    border:1px solid rgba(255,255,255,.18);font-size:13px;font-weight:600;
+    transition:background .2s,border-color .2s;
+  }
+  .price-card.featured .price-btn{ background:#fff;color:#0a0a0f;border-color:transparent; }
+  .price-btn:hover{ border-color:rgba(255,255,255,.4); }
+
+  /* Contact */
+  .contact-wrap{
+    display:grid;grid-template-columns:1.2fr 1fr;gap:min(8vw,90px);align-items:end;
+  }
+  .contact-wrap h2{ font-size:clamp(34px,5.4vw,68px); }
+  .contact-links{ display:flex;flex-direction:column;gap:22px; }
+  .contact-links a.big-link{
+    font-size:clamp(20px,2.4vw,26px);font-family:'Clash Display',sans-serif;font-weight:600;
+    border-bottom:1px solid rgba(255,255,255,.15);padding-bottom:14px;
+    display:flex;justify-content:space-between;align-items:center;
+    transition:border-color .2s,color .2s;
+  }
+  .contact-links a.big-link:hover{ border-color:var(--green);color:var(--green); }
+  .contact-meta{ font-size:13px;color:var(--ink-dim); }
+
+  @media (max-width:860px){
+    .contact-wrap{grid-template-columns:1fr;}
+  }
+
+  footer{
+    border-top:1px solid rgba(255,255,255,.08);
+    padding:36px clamp(20px,6vw,80px);
+    display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;
+    font-size:12px;color:var(--ink-dim);
+  }
+  .footer-socials{ display:flex;gap:16px; }
+  .footer-socials a{ opacity:.7;transition:opacity .2s; }
+  .footer-socials a:hover{ opacity:1; }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ scroll-behavior:auto !important; }
+  }
+</style>
+</head>
+<body>
+
+<header id="siteHeader">
+  <div class="logo">
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 2L12 8" stroke="currentColor" stroke-width="1.4"/>
+      <path d="M12 16L12 22" stroke="currentColor" stroke-width="1.4"/>
+      <path d="M2 12L8 12" stroke="currentColor" stroke-width="1.4"/>
+      <path d="M16 12L22 12" stroke="currentColor" stroke-width="1.4"/>
+      <circle cx="12" cy="12" r="3.4" stroke="url(#lg)" stroke-width="1.6"/>
+      <defs>
+        <linearGradient id="lg" x1="0" y1="0" x2="24" y2="24">
+          <stop offset="0" stop-color="#7b2ff7"/>
+          <stop offset="1" stop-color="#39ff6a"/>
+        </linearGradient>
+      </defs>
+    </svg>
+    <span class="logo-text">YOUR PREMIUM SITES</span>
+  </div>
+  <nav>
+    <a class="nav-link" href="#services">Services</a>
+    <a class="nav-link" href="#pricing">Pricing</a>
+    <a class="nav-link" href="#contact">Contact</a>
+    <a class="nav-cta" href="#contact">Start a project</a>
+  </nav>
+</header>
+
+<div class="film-scroll" id="filmScroll">
+  <div class="film-stage">
+    <canvas id="filmCanvas"></canvas>
+    <canvas id="ambientCanvas"></canvas>
+    <div id="grainVignette"></div>
+    <div id="bottomFade"></div>
+
+    <div class="beat beat-1" data-in="-0.1" data-peak="0" data-out="0.16">
+      <h1>Your Premium Sites</h1>
+      <p>Custom-built websites, drafted and assembled from the ground up — no templates, no shortcuts.</p>
+    </div>
+
+    <div class="beat beat-mid" data-in="0.16" data-peak="0.235" data-out="0.38">
+      <h2>We start with structure.</h2>
+      <p>Every project begins as a blueprint — architecture before pixels.</p>
+    </div>
+
+    <div class="beat beat-mid" data-in="0.38" data-peak="0.455" data-out="0.58">
+      <h2>Then it comes together.</h2>
+      <p>Design and code, built in tandem, panel by panel.</p>
+    </div>
+
+    <div class="beat beat-mid" data-in="0.58" data-peak="0.655" data-out="0.78">
+      <h2>No templates. No shortcuts.</h2>
+      <p>Just a site engineered for exactly what you need.</p>
+    </div>
+
+    <div class="beat beat-5" data-in="0.78" data-peak="0.86" data-out="2">
+      <h2>This is what premium looks like.</h2>
+      <p>See what we can build for you.</p>
+      <a class="cta" href="#contact">Start Your Project</a>
+    </div>
+
+    <div class="readout" id="readout">
+      <div class="chapter-name mono" id="readoutName">01 — DRAFT</div>
+      <div class="chapter-pct mono" id="readoutPct">0%</div>
+      <div class="readout-bar"><div class="readout-bar-fill" id="readoutFill"></div></div>
+    </div>
+
+    <div class="loader" id="loader">
+      <div class="logo-text" style="font-size:13px;letter-spacing:.1em;color:#9aa0b4;">LOADING FILM</div>
+      <div class="loader-bar"><div class="loader-fill" id="loaderFill"></div></div>
+      <div class="loader-label mono" id="loaderLabel">0 / 301</div>
+    </div>
+  </div>
+</div>
+
+<main>
+  <section id="services">
+    <div class="section-head">
+      <div class="eyebrow">SERVICES</div>
+      <h2>What we build</h2>
+      <p>Four ways we've helped clients turn an idea into a site that actually performs — picked to fit the project, not a template catalogue.</p>
+    </div>
+    <div class="services-grid">
+      <div class="service-card">
+        <div class="service-num mono">01</div>
+        <h3>Brochure &amp; marketing sites</h3>
+        <p>Fast, sharp, conversion-focused sites for businesses that need to look as good as they perform.</p>
+      </div>
+      <div class="service-card">
+        <div class="service-num mono">02</div>
+        <h3>E-commerce</h3>
+        <p>Custom storefronts built around your catalogue and checkout flow — not a plugin's idea of one.</p>
+      </div>
+      <div class="service-card">
+        <div class="service-num mono">03</div>
+        <h3>Scroll-film flagships</h3>
+        <p>Cinematic, one-shot scroll experiences like this page — for launches that need to be remembered.</p>
+      </div>
+      <div class="service-card">
+        <div class="service-num mono">04</div>
+        <h3>Web apps &amp; dashboards</h3>
+        <p>Product interfaces and internal tools, engineered with the same care as a marketing site.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="pricing">
+    <div class="section-head">
+      <div class="eyebrow">PRICING</div>
+      <h2>Straightforward packages</h2>
+      <p>Every project is scoped for what it actually needs. These are starting points — final quotes are scoped to your project.</p>
+    </div>
+    <div class="pricing-grid">
+      <div class="price-card">
+        <div class="price-tier mono">LAUNCH</div>
+        <div class="price-amount">$2,500<span>starting at</span></div>
+        <ul>
+          <li>Single-page premium site</li>
+          <li>Custom design, no templates</li>
+          <li>Mobile-first build</li>
+          <li>2 weeks turnaround</li>
+        </ul>
+        <a class="price-btn" href="#contact">Get started</a>
+      </div>
+      <div class="price-card featured">
+        <div class="price-tier mono">GROWTH</div>
+        <div class="price-amount">$6,500<span>starting at</span></div>
+        <ul>
+          <li>Multi-page custom build</li>
+          <li>CMS &amp; content tooling</li>
+          <li>Motion &amp; interaction design</li>
+          <li>4–6 weeks turnaround</li>
+        </ul>
+        <a class="price-btn" href="#contact">Get started</a>
+      </div>
+      <div class="price-card">
+        <div class="price-tier mono">SIGNATURE</div>
+        <div class="price-amount">Custom<span>quoted per project</span></div>
+        <ul>
+          <li>Scroll-film flagship builds</li>
+          <li>Bespoke generated cinematics</li>
+          <li>Full brand + motion system</li>
+          <li>Dedicated build team</li>
+        </ul>
+        <a class="price-btn" href="#contact">Talk to us</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact">
+    <div class="contact-wrap">
+      <h2>Let's build something premium.</h2>
+      <div class="contact-links">
+        <a class="big-link" href="mailto:hello@yourpremiumsites.com">
+          <span>hello@yourpremiumsites.com</span>
+          <span>→</span>
+        </a>
+        <div class="contact-meta">Tell us about your project and we'll get back to you within one business day.</div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div>&copy; <span id="year"></span> Your Premium Sites. All rights reserved.</div>
+    <div class="footer-socials">
+      <a href="#" aria-label="Instagram">Instagram</a>
+      <a href="#" aria-label="X / Twitter">X</a>
+      <a href="#" aria-label="LinkedIn">LinkedIn</a>
+    </div>
+  </footer>
+</main>
+
+<script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
+<script>
+(function(){
+  "use strict";
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------------- Dev contract ---------------- */
+  var params = new URLSearchParams(location.search);
+  var JUMP = params.get('jump');
+  if (JUMP !== null) { history.scrollRestoration = 'manual'; }
+
+  /* ---------------- Frame loading ---------------- */
+  var FRAME_COUNT = 301;
+  var FRAME_W = 1280, FRAME_H = 720;
+  function framePath(i){
+    return 'frames/f_' + String(i+1).padStart(4,'0') + '.jpg';
+  }
+  var images = new Array(FRAME_COUNT).fill(null);
+  var loadedCount = 0;
+  var loaderFill = document.getElementById('loaderFill');
+  var loaderLabel = document.getElementById('loaderLabel');
+  var loader = document.getElementById('loader');
+
+  function loadFrame(i){
+    return new Promise(function(resolve){
+      var img = new Image();
+      img.onload = function(){ images[i] = img; loadedCount++; updateLoader(); resolve(); };
+      img.onerror = function(){ loadedCount++; updateLoader(); resolve(); };
+      img.src = framePath(i);
+    });
+  }
+  function updateLoader(){
+    var pct = Math.round((loadedCount/FRAME_COUNT)*100);
+    loaderFill.style.width = pct + '%';
+    loaderLabel.textContent = loadedCount + ' / ' + FRAME_COUNT;
+  }
+  function nearestFrame(i){
+    if (images[i]) return images[i];
+    for (var d=1; d<FRAME_COUNT; d++){
+      if (images[i-d]) return images[i-d];
+      if (images[i+d]) return images[i+d];
+    }
+    return null;
+  }
+
+  var CONCURRENCY = 10;
+  function loadAll(){
+    return new Promise(function(resolve){
+      var next = 0, active = 0, done = 0;
+      function pump(){
+        while (active < CONCURRENCY && next < FRAME_COUNT){
+          var idx = next++; active++;
+          loadFrame(idx).then(function(){
+            active--; done++;
+            if (done === FRAME_COUNT) resolve();
+            else pump();
+          });
+        }
+      }
+      pump();
+    });
+  }
+
+  /* ---------------- Canvas + ImageBitmap sliding window ---------------- */
+  var canvas = document.getElementById('filmCanvas');
+  var ctx = canvas.getContext('2d');
+  var DPR = Math.min(window.devicePixelRatio || 1, 1.5);
+
+  function resizeCanvas(){
+    var w = window.innerWidth, h = window.innerHeight;
+    canvas.width = Math.round(w*DPR);
+    canvas.height = Math.round(h*DPR);
+    canvas.style.width = w+'px';
+    canvas.style.height = h+'px';
+  }
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
+
+  var bitmaps = new Map(), decoding = new Set();
+  var B_AHEAD = 18, B_KEEP = 28;
+  var bmpCenter = -999;
+  var displayed = 0;
+
+  function ensureBitmaps(center){
+    if (Math.abs(center - bmpCenter) < 3) return;
+    bmpCenter = center;
+    var lo = Math.max(0, center - B_AHEAD), hi = Math.min(FRAME_COUNT-1, center + B_AHEAD);
+    for (var i = lo; i <= hi; i++){
+      if (bitmaps.has(i) || decoding.has(i) || !images[i]) continue;
+      decoding.add(i);
+      (function(idx){
+        createImageBitmap(images[idx]).then(function(b){
+          decoding.delete(idx);
+          if (Math.abs(idx - bmpCenter) > B_KEEP){ b.close(); return; }
+          bitmaps.set(idx, b);
+          if (idx === displayed) drawFrame(idx, true);
+        }).catch(function(){ decoding.delete(idx); });
+      })(i);
+    }
+    for (var k of Array.from(bitmaps.keys())){
+      if (k < center - B_KEEP || k > center + B_KEEP){ bitmaps.get(k).close(); bitmaps.delete(k); }
+    }
+  }
+
+  function drawSource(src, w, h){
+    var cw = canvas.width, ch = canvas.height;
+    var scale = Math.max(cw/w, ch/h);
+    var dw = w*scale, dh = h*scale;
+    var dx = (cw-dw)/2, dy = (ch-dh)/2;
+    ctx.drawImage(src, dx, dy, dw, dh);
+  }
+
+  function drawFrame(idx, force){
+    if (!force && idx === displayed && bitmaps.has(idx)) return;
+    displayed = idx;
+    var bmp = bitmaps.get(idx);
+    if (bmp){ drawSource(bmp, bmp.width, bmp.height); return; }
+    var img = images[idx] || nearestFrame(idx);
+    if (img) drawSource(img, FRAME_W, FRAME_H);
+  }
+
+  /* ---------------- Film progress + lerped playhead ---------------- */
+  var filmScroll = document.getElementById('filmScroll');
+  var currentFrame = 0, targetFrame = 0;
+
+  function getProgress(){
+    var r = filmScroll.getBoundingClientRect();
+    var p = -r.top / (r.height - window.innerHeight);
+    return Math.max(0, Math.min(1, p));
+  }
+
+  /* ---------------- Beat overlays ---------------- */
+  var beats = Array.from(document.querySelectorAll('.beat')).map(function(el){
+    return {
+      el: el,
+      in: parseFloat(el.dataset.in),
+      peak: parseFloat(el.dataset.peak),
+      out: parseFloat(el.dataset.out)
+    };
+  });
+  function beatAlpha(b, p){
+    if (p < b.in || p > b.out) return 0;
+    if (p < b.peak) return (p - b.in) / Math.max(1e-4, b.peak - b.in);
+    if (b.out > 1.5) return 1;
+    return 1 - (p - b.peak) / Math.max(1e-4, b.out - b.peak);
+  }
+  function updateBeats(p){
+    beats.forEach(function(b){
+      var a = beatAlpha(b, p);
+      b.el.style.opacity = a;
+      b.el.style.transform = 'translateY(' + ((1-a)*14) + 'px)';
+    });
+  }
+
+  /* ---------------- Chapter readout ---------------- */
+  var CHAPTERS = [
+    {name:'01 — DRAFT', from:0, to:0.2},
+    {name:'02 — STRUCTURE', from:0.2, to:0.4},
+    {name:'03 — ASSEMBLY', from:0.4, to:0.6},
+    {name:'04 — REFINEMENT', from:0.6, to:0.8},
+    {name:'05 — LAUNCH', from:0.8, to:1.0}
+  ];
+  var readout = document.getElementById('readout');
+  var readoutName = document.getElementById('readoutName');
+  var readoutPct = document.getElementById('readoutPct');
+  var readoutFill = document.getElementById('readoutFill');
+  function updateReadout(p){
+    if (p <= 0.001 || p >= 0.999){ readout.classList.remove('show'); return; }
+    readout.classList.add('show');
+    var ch = CHAPTERS[CHAPTERS.length-1];
+    for (var i=0;i<CHAPTERS.length;i++){ if (p < CHAPTERS[i].to){ ch = CHAPTERS[i]; break; } }
+    readoutName.textContent = ch.name;
+    var pct = Math.round(p*100);
+    readoutPct.textContent = pct + '%';
+    readoutFill.style.width = pct + '%';
+  }
+
+  /* ---------------- Adaptive header ---------------- */
+  var header = document.getElementById('siteHeader');
+  var sampleCanvas = document.createElement('canvas');
+  sampleCanvas.width = 16; sampleCanvas.height = 4;
+  var sampleCtx = sampleCanvas.getContext('2d', {willReadFrequently:true});
+  var lastSample = 0;
+  function sampleHeaderLuminance(now){
+    if (now - lastSample < 180) return;
+    lastSample = now;
+    try{
+      sampleCtx.drawImage(canvas, 0, 0, canvas.width, Math.round(canvas.height*0.12), 0, 0, 16, 4);
+      var data = sampleCtx.getImageData(0,0,16,4).data;
+      var sum=0, n=data.length/4;
+      for (var i=0;i<data.length;i+=4){ sum += 0.299*data[i]+0.587*data[i+1]+0.114*data[i+2]; }
+      var avg = sum/n;
+      header.classList.toggle('on-light', avg > 138);
+    }catch(e){}
+  }
+
+  /* ---------------- Seam handoff ---------------- */
+  var bottomFade = document.getElementById('bottomFade');
+  var grainVignette = document.getElementById('grainVignette');
+  var SEAM_COLOR = '#000000';
+  document.documentElement.style.setProperty('--seam', SEAM_COLOR);
+
+  /* ---------------- Ambient hero particle layer ---------------- */
+  var ambientCanvas = document.getElementById('ambientCanvas');
+  var actx = ambientCanvas.getContext('2d');
+  var particles = [];
+  var sprite = null;
+  function buildSprite(){
+    var s = document.createElement('canvas');
+    s.width = 32; s.height = 32;
+    var sc = s.getContext('2d');
+    var g = sc.createRadialGradient(16,16,0,16,16,16);
+    g.addColorStop(0, 'rgba(255,255,255,0.9)');
+    g.addColorStop(0.4, 'rgba(180,140,255,0.5)');
+    g.addColorStop(1, 'rgba(180,140,255,0)');
+    sc.fillStyle = g;
+    sc.fillRect(0,0,32,32);
+    return s;
+  }
+  function initParticles(){
+    ambientCanvas.width = canvas.width; ambientCanvas.height = canvas.height;
+    ambientCanvas.style.width = canvas.style.width; ambientCanvas.style.height = canvas.style.height;
+    sprite = buildSprite();
+    particles = [];
+    var n = 46;
+    for (var i=0;i<n;i++){
+      particles.push({
+        x: Math.random()*ambientCanvas.width,
+        y: Math.random()*ambientCanvas.height,
+        size: 6 + Math.random()*20,
+        speed: 0.08 + Math.random()*0.25,
+        phase: Math.random()*Math.PI*2,
+        depth: 0.3 + Math.random()*0.7,
+        green: Math.random() > 0.5
+      });
+    }
+  }
+  var ambientAlpha = 1;
+  function drawAmbient(p, now){
+    ambientAlpha = Math.max(0, 1 - p/0.07);
+    if (ambientAlpha <= 0 || !sprite){ actx.clearRect(0,0,ambientCanvas.width,ambientCanvas.height); return; }
+    actx.clearRect(0,0,ambientCanvas.width,ambientCanvas.height);
+    for (var i=0;i<particles.length;i++){
+      var pt = particles[i];
+      pt.y -= pt.speed * pt.depth;
+      if (pt.y < -20) pt.y = ambientCanvas.height + 20;
+      var twinkle = 0.5 + 0.5*Math.sin(now*0.001 + pt.phase);
+      actx.globalAlpha = ambientAlpha * (0.25 + 0.5*twinkle) * pt.depth;
+      var sz = pt.size * pt.depth;
+      actx.drawImage(sprite, pt.x - sz/2, pt.y - sz/2, sz, sz);
+    }
+    actx.globalAlpha = 1;
+  }
+
+  /* ---------------- Jank meter ---------------- */
+  var jankDeltas = [];
+  var lastJankLog = 0;
+
+  /* ---------------- Main render loop ---------------- */
+  var lastTime = performance.now();
+  var settled = false;
+
+  function tick(now){
+    var dt = now - lastTime; lastTime = now;
+    jankDeltas.push(dt);
+    if (now - lastJankLog > 2000){
+      var max = Math.max.apply(null, jankDeltas);
+      console.log('[jank] max frame delta:', max.toFixed(1), 'ms over', jankDeltas.length, 'frames');
+      jankDeltas = [];
+      lastJankLog = now;
+    }
+
+    var p = getProgress();
+    targetFrame = p * (FRAME_COUNT - 1);
+    currentFrame += (targetFrame - currentFrame) * 0.14;
+    if (Math.abs(targetFrame - currentFrame) < 0.05) currentFrame = targetFrame;
+
+    var idx = Math.round(currentFrame);
+    ensureBitmaps(idx);
+    drawFrame(idx);
+
+    updateBeats(p);
+    updateReadout(p);
+    header.classList.toggle('in-content', p >= 0.999);
+    if (p < 0.999) sampleHeaderLuminance(now);
+    if (!reduceMotion) drawAmbient(p, now);
+
+    var fadeP = Math.max(0, (p - 0.92) / 0.08);
+    bottomFade.style.opacity = fadeP;
+    grainVignette.style.opacity = 1 - fadeP*0.85;
+
+    requestAnimationFrame(tick);
+  }
+
+  /* ---------------- Lenis smooth scroll ---------------- */
+  var lenis = null;
+  function initLenis(){
+    if (reduceMotion || typeof Lenis === 'undefined') return;
+    lenis = new Lenis({ lerp: 0.09, smoothWheel: true });
+    function raf(time){ lenis.raf(time); requestAnimationFrame(raf); }
+    requestAnimationFrame(raf);
+  }
+
+  /* ---------------- Boot ---------------- */
+  loadAll().then(function(){
+    initParticles();
+    if (JUMP === null) initLenis(); /* dev contract: skip smooth-scroll init on a forced jump */
+    ensureBitmaps(0);
+    drawFrame(0, true);
+
+    loader.classList.add('hidden');
+
+    if (JUMP !== null){
+      var y = +JUMP || 0;
+      window.scrollTo(0, y);
+      var p = getProgress();
+      currentFrame = targetFrame = p*(FRAME_COUNT-1);
+      var idx = Math.round(currentFrame);
+      ensureBitmaps(idx);
+      drawFrame(idx, true);
+      updateBeats(p);
+      updateReadout(p);
+    }
+
+    requestAnimationFrame(function(){
+      requestAnimationFrame(function(){
+        settled = true;
+        window.__ready = true;
+        requestAnimationFrame(tick);
+      });
+    });
+  });
+})();
+</script>
+</body>
+</html>
