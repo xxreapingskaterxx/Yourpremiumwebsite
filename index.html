@@ -6,6 +6,11 @@
 <title>Your Premium Sites — Custom-Built Websites</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2L12 8' stroke='%237b2ff7' stroke-width='1.6'/%3E%3Cpath d='M12 16L12 22' stroke='%2339ff6a' stroke-width='1.6'/%3E%3Cpath d='M2 12L8 12' stroke='%237b2ff7' stroke-width='1.6'/%3E%3Cpath d='M16 12L22 12' stroke='%2339ff6a' stroke-width='1.6'/%3E%3Ccircle cx='12' cy='12' r='3.4' fill='%23000' stroke='%237b2ff7' stroke-width='1.6'/%3E%3C/svg%3E">
 <meta name="description" content="Your Premium Sites builds custom websites from the ground up — no templates, no shortcuts.">
+<meta name="theme-color" content="#05060a">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Your Premium Sites — Custom-Built Websites">
+<meta property="og:description" content="Custom websites built from the ground up — no templates, no shortcuts.">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -27,13 +32,16 @@
     color:var(--ink);
     font-family:'Inter',system-ui,sans-serif;
     overflow-x:hidden;
+    line-height:1.5;
     -webkit-font-smoothing:antialiased;
   }
+  p{ text-wrap:pretty; }
   h1,h2,h3,.display{
     font-family:'Clash Display',sans-serif;
     font-weight:600;
     letter-spacing:-0.02em;
     line-height:1.05;
+    text-wrap:balance;
   }
   .mono{
     font-family:'Space Mono',monospace;
@@ -41,6 +49,16 @@
   }
   a{color:inherit;text-decoration:none;}
   button{font-family:inherit;cursor:pointer;}
+
+  /* Keyboard focus + skip link */
+  :focus-visible{ outline:2px solid var(--green); outline-offset:3px; border-radius:4px; }
+  .skip-link{
+    position:absolute;left:16px;top:-48px;z-index:200;
+    padding:10px 16px;border-radius:8px;background:#fff;color:#0a0a0f;font-size:13px;font-weight:600;
+    transition:top .2s ease;
+  }
+  .skip-link:focus{ top:12px; }
+  section[id]{ scroll-margin-top:var(--header-h); }
 
   /* ---------- Header ---------- */
   header{
@@ -70,7 +88,10 @@
     padding:10px 20px;border-radius:999px;
     background:linear-gradient(90deg,var(--purple),var(--green));
     color:#050608;
+    transition:transform .2s ease,filter .2s ease;
   }
+  .nav-cta:hover{ filter:brightness(1.08); transform:translateY(-1px); }
+  .nav-cta:active, .cta:active, .price-btn:active{ transform:scale(.98); }
   @media (max-width:720px){
     nav a.nav-link{display:none;}
     .nav-cta{font-size:12px;padding:9px 16px;}
@@ -122,7 +143,7 @@
   .loader.hidden{opacity:0;pointer-events:none;}
   .loader-bar{width:200px;height:2px;background:rgba(255,255,255,.12);border-radius:2px;overflow:hidden;}
   .loader-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--purple),var(--green));transition:width .15s ease;}
-  .loader-label{font-size:11px;color:var(--ink-dim);}
+  .loader-label{font-size:11px;color:var(--ink-dim);font-variant-numeric:tabular-nums;}
 
   /* ---------- Beat overlays ---------- */
   .beat{
@@ -134,6 +155,7 @@
   }
   .beat-1{ top:0;height:100%;display:flex;flex-direction:column;justify-content:center;align-items:flex-start; }
   .beat-1 h1{ font-size:clamp(40px,7.2vw,108px); max-width:14ch; }
+  .beat p{ color:#c3c8d6 !important; text-shadow:0 1px 14px rgba(0,0,0,.85),0 0 2px rgba(0,0,0,.6); }
   .beat-1 p{ margin-top:18px;font-size:clamp(14px,1.6vw,19px);color:var(--ink-dim);max-width:34ch; }
 
   .beat-mid{ top:0;height:100%;display:flex;flex-direction:column;justify-content:flex-end;padding-bottom:16vh; }
@@ -147,7 +169,9 @@
     margin-top:26px;display:inline-block;width:fit-content;
     padding:14px 28px;border-radius:999px;
     background:#fff;color:#0a0a0f;font-size:13px;font-weight:600;
+    transition:transform .2s ease,background .2s ease;
   }
+  .beat-5 .cta:hover{ background:#e9ecf5; transform:translateY(-1px); }
 
   /* Chapter readout — doubles as build-progress meter */
   .readout{
@@ -157,7 +181,7 @@
   }
   .readout.show{opacity:1;}
   .readout .chapter-name{font-size:11px;font-weight:700;letter-spacing:.12em;}
-  .readout .chapter-pct{font-size:11px;color:var(--ink-dim);margin-top:4px;}
+  .readout .chapter-pct{font-size:11px;color:var(--ink-dim);margin-top:4px;font-variant-numeric:tabular-nums;}
   .readout-bar{width:120px;height:2px;background:rgba(255,255,255,.15);margin-top:8px;margin-left:auto;}
   .readout-bar-fill{height:100%;background:linear-gradient(90deg,var(--purple),var(--green));width:0%;}
 
@@ -210,17 +234,18 @@
   }
   .price-tier{ font-size:13px;color:var(--ink-dim);font-weight:600;letter-spacing:.04em; }
   .price-amount{ font-family:'Clash Display',sans-serif;font-size:38px;font-weight:600; }
-  .price-amount span{ font-size:14px;color:var(--ink-dim);font-family:'Inter';font-weight:400; }
+  .price-amount span{ font-size:14px;color:var(--ink-dim);font-family:'Inter',system-ui,sans-serif;font-weight:400;margin-left:6px; }
   .price-card ul{ list-style:none;display:flex;flex-direction:column;gap:10px; }
   .price-card li{ font-size:14px;color:var(--ink-dim);display:flex;gap:10px;align-items:flex-start; }
   .price-card li::before{ content:'—';color:var(--green);flex:none; }
   .price-btn{
     margin-top:auto;text-align:center;padding:13px;border-radius:10px;
     border:1px solid rgba(255,255,255,.18);font-size:13px;font-weight:600;
-    transition:background .2s,border-color .2s;
+    transition:background .2s,border-color .2s,transform .2s;
   }
   .price-card.featured .price-btn{ background:#fff;color:#0a0a0f;border-color:transparent; }
-  .price-btn:hover{ border-color:rgba(255,255,255,.4); }
+  .price-btn:hover{ border-color:rgba(255,255,255,.4); background:rgba(255,255,255,.04); }
+  .price-card.featured .price-btn:hover{ background:#e9ecf5; }
 
   /* Contact */
   .contact-wrap{
@@ -252,15 +277,16 @@
   .footer-socials a:hover{ opacity:1; }
 
   @media (prefers-reduced-motion: reduce){
-    *{ scroll-behavior:auto !important; }
+    *{ scroll-behavior:auto !important; transition:none !important; }
   }
 </style>
 </head>
 <body>
+<a class="skip-link" href="#services">Skip to content</a>
 
 <header id="siteHeader">
-  <div class="logo">
-    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <a class="logo" href="#" aria-label="Your Premium Sites, back to top">
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
       <path d="M12 2L12 8" stroke="currentColor" stroke-width="1.4"/>
       <path d="M12 16L12 22" stroke="currentColor" stroke-width="1.4"/>
       <path d="M2 12L8 12" stroke="currentColor" stroke-width="1.4"/>
@@ -274,8 +300,8 @@
       </defs>
     </svg>
     <span class="logo-text">YOUR PREMIUM SITES</span>
-  </div>
-  <nav>
+  </a>
+  <nav aria-label="Main">
     <a class="nav-link" href="#services">Services</a>
     <a class="nav-link" href="#pricing">Pricing</a>
     <a class="nav-link" href="#contact">Contact</a>
@@ -284,7 +310,7 @@
 </header>
 
 <div class="film-scroll" id="filmScroll">
-  <div class="film-stage">
+  <div class="film-stage" role="img" aria-label="A wireframe draft assembling into a finished website as you scroll">
     <canvas id="filmCanvas"></canvas>
     <canvas id="ambientCanvas"></canvas>
     <div id="grainVignette"></div>
@@ -313,7 +339,7 @@
     <div class="beat beat-5" data-in="0.78" data-peak="0.86" data-out="2">
       <h2>This is what premium looks like.</h2>
       <p>See what we can build for you.</p>
-      <a class="cta" href="#contact">Start Your Project</a>
+      <a class="cta" href="#contact">Start your project</a>
     </div>
 
     <div class="readout" id="readout">
@@ -419,11 +445,7 @@
 
   <footer>
     <div>&copy; <span id="year"></span> Your Premium Sites. All rights reserved.</div>
-    <div class="footer-socials">
-      <a href="#" aria-label="Instagram">Instagram</a>
-      <a href="#" aria-label="X / Twitter">X</a>
-      <a href="#" aria-label="LinkedIn">LinkedIn</a>
-    </div>
+    <a href="mailto:hello@yourpremiumsites.com">hello@yourpremiumsites.com</a>
   </footer>
 </main>
 
@@ -773,23 +795,12 @@
     actx.globalAlpha = 1;
   }
 
-  /* ---------------- Jank meter ---------------- */
-  var jankDeltas = [];
-  var lastJankLog = 0;
-
   /* ---------------- Main render loop ---------------- */
   var lastTime = performance.now();
   var settled = false;
 
   function tick(now){
-    var dt = now - lastTime; lastTime = now;
-    jankDeltas.push(dt);
-    if (now - lastJankLog > 2000){
-      var max = Math.max.apply(null, jankDeltas);
-      console.log('[jank] max frame delta:', max.toFixed(1), 'ms over', jankDeltas.length, 'frames');
-      jankDeltas = [];
-      lastJankLog = now;
-    }
+    lastTime = now;
 
     var p = getProgress();
     targetFrame = p * (FRAME_COUNT - 1);
@@ -821,6 +832,19 @@
     function raf(time){ lenis.raf(time); requestAnimationFrame(raf); }
     requestAnimationFrame(raf);
   }
+  /* In-page links glide instead of jumping (Lenis when it's running, native otherwise). */
+  document.addEventListener('click', function(e){
+    var a = e.target.closest && e.target.closest('a[href^="#"]');
+    if (!a) return;
+    var id = a.getAttribute('href');
+    var target = id === '#' ? document.body : document.querySelector(id);
+    if (!target) return;
+    e.preventDefault();
+    if (lenis) lenis.scrollTo(id === '#' ? 0 : target, { offset: id === '#' ? 0 : -header.offsetHeight });
+    else if (id === '#') window.scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' });
+    else target.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth' });
+    if (id !== '#') history.replaceState(null, '', id);
+  });
 
   /* ---------------- Boot ----------------
      Show the film as soon as the opening frames are in (or after START_TIMEOUT_MS on a
