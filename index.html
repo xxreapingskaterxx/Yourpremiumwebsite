@@ -15,6 +15,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&display=swap">
+<script>document.documentElement.classList.add('js');</script>
 <style>
   :root{
     --black:#05060a;
@@ -24,6 +25,11 @@
     --ink:#eef0f6;
     --ink-dim:#9aa0b4;
     --header-h:76px;
+    /* Motion tokens: strong custom curves (built-in ease/ease-out are too weak) */
+    --ease-out:cubic-bezier(0.23, 1, 0.32, 1);
+    --ease-in-out:cubic-bezier(0.77, 0, 0.175, 1);
+    --dur-press:160ms;
+    --dur-ui:200ms;
   }
   *{margin:0;padding:0;box-sizing:border-box;}
   html{background:var(--black);}
@@ -53,11 +59,11 @@
   /* Keyboard focus + skip link */
   :focus-visible{ outline:2px solid var(--green); outline-offset:3px; border-radius:4px; }
   .skip-link{
-    position:absolute;left:16px;top:-48px;z-index:200;
+    position:absolute;left:16px;top:12px;z-index:200;transform:translateY(-64px);
     padding:10px 16px;border-radius:8px;background:#fff;color:#0a0a0f;font-size:13px;font-weight:600;
-    transition:top .2s ease;
+    transition:transform var(--dur-ui) var(--ease-out);
   }
-  .skip-link:focus{ top:12px; }
+  .skip-link:focus{ transform:translateY(0); }
   section[id]{ scroll-margin-top:var(--header-h); }
 
   /* ---------- Header ---------- */
@@ -69,7 +75,7 @@
     color:#fff;
     background:transparent;
     backdrop-filter:none;
-    transition:color .25s ease,background .35s ease,backdrop-filter .35s ease;
+    transition:color .25s ease,background .3s var(--ease-out),backdrop-filter .3s var(--ease-out);
   }
   header.on-light{ color:#0a0a0f; }
   header.in-content{
@@ -81,17 +87,22 @@
   .logo svg{width:22px;height:22px;flex:none;}
   .logo-text{font-family:'Clash Display',sans-serif;font-weight:700;font-size:15px;letter-spacing:0.04em;white-space:nowrap;}
   nav{display:flex;align-items:center;gap:clamp(18px,3vw,40px);}
-  nav a.nav-link{font-size:13px;font-weight:500;opacity:.85;transition:opacity .2s;}
+  nav a.nav-link{font-size:13px;font-weight:500;opacity:.85;transition:opacity var(--dur-ui) ease;}
   nav a.nav-link:hover{opacity:1;}
   .nav-cta{
     font-size:13px;font-weight:600;white-space:nowrap;
     padding:10px 20px;border-radius:999px;
     background:linear-gradient(90deg,var(--purple),var(--green));
     color:#050608;
-    transition:transform .2s ease,filter .2s ease;
+    transition:transform var(--dur-press) var(--ease-out),filter var(--dur-ui) ease;
   }
-  .nav-cta:hover{ filter:brightness(1.08); transform:translateY(-1px); }
-  .nav-cta:active, .cta:active, .price-btn:active{ transform:scale(.98); }
+  /* Hover lift only where a real pointer hovers; touch fires false hovers on tap */
+  @media (hover:hover) and (pointer:fine){
+    .nav-cta:hover{ filter:brightness(1.08); transform:translateY(-1px); }
+    .beat-5 .cta:hover{ background:#e9ecf5; transform:translateY(-1px); }
+  }
+  /* Press feedback on every pressable element */
+  .nav-cta:active, .cta:active, .price-btn:active, .big-link:active{ transform:scale(.97); }
   @media (max-width:720px){
     nav a.nav-link{display:none;}
     .nav-cta{font-size:12px;padding:9px 16px;}
@@ -138,11 +149,11 @@
     position:absolute;inset:0;
     display:flex;flex-direction:column;align-items:center;justify-content:center;
     gap:16px;background:#000;z-index:5;
-    transition:opacity .5s ease;
+    transition:opacity .5s var(--ease-out);
   }
   .loader.hidden{opacity:0;pointer-events:none;}
   .loader-bar{width:200px;height:2px;background:rgba(255,255,255,.12);border-radius:2px;overflow:hidden;}
-  .loader-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--purple),var(--green));transition:width .15s ease;}
+  .loader-fill{height:100%;width:100%;transform:scaleX(0);transform-origin:left;background:linear-gradient(90deg,var(--purple),var(--green));transition:transform .2s var(--ease-out);}
   .loader-label{font-size:11px;color:var(--ink-dim);font-variant-numeric:tabular-nums;}
 
   /* ---------- Beat overlays ---------- */
@@ -169,21 +180,20 @@
     margin-top:26px;display:inline-block;width:fit-content;
     padding:14px 28px;border-radius:999px;
     background:#fff;color:#0a0a0f;font-size:13px;font-weight:600;
-    transition:transform .2s ease,background .2s ease;
+    transition:transform var(--dur-press) var(--ease-out),background var(--dur-ui) ease;
   }
-  .beat-5 .cta:hover{ background:#e9ecf5; transform:translateY(-1px); }
 
   /* Chapter readout — doubles as build-progress meter */
   .readout{
     position:absolute;right:clamp(20px,4vw,56px);top:calc(var(--header-h) + 28px);
     text-align:right;z-index:3;color:#fff;
-    opacity:0;transition:opacity .3s;
+    opacity:0;transition:opacity var(--dur-ui) var(--ease-out);
   }
   .readout.show{opacity:1;}
   .readout .chapter-name{font-size:11px;font-weight:700;letter-spacing:.12em;}
   .readout .chapter-pct{font-size:11px;color:var(--ink-dim);margin-top:4px;font-variant-numeric:tabular-nums;}
   .readout-bar{width:120px;height:2px;background:rgba(255,255,255,.15);margin-top:8px;margin-left:auto;}
-  .readout-bar-fill{height:100%;background:linear-gradient(90deg,var(--purple),var(--green));width:0%;}
+  .readout-bar-fill{height:100%;width:100%;transform:scaleX(0);transform-origin:left;background:linear-gradient(90deg,var(--purple),var(--green));}
 
   /* ---------- After-film content ---------- */
   main{ position:relative; background:var(--black); z-index:2; }
@@ -205,7 +215,7 @@
   .service-card{
     background:var(--black);padding:36px 28px;
     display:flex;flex-direction:column;gap:14px;
-    transition:background .25s ease;
+    transition:background var(--dur-ui) ease;
   }
   .service-card:hover{ background:#0b0d16; }
   .service-num{ font-family:'Space Mono',monospace;font-size:12px;color:var(--purple); }
@@ -241,7 +251,7 @@
   .price-btn{
     margin-top:auto;text-align:center;padding:13px;border-radius:10px;
     border:1px solid rgba(255,255,255,.18);font-size:13px;font-weight:600;
-    transition:background .2s,border-color .2s,transform .2s;
+    transition:background var(--dur-ui) ease,border-color var(--dur-ui) ease,transform var(--dur-press) var(--ease-out);
   }
   .price-card.featured .price-btn{ background:#fff;color:#0a0a0f;border-color:transparent; }
   .price-btn:hover{ border-color:rgba(255,255,255,.4); background:rgba(255,255,255,.04); }
@@ -257,7 +267,7 @@
     font-size:clamp(20px,2.4vw,26px);font-family:'Clash Display',sans-serif;font-weight:600;
     border-bottom:1px solid rgba(255,255,255,.15);padding-bottom:14px;
     display:flex;justify-content:space-between;align-items:center;
-    transition:border-color .2s,color .2s;
+    transition:border-color var(--dur-ui) ease,color var(--dur-ui) ease,transform var(--dur-press) var(--ease-out);
   }
   .contact-links a.big-link:hover{ border-color:var(--green);color:var(--green); }
   .contact-meta{ font-size:13px;color:var(--ink-dim); }
@@ -273,11 +283,30 @@
     font-size:12px;color:var(--ink-dim);
   }
   .footer-socials{ display:flex;gap:16px; }
-  .footer-socials a{ opacity:.7;transition:opacity .2s; }
+  .footer-socials a{ opacity:.7;transition:opacity var(--dur-ui) ease; }
   .footer-socials a:hover{ opacity:1; }
 
+  /* Scroll reveal for the after-film sections. Only armed when JS runs (html.js),
+     so content is never hidden without it. Transitions (not keyframes) so a fast
+     scroll back and forth retargets instead of restarting. */
+  .js .reveal{
+    opacity:0;transform:translateY(16px);
+    --d:calc(var(--i,0) * 60ms);
+    transition:opacity .6s var(--ease-out) var(--d),transform .6s var(--ease-out) var(--d);
+  }
+  .js .reveal.in{ opacity:1;transform:none; }
+  /* service cards keep their hover background fade, undelayed */
+  .js .service-card.reveal{
+    transition:opacity .6s var(--ease-out) var(--d),transform .6s var(--ease-out) var(--d),background var(--dur-ui) ease;
+  }
+
+  /* Reduced motion = fewer, gentler animations, not zero: keep opacity/colour
+     feedback, drop movement. */
   @media (prefers-reduced-motion: reduce){
-    *{ scroll-behavior:auto !important; transition:none !important; }
+    *{ scroll-behavior:auto !important; }
+    .js .reveal, .js .service-card.reveal{ transform:none;transition:opacity .2s ease,background var(--dur-ui) ease; }
+    .nav-cta, .cta, .price-btn, .big-link, .nav-cta:hover, .beat-5 .cta:hover{ transform:none !important; }
+    .skip-link{ transition:none; }
   }
 </style>
 </head>
@@ -358,28 +387,28 @@
 
 <main>
   <section id="services">
-    <div class="section-head">
+    <div class="section-head reveal">
       <div class="eyebrow">SERVICES</div>
       <h2>What we build</h2>
       <p>Four ways we've helped clients turn an idea into a site that actually performs — picked to fit the project, not a template catalogue.</p>
     </div>
     <div class="services-grid">
-      <div class="service-card">
+      <div class="service-card reveal" style="--i:0">
         <div class="service-num mono">01</div>
         <h3>Brochure &amp; marketing sites</h3>
         <p>Fast, sharp, conversion-focused sites for businesses that need to look as good as they perform.</p>
       </div>
-      <div class="service-card">
+      <div class="service-card reveal" style="--i:1">
         <div class="service-num mono">02</div>
         <h3>E-commerce</h3>
         <p>Custom storefronts built around your catalogue and checkout flow — not a plugin's idea of one.</p>
       </div>
-      <div class="service-card">
+      <div class="service-card reveal" style="--i:2">
         <div class="service-num mono">03</div>
         <h3>Scroll-film flagships</h3>
         <p>Cinematic, one-shot scroll experiences like this page — for launches that need to be remembered.</p>
       </div>
-      <div class="service-card">
+      <div class="service-card reveal" style="--i:3">
         <div class="service-num mono">04</div>
         <h3>Web apps &amp; dashboards</h3>
         <p>Product interfaces and internal tools, engineered with the same care as a marketing site.</p>
@@ -388,13 +417,13 @@
   </section>
 
   <section id="pricing">
-    <div class="section-head">
+    <div class="section-head reveal">
       <div class="eyebrow">PRICING</div>
       <h2>Straightforward packages</h2>
       <p>Every project is scoped for what it actually needs. These are starting points — final quotes are scoped to your project.</p>
     </div>
     <div class="pricing-grid">
-      <div class="price-card">
+      <div class="price-card reveal" style="--i:0">
         <div class="price-tier mono">LAUNCH</div>
         <div class="price-amount">$2,500<span>starting at</span></div>
         <ul>
@@ -405,7 +434,7 @@
         </ul>
         <a class="price-btn" href="#contact">Get started</a>
       </div>
-      <div class="price-card featured">
+      <div class="price-card featured reveal" style="--i:1">
         <div class="price-tier mono">GROWTH</div>
         <div class="price-amount">$6,500<span>starting at</span></div>
         <ul>
@@ -416,7 +445,7 @@
         </ul>
         <a class="price-btn" href="#contact">Get started</a>
       </div>
-      <div class="price-card">
+      <div class="price-card reveal" style="--i:2">
         <div class="price-tier mono">SIGNATURE</div>
         <div class="price-amount">Custom<span>quoted per project</span></div>
         <ul>
@@ -432,8 +461,8 @@
 
   <section id="contact">
     <div class="contact-wrap">
-      <h2>Let's build something premium.</h2>
-      <div class="contact-links">
+      <h2 class="reveal">Let's build something premium.</h2>
+      <div class="contact-links reveal" style="--i:1">
         <a class="big-link" href="mailto:hello@yourpremiumsites.com">
           <span>hello@yourpremiumsites.com</span>
           <span>→</span>
@@ -489,7 +518,7 @@
   }
   function updateLoader(){
     var pct = Math.round((loadedCount/FRAME_COUNT)*100);
-    loaderFill.style.width = pct + '%';
+    loaderFill.style.transform = 'scaleX(' + (pct/100) + ')';
     loaderLabel.textContent = loadedCount + ' / ' + FRAME_COUNT;
   }
 
@@ -687,7 +716,7 @@
     beats.forEach(function(b){
       var a = beatAlpha(b, p);
       b.el.style.opacity = a;
-      b.el.style.transform = 'translateY(' + ((1-a)*14) + 'px)';
+      if (!reduceMotion) b.el.style.transform = 'translateY(' + ((1-a)*14) + 'px)';
     });
   }
 
@@ -711,7 +740,7 @@
     readoutName.textContent = ch.name;
     var pct = Math.round(p*100);
     readoutPct.textContent = pct + '%';
-    readoutFill.style.width = pct + '%';
+    readoutFill.style.transform = 'scaleX(' + (pct/100) + ')';
   }
 
   /* ---------------- Adaptive header ---------------- */
@@ -823,6 +852,18 @@
 
     requestAnimationFrame(tick);
   }
+
+  /* ---------------- Scroll reveal ---------------- */
+  (function(){
+    var els = document.querySelectorAll('.reveal');
+    if (!('IntersectionObserver' in window)){ els.forEach(function(el){ el.classList.add('in'); }); return; }
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if (e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); }
+      });
+    }, { rootMargin:'0px 0px -10% 0px' });
+    els.forEach(function(el){ io.observe(el); });
+  })();
 
   /* ---------------- Lenis smooth scroll ---------------- */
   var lenis = null;
