@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Pricing — Da Website Builder</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='5' fill='%2305080d'/%3E%3Cpath d='M9 7L4 12L9 17' stroke='%2322d3ee' stroke-width='2' fill='none'/%3E%3Cpath d='M15 7L20 12L15 17' stroke='%2322d3ee' stroke-width='2' fill='none'/%3E%3Cpath d='M13.5 5L10.5 19' stroke='%23ffb224' stroke-width='2'/%3E%3C/svg%3E">
-<meta name="description" content="Website packages from Da Website Builder: Launch from $2,500, Growth from $6,500, and custom Signature builds.">
+<meta name="description" content="Website packages from Da Website Builder: Basic sites from $300, Advanced from $2,500, and Custom builds from $5,000.">
 <meta name="theme-color" content="#05080d">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Pricing — Da Website Builder">
-<meta property="og:description" content="Website packages from Da Website Builder: Launch from $2,500, Growth from $6,500, and custom Signature builds.">
+<meta property="og:description" content="Website packages from Da Website Builder: Basic sites from $300, Advanced from $2,500, and Custom builds from $5,000.">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -175,6 +175,36 @@
   .service-card ul{ list-style:none;display:flex;flex-direction:column;gap:8px;margin-top:6px; }
   .service-card li{ font-size:13px;color:var(--ink-dim);display:flex;gap:10px; }
   .service-card li::before{ content:'—';color:var(--amber);flex:none; }
+  /* Custom build request form */
+  .custom-wrap{ max-width:980px; }
+  .custom-form{ display:grid;grid-template-columns:repeat(3,1fr);gap:20px 22px; }
+  .custom-form .field{ display:flex;flex-direction:column;gap:8px;min-width:0; }
+  .custom-form .field.wide{ grid-column:1 / -1; }
+  .custom-form label{ font-size:13px;font-weight:600; }
+  .custom-form .opt-tag{ font-weight:400;color:var(--ink-dim);margin-left:4px; }
+  .custom-form input, .custom-form select, .custom-form textarea{
+    width:100%;font:inherit;font-size:15px;color:var(--ink);
+    background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.14);border-radius:10px;
+    padding:12px 14px;transition:border-color var(--dur-ui) ease,background var(--dur-ui) ease;
+  }
+  .custom-form select{ appearance:none;-webkit-appearance:none;padding-right:36px;
+    background-image:linear-gradient(45deg,transparent 50%,var(--ink-dim) 50%),linear-gradient(135deg,var(--ink-dim) 50%,transparent 50%);
+    background-position:calc(100% - 19px) 52%,calc(100% - 14px) 52%;background-size:5px 5px;background-repeat:no-repeat; }
+  .custom-form select option{ background:#0b111a;color:var(--ink); }
+  .custom-form textarea{ resize:vertical;min-height:140px;line-height:1.5; }
+  .custom-form input:focus, .custom-form select:focus, .custom-form textarea:focus{ outline:none;border-color:var(--cyan);background:rgba(34,211,238,.04); }
+  .custom-form [aria-invalid="true"]{ border-color:#ff6b6b; }
+  .field-err{ font-size:13px;color:#ff8a8a;min-height:0; }
+  .field-err:empty{ display:none; }
+  .field-hint{ font-size:13px;color:var(--ink-dim); }
+  .form-foot{ flex-direction:row !important;align-items:center;gap:20px !important;flex-wrap:wrap;margin-top:6px; }
+  .form-send{
+    display:inline-block;border:0;padding:15px 28px;border-radius:999px;background:var(--amber);color:#050608;
+    font-size:15px;font-weight:600;transition:background var(--dur-ui) ease,transform var(--dur-press) var(--ease-out);
+  }
+  .form-send:active{ transform:scale(.97); }
+  @media (hover:hover) and (pointer:fine){ .form-send:hover{ background:#ffc457; } }
+  @media (max-width:760px){ .custom-form{ grid-template-columns:1fr; } }
 
   /* ---------- Build stage ---------- */
   .film-scroll{
@@ -507,23 +537,23 @@
       <div class="scroll-cue mono" aria-hidden="true"><span class="cue-line"></span>SCROLL TO COMPARE</div>
     </div>
     <div class="beat beat-mid" data-in="0.13" data-peak="0.22" data-out="0.31">
-      <div class="beat-num mono">01 / LAUNCH</div>
-      <h2>$2,500 to launch.</h2>
-      <p>A single-page custom site, designed from scratch and built mobile-first. About two weeks.</p>
+      <div class="beat-num mono">01 / BASIC</div>
+      <h2>$300–500. Simple and solid.</h2>
+      <p>A clean, non-animated site that gets you online fast. Mobile-friendly, in about a week.</p>
     </div>
     <div class="beat beat-mid" data-in="0.37" data-peak="0.46" data-out="0.55">
-      <div class="beat-num mono">02 / GROWTH · MOST POPULAR</div>
-      <h2>$6,500 to grow.</h2>
-      <p>A multi-page build with CMS, content tooling and motion design. Four to six weeks.</p>
+      <div class="beat-num mono">02 / ADVANCED · MOST POPULAR</div>
+      <h2>$2,500, fully dressed.</h2>
+      <p>A premium template customized to your brand, with animations and scroll effects. Two to three weeks.</p>
     </div>
     <div class="beat beat-mid" data-in="0.61" data-peak="0.7" data-out="0.79">
-      <div class="beat-num mono">03 / SIGNATURE</div>
-      <h2>Custom, top to bottom.</h2>
-      <p>Scroll-film flagships, bespoke cinematics and a full brand and motion system, with a dedicated build team.</p>
+      <div class="beat-num mono">03 / CUSTOM</div>
+      <h2>Custom, from $5,000.</h2>
+      <p>Built from scratch: 3D scroll films, online stores, web apps. Tell us what you need and we'll quote it.</p>
     </div>
     <div class="beat beat-5" data-in="0.83" data-peak="0.93" data-out="2">
       <h2>Pick your floor plan.</h2>
-      <p>Starting points, not ceilings. Every quote is scoped to your project.</p>
+      <p>Compare the packages, or send us a custom request.</p>
       <a class="cta" href="#pricing">Compare packages</a>
     </div>
     <div class="readout" id="readout">
@@ -538,44 +568,150 @@
     <div class="section-head reveal">
       <div class="eyebrow mono">// PRICING</div>
       <h2>Straightforward packages</h2>
-      <p>Every project is scoped for what it actually needs. These are starting points — final quotes are scoped to your project.</p>
+      <p>Three ways to get online, from a simple site to a fully custom build. Final quotes are scoped to your project.</p>
     </div>
     <div class="pricing-grid">
       <div class="price-card spot reveal" style="--i:0">
-        <div class="price-tier mono">LAUNCH</div>
-        <div class="price-amount">$2,500<span>starting at</span></div>
+        <div class="price-tier mono">BASIC</div>
+        <div class="price-amount">$300–500<span>one-time</span></div>
         <ul>
-          <li>Single-page custom site</li>
-          <li>Custom design, no templates</li>
-          <li>Mobile-first build</li>
-          <li>2 weeks turnaround</li>
+          <li>Clean, non-animated website</li>
+          <li>1–3 pages</li>
+          <li>Mobile-friendly</li>
+          <li>About 1 week turnaround</li>
         </ul>
         <a class="price-btn" href="contact.html">Get started</a>
       </div>
       <div class="price-card featured spot reveal" style="--i:1">
-        <div class="price-tier mono">GROWTH</div>
-        <div class="price-amount">$6,500<span>starting at</span></div>
+        <div class="price-tier mono">ADVANCED</div>
+        <div class="price-amount">$2,500<span>approx.</span></div>
         <ul>
-          <li>Multi-page custom build</li>
-          <li>CMS &amp; content tooling</li>
-          <li>Motion &amp; interaction design</li>
-          <li>4–6 weeks turnaround</li>
+          <li>Premium template, customized to your brand</li>
+          <li>Multi-page site</li>
+          <li>Animations &amp; scroll effects</li>
+          <li>2–3 weeks turnaround</li>
         </ul>
         <a class="price-btn" href="contact.html">Get started</a>
       </div>
       <div class="price-card spot reveal" style="--i:2">
-        <div class="price-tier mono">SIGNATURE</div>
-        <div class="price-amount">Custom<span>quoted per project</span></div>
+        <div class="price-tier mono">CUSTOM</div>
+        <div class="price-amount">$5,000<span>starting at</span></div>
         <ul>
-          <li>Scroll-film flagship builds</li>
-          <li>Bespoke generated cinematics</li>
-          <li>Full brand + motion system</li>
-          <li>Dedicated build team</li>
+          <li>Designed &amp; built from scratch</li>
+          <li>3D &amp; scroll-film cinematics</li>
+          <li>Stores, web apps &amp; dashboards</li>
+          <li>Quoted to your project</li>
         </ul>
-        <a class="price-btn" href="contact.html">Talk to us</a>
+        <a class="price-btn" href="#custom">Request a custom build</a>
       </div>
     </div>
   </section>
+
+  <section id="custom">
+    <div class="custom-wrap">
+      <div class="section-head reveal">
+        <div class="eyebrow mono">// CUSTOM BUILD</div>
+        <h2>Tell us what to build.</h2>
+        <p>Custom builds start at $5,000. Describe what you want and it goes straight to our inbox. We'll reply with a plan and a quote within one business day.</p>
+      </div>
+      <form class="custom-form reveal" id="customForm" novalidate>
+        <div class="field">
+          <label for="cfName">Your name</label>
+          <input id="cfName" name="name" type="text" autocomplete="name" required>
+          <p class="field-err" id="cfNameErr"></p>
+        </div>
+        <div class="field">
+          <label for="cfEmail">Email</label>
+          <input id="cfEmail" name="email" type="email" autocomplete="email" required>
+          <p class="field-err" id="cfEmailErr"></p>
+        </div>
+        <div class="field">
+          <label for="cfBiz">Business or project name <span class="opt-tag">optional</span></label>
+          <input id="cfBiz" name="business" type="text" autocomplete="organization">
+        </div>
+        <div class="field">
+          <label for="cfType">What do you need?</label>
+          <select id="cfType" name="type">
+            <option>A custom website</option>
+            <option>An online store</option>
+            <option>A web app or dashboard</option>
+            <option>A 3D / scroll-film site</option>
+            <option>Something else</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="cfBudget">Budget</label>
+          <select id="cfBudget" name="budget">
+            <option>$5,000 – $10,000</option>
+            <option>$10,000 – $20,000</option>
+            <option>$20,000+</option>
+            <option>Not sure yet</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="cfTime">Timeline</label>
+          <select id="cfTime" name="timeline">
+            <option>Flexible</option>
+            <option>As soon as possible</option>
+            <option>1–2 months</option>
+            <option>3+ months</option>
+          </select>
+        </div>
+        <div class="field wide">
+          <label for="cfDetails">Describe your build</label>
+          <textarea id="cfDetails" name="details" rows="6" required></textarea>
+          <p class="field-hint">Pages, features, sites you like, deadline. Rough notes are fine.</p>
+          <p class="field-err" id="cfDetailsErr"></p>
+        </div>
+        <div class="field wide form-foot">
+          <button class="cta form-send" type="submit">Send my request</button>
+          <p class="field-hint" id="cfStatus" role="status">Opens your email app with everything filled in, addressed to desmondbetts@ymail.com.</p>
+        </div>
+      </form>
+    </div>
+  </section>
+<script>
+/* custom build request: validates, then hands a filled-in email to the visitor's mail app */
+(function(){
+  var form = document.getElementById('customForm');
+  var checks = {
+    cfName: function(v){ return v ? '' : 'Add your name so we know who to reply to.'; },
+    cfEmail: function(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) ? '' : 'Add an email like name@example.com.'; },
+    cfDetails: function(v){ return v.length >= 10 ? '' : 'Add a line or two about what you want built.'; }
+  };
+  function check(id){
+    var el = document.getElementById(id), msg = checks[id](el.value.trim()), err = document.getElementById(id + 'Err');
+    err.textContent = msg;
+    el.setAttribute('aria-invalid', msg ? 'true' : 'false');
+    if (msg) el.setAttribute('aria-describedby', id + 'Err'); else el.removeAttribute('aria-describedby');
+    return !msg;
+  }
+  Object.keys(checks).forEach(function(id){
+    var el = document.getElementById(id);
+    el.addEventListener('blur', function(){ if (el.value.trim()) check(id); });
+    el.addEventListener('input', function(){ if (el.getAttribute('aria-invalid') === 'true') check(id); });
+  });
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    var bad = Object.keys(checks).filter(function(id){ return !check(id); });
+    if (bad.length){ document.getElementById(bad[0]).focus(); return; }
+    var f = form.elements;
+    var body = [
+      'Name: ' + f.name.value.trim(),
+      'Email: ' + f.email.value.trim(),
+      'Business / project: ' + (f.business.value.trim() || '-'),
+      'Need: ' + f.type.value,
+      'Budget: ' + f.budget.value,
+      'Timeline: ' + f.timeline.value,
+      '',
+      f.details.value.trim()
+    ].join('\n');
+    location.href = 'mailto:desmondbetts@ymail.com?subject=' + encodeURIComponent('Custom build request: ' + f.name.value.trim())
+      + '&body=' + encodeURIComponent(body);
+    document.getElementById('cfStatus').textContent = "Your email app should open with the request ready to send. If it didn't, email desmondbetts@ymail.com directly.";
+  });
+})();
+</script>
 
   <section id="contact">
     <div class="contact-wrap">
@@ -792,9 +928,9 @@
   /* ---------------- Three towers, one per package ---------------- */
   /* each package is a tower of floors: the more floors, the more is included */
   var TIERS = [
-    { x: -22, floors: 4,  col: CYAN,  name: 'LAUNCH',    price: '$2,500', feats: ['SINGLE-PAGE SITE', 'CUSTOM DESIGN', 'MOBILE-FIRST', '2 WEEKS'] },
-    { x: 0,   floors: 7,  col: AMBER, name: 'GROWTH',    price: '$6,500', feats: ['MULTI-PAGE BUILD', 'CMS + CONTENT', 'MOTION DESIGN', '4–6 WEEKS'] },
-    { x: 22,  floors: 11, col: CYAN,  name: 'SIGNATURE', price: 'CUSTOM', feats: ['SCROLL-FILM FLAGSHIP', 'BESPOKE CINEMATICS', 'BRAND + MOTION', 'DEDICATED TEAM'] }
+    { x: -22, floors: 4,  col: CYAN,  name: 'BASIC',    price: '$300–500', feats: ['NON-ANIMATED', '1–3 PAGES', 'MOBILE-FRIENDLY', '~1 WEEK'] },
+    { x: 0,   floors: 7,  col: AMBER, name: 'ADVANCED', price: '$2,500',   feats: ['PREMIUM TEMPLATE', 'YOUR BRANDING', 'ANIMATIONS', '2–3 WEEKS'] },
+    { x: 22,  floors: 11, col: CYAN,  name: 'CUSTOM',   price: 'FROM $5,000', feats: ['BUILT FROM SCRATCH', '3D + SCROLL FILMS', 'STORES + WEB APPS', 'QUOTED TO YOU'] }
   ];
   var FLOOR_H = .7, FLOOR_GAP = .9;
   var towers = TIERS.map(function(t, ti){
@@ -897,9 +1033,9 @@
   /* the skyline, then one shot per tower as it goes up, then all three side by side */
   var SHOTS = [
     { at: 0.00, pos: [44, 10, 26],  look: [-4, 5, 0] },    /* hero: three blueprints down the row */
-    { at: 0.22, pos: [-12, 6, 17],  look: [-20, 2.6, 0] }, /* launch, eye level */
-    { at: 0.46, pos: [9, 9, 19],    look: [1, 4.4, 0] },   /* growth */
-    { at: 0.70, pos: [37, 4, 26],   look: [22, 6.5, 0] },  /* signature, low looking up */
+    { at: 0.22, pos: [-12, 6, 17],  look: [-20, 2.6, 0] }, /* basic, eye level */
+    { at: 0.46, pos: [9, 9, 19],    look: [1, 4.4, 0] },   /* advanced */
+    { at: 0.70, pos: [37, 4, 26],   look: [22, 6.5, 0] },  /* custom, low looking up */
     { at: 1.00, pos: [0, 13, 46],   look: [0, 5, 0] }      /* all three */
   ];
   if (MOBILE){
@@ -1054,12 +1190,12 @@
   /* ---------------- Terminal build log ---------------- */
   var LOG = [
     { at: 0.00, t: '$ dwb quote --list', c: 'cmd' },
-    { at: 0.08, t: '→ estimating launch…' },
-    { at: 0.22, t: '✓ LAUNCH     $2,500', c: 'ok' },
-    { at: 0.32, t: '→ estimating growth…' },
-    { at: 0.46, t: '✓ GROWTH     $6,500', c: 'ok' },
-    { at: 0.56, t: '→ scoping signature…' },
-    { at: 0.71, t: '✓ SIGNATURE  custom', c: 'ok' },
+    { at: 0.08, t: '→ estimating basic…' },
+    { at: 0.22, t: '✓ BASIC     $300–500', c: 'ok' },
+    { at: 0.32, t: '→ estimating advanced…' },
+    { at: 0.46, t: '✓ ADVANCED  $2,500', c: 'ok' },
+    { at: 0.56, t: '→ scoping custom…' },
+    { at: 0.71, t: '✓ CUSTOM    from $5,000', c: 'ok' },
     { at: 0.85, t: '$ dwb quote --yours', c: 'cmd' },
     { at: 0.93, t: '✓ scoped to your project.', c: 'live' }
   ];
@@ -1108,7 +1244,7 @@
     });
   }
   var CHAPTERS = [
-    { name: '00 — PACKAGES', to: 0.12 }, { name: '01 — LAUNCH', to: 0.34 }, { name: '02 — GROWTH', to: 0.58 }, { name: '03 — SIGNATURE', to: 0.8 }, { name: '04 — COMPARE', to: 1.01 }
+    { name: '00 — PACKAGES', to: 0.12 }, { name: '01 — BASIC', to: 0.34 }, { name: '02 — ADVANCED', to: 0.58 }, { name: '03 — CUSTOM', to: 0.8 }, { name: '04 — COMPARE', to: 1.01 }
   ];
   var readout = document.getElementById('readout'), readoutName = document.getElementById('readoutName');
   var readoutPct = document.getElementById('readoutPct'), readoutFill = document.getElementById('readoutFill');

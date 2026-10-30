@@ -175,6 +175,36 @@
   .service-card ul{ list-style:none;display:flex;flex-direction:column;gap:8px;margin-top:6px; }
   .service-card li{ font-size:13px;color:var(--ink-dim);display:flex;gap:10px; }
   .service-card li::before{ content:'—';color:var(--amber);flex:none; }
+  /* Custom build request form */
+  .custom-wrap{ max-width:980px; }
+  .custom-form{ display:grid;grid-template-columns:repeat(3,1fr);gap:20px 22px; }
+  .custom-form .field{ display:flex;flex-direction:column;gap:8px;min-width:0; }
+  .custom-form .field.wide{ grid-column:1 / -1; }
+  .custom-form label{ font-size:13px;font-weight:600; }
+  .custom-form .opt-tag{ font-weight:400;color:var(--ink-dim);margin-left:4px; }
+  .custom-form input, .custom-form select, .custom-form textarea{
+    width:100%;font:inherit;font-size:15px;color:var(--ink);
+    background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.14);border-radius:10px;
+    padding:12px 14px;transition:border-color var(--dur-ui) ease,background var(--dur-ui) ease;
+  }
+  .custom-form select{ appearance:none;-webkit-appearance:none;padding-right:36px;
+    background-image:linear-gradient(45deg,transparent 50%,var(--ink-dim) 50%),linear-gradient(135deg,var(--ink-dim) 50%,transparent 50%);
+    background-position:calc(100% - 19px) 52%,calc(100% - 14px) 52%;background-size:5px 5px;background-repeat:no-repeat; }
+  .custom-form select option{ background:#0b111a;color:var(--ink); }
+  .custom-form textarea{ resize:vertical;min-height:140px;line-height:1.5; }
+  .custom-form input:focus, .custom-form select:focus, .custom-form textarea:focus{ outline:none;border-color:var(--cyan);background:rgba(34,211,238,.04); }
+  .custom-form [aria-invalid="true"]{ border-color:#ff6b6b; }
+  .field-err{ font-size:13px;color:#ff8a8a;min-height:0; }
+  .field-err:empty{ display:none; }
+  .field-hint{ font-size:13px;color:var(--ink-dim); }
+  .form-foot{ flex-direction:row !important;align-items:center;gap:20px !important;flex-wrap:wrap;margin-top:6px; }
+  .form-send{
+    display:inline-block;border:0;padding:15px 28px;border-radius:999px;background:var(--amber);color:#050608;
+    font-size:15px;font-weight:600;transition:background var(--dur-ui) ease,transform var(--dur-press) var(--ease-out);
+  }
+  .form-send:active{ transform:scale(.97); }
+  @media (hover:hover) and (pointer:fine){ .form-send:hover{ background:#ffc457; } }
+  @media (max-width:760px){ .custom-form{ grid-template-columns:1fr; } }
 
   /* ---------- Build stage ---------- */
   .film-scroll{
@@ -562,7 +592,7 @@
       <a class="page-link spot reveal" style="--i:1" href="pricing.html">
         <div class="service-num mono">02</div>
         <h3>Pricing</h3>
-        <p>Three packages, from a sharp single-page launch to a full flagship build.</p>
+        <p>From $300 basic sites to fully custom builds starting at $5,000.</p>
         <span class="go mono">SEE THE PACKAGES →</span>
       </a>
       <a class="page-link spot reveal" style="--i:2" href="index.html">
