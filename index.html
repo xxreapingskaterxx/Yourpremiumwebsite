@@ -489,7 +489,6 @@
 </style>
 </head>
 <body>
-<a class="skip-link" href="#main">Skip to content</a>
 
 <header id="siteHeader">
   <a class="logo" href="index.html" aria-label="Da Website Builder, home">
@@ -560,52 +559,12 @@
     </div>
   </div>
 </div>
-<main id="main">
-  <div class="stack" aria-label="What we build with">
-    <div class="stack-track mono">
-      <span>HTML5</span><span>CSS3</span><span>JAVASCRIPT</span><span>REACT</span><span>NEXT.JS</span><span>NODE</span><span>VERCEL</span><span>STRIPE</span><span>HEADLESS CMS</span><span>SEO</span><span>ANALYTICS</span><span>SCROLL MOTION</span>
-      <span aria-hidden="true">HTML5</span><span aria-hidden="true">CSS3</span><span aria-hidden="true">JAVASCRIPT</span><span aria-hidden="true">REACT</span><span aria-hidden="true">NEXT.JS</span><span aria-hidden="true">NODE</span><span aria-hidden="true">VERCEL</span><span aria-hidden="true">STRIPE</span><span aria-hidden="true">HEADLESS CMS</span><span aria-hidden="true">SEO</span><span aria-hidden="true">ANALYTICS</span><span aria-hidden="true">SCROLL MOTION</span>
-    </div>
-  </div>
-  <section id="explore">
-    <div class="section-head reveal">
-      <div class="eyebrow mono">// KEEP EXPLORING</div>
-      <h2>Every page is its own film.</h2>
-    </div>
-    <div class="page-links">
-      <a class="page-link spot reveal" style="--i:0" href="services.html">
-        <div class="service-num mono">01</div>
-        <h3>Services</h3>
-        <p>Brochure sites, e-commerce, scroll-film flagships and web apps. Watch each one get built.</p>
-        <span class="go mono">WATCH THE SERVICES FILM →</span>
-      </a>
-      <a class="page-link spot reveal" style="--i:1" href="pricing.html">
-        <div class="service-num mono">02</div>
-        <h3>Pricing</h3>
-        <p>From $300 basic sites to fully custom builds starting at $5,000.</p>
-        <span class="go mono">SEE THE PACKAGES →</span>
-      </a>
-      <a class="page-link spot reveal" style="--i:2" href="contact.html">
-        <div class="service-num mono">03</div>
-        <h3>Contact</h3>
-        <p>Send the brief and we'll reply with a plan within one business day.</p>
-        <span class="go mono">START A BUILD →</span>
-      </a>
-    </div>
-  </section>
-
-  <footer>
-    <div>&copy; <span id="year"></span> Da Website Builder. All rights reserved.</div>
-    <a href="mailto:desmondbetts@ymail.com">desmondbetts@ymail.com</a>
-  </footer>
-</main>
 
 <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
 <script src="vendor/three.min.js"></script>
 <script>
 (function(){
   "use strict";
-  document.getElementById('year').textContent = new Date().getFullYear();
 
   /* split the hero wordmark into characters for the load reveal; "Builder" gets the accent */
   (function(){
@@ -1352,7 +1311,7 @@
     updateBeats(p);
     updateReadout(p);
     updateTerm(smoothP);
-    var fadeP = Math.max(0, (p - .965) / .035);
+    var fadeP = 0;
     bottomFade.style.opacity = fadeP;
     grainVignette.style.opacity = 1 - fadeP * .85;
   }
