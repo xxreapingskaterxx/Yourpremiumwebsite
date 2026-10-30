@@ -792,6 +792,10 @@
   })();
 
   var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  /* Windows reports reduced motion whenever its "Animation effects" setting is off, which used to
+     freeze the whole board on many PCs. The board's own life (pulses, motes, blinks, cursor sparks)
+     keeps running; reduced motion only calms the camera, scrolling and page transitions. */
+  var calmFx = false;
   var finePointer = window.matchMedia('(hover:hover) and (pointer:fine)').matches;
 
   /* ---------------- Dev contract ----------------
@@ -1090,7 +1094,7 @@
     if (!ptr.has){ ptr.has = true; ptr.lastX = x; ptr.lastY = y; ptr.sx = x; ptr.sy = y; }
     ptr.x = x; ptr.y = y;
     ptr.nx = (x / r.width) * 2 - 1; ptr.ny = -(y / r.height) * 2 + 1;
-    if (reduceMotion || heroFx <= .02) return;
+    if (calmFx || heroFx <= .02) return;
     var dist = Math.hypot(x - ptr.lastX, y - ptr.lastY);
     if (dist > 12){ spawnBits(x, y, Math.min(3, Math.floor(dist / 12))); ptr.lastX = x; ptr.lastY = y; }
     var now = performance.now();
@@ -1099,7 +1103,7 @@
   stage.addEventListener('pointermove', function(e){ onMove(e.clientX, e.clientY); });
   stage.addEventListener('pointerdown', function(e){
     onMove(e.clientX, e.clientY);
-    if (!reduceMotion && heroFx > .02){ spawnBits(ptr.x, ptr.y, 10); if (hitValid) pulseNear(hit); }
+    if (!calmFx && heroFx > .02){ spawnBits(ptr.x, ptr.y, 10); if (hitValid) pulseNear(hit); }
   });
   /* touch scrolling cancels pointer events, so follow the finger directly while it scrolls */
   stage.addEventListener('touchmove', function(e){ var t = e.touches[0]; if (t) onMove(t.clientX, t.clientY); }, { passive: true });
@@ -1107,7 +1111,7 @@
   var lastScrollY = window.scrollY;
   window.addEventListener('scroll', function(){
     var dy = window.scrollY - lastScrollY; lastScrollY = window.scrollY;
-    if (reduceMotion || !ptr.has || heroFx <= .02 || !dy) return;
+    if (calmFx || !ptr.has || heroFx <= .02 || !dy) return;
     spawnBits(ptr.x, ptr.y, Math.min(3, 1 + Math.abs(dy) / 40 | 0), -clamp(dy, -60, 60) * 2.2);
   }, { passive: true });
 
@@ -1115,7 +1119,7 @@
     fctx.setTransform(FDPR, 0, 0, FDPR, 0, 0);
     fctx.clearRect(0, 0, fx.width, fx.height);
     if (ptr.has && heroFx > .02){
-      var k = reduceMotion ? 1 : Math.min(1, dt * 16);
+      var k = calmFx ? 1 : Math.min(1, dt * 16);
       ptr.sx += (ptr.x - ptr.sx) * k; ptr.sy += (ptr.y - ptr.sy) * k;
       fctx.globalAlpha = heroFx;
       fctx.strokeStyle = 'rgba(34,211,238,.75)'; fctx.lineWidth = 1;
@@ -1155,7 +1159,7 @@
         f.g.position.y = f.g.userData.y + (1 - e) * 5;
         f.body.material.opacity = .95 * e;
         f.edge.material.opacity = .9 * e;
-        f.strip.material.opacity = (.35 + .5 * tEnd) * e * (reduceMotion ? 1 : .8 + .2 * Math.sin(now * .004 + k + ti * 2));
+        f.strip.material.opacity = (.35 + .5 * tEnd) * e * (calmFx ? 1 : .8 + .2 * Math.sin(now * .004 + k + ti * 2));
       });
       var done = seg(tt, .85, 1);
       tw.ghost.material.opacity = .35 * (1 - done);
@@ -1165,13 +1169,13 @@
     });
 
     traceUniforms.uLit.value = .08 * heroFx + .45 * tEnd;
-    if (!reduceMotion && now - lastIdle > 300){
+    if (!calmFx && now - lastIdle > 300){
       lastIdle = now;
       var it = traces[(Math.random() * traces.length) | 0];
       addPulse(it.curve, it.amber ? AMBER : CYAN, 12);
     }
 
-    if (!reduceMotion){
+    if (!calmFx){
       var boost = 1 + tEnd * 4;
       for (var m = 0; m < MOTES; m++){
         motePos[m*3+1] += moteSpd[m] * dt * boost;
@@ -1218,7 +1222,7 @@
       termBody.textContent = '';
       for (var i = Math.max(0, n - 6); i < n; i++){
         var el = document.createElement('div');
-        el.className = 'term-line' + (LOG[i].c ? ' ' + LOG[i].c : '') + (grew && i === n - 1 && !reduceMotion ? ' typing' : '');
+        el.className = 'term-line' + (LOG[i].c ? ' ' + LOG[i].c : '') + (grew && i === n - 1 && !calmFx ? ' typing' : '');
         el.textContent = LOG[i].t;
         termBody.appendChild(el);
       }

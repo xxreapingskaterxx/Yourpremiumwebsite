@@ -643,6 +643,10 @@
   })();
 
   var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  /* Windows reports reduced motion whenever its "Animation effects" setting is off, which used to
+     freeze the whole board on many PCs. The board's own life (pulses, motes, blinks, cursor sparks)
+     keeps running; reduced motion only calms the camera, scrolling and page transitions. */
+  var calmFx = false;
   var finePointer = window.matchMedia('(hover:hover) and (pointer:fine)').matches;
 
   /* ---------------- Dev contract ----------------
@@ -949,7 +953,7 @@
     if (!ptr.has){ ptr.has = true; ptr.lastX = x; ptr.lastY = y; ptr.sx = x; ptr.sy = y; }
     ptr.x = x; ptr.y = y;
     ptr.nx = (x / r.width) * 2 - 1; ptr.ny = -(y / r.height) * 2 + 1;
-    if (reduceMotion || heroFx <= .02) return;
+    if (calmFx || heroFx <= .02) return;
     var dist = Math.hypot(x - ptr.lastX, y - ptr.lastY);
     if (dist > 12){ spawnBits(x, y, Math.min(3, Math.floor(dist / 12))); ptr.lastX = x; ptr.lastY = y; }
     var now = performance.now();
@@ -958,7 +962,7 @@
   stage.addEventListener('pointermove', function(e){ onMove(e.clientX, e.clientY); });
   stage.addEventListener('pointerdown', function(e){
     onMove(e.clientX, e.clientY);
-    if (!reduceMotion && heroFx > .02){ spawnBits(ptr.x, ptr.y, 10); if (hitValid) pulseNear(hit); }
+    if (!calmFx && heroFx > .02){ spawnBits(ptr.x, ptr.y, 10); if (hitValid) pulseNear(hit); }
   });
   /* touch scrolling cancels pointer events, so follow the finger directly while it scrolls */
   stage.addEventListener('touchmove', function(e){ var t = e.touches[0]; if (t) onMove(t.clientX, t.clientY); }, { passive: true });
@@ -966,7 +970,7 @@
   var lastScrollY = window.scrollY;
   window.addEventListener('scroll', function(){
     var dy = window.scrollY - lastScrollY; lastScrollY = window.scrollY;
-    if (reduceMotion || !ptr.has || heroFx <= .02 || !dy) return;
+    if (calmFx || !ptr.has || heroFx <= .02 || !dy) return;
     spawnBits(ptr.x, ptr.y, Math.min(3, 1 + Math.abs(dy) / 40 | 0), -clamp(dy, -60, 60) * 2.2);
   }, { passive: true });
 
@@ -974,7 +978,7 @@
     fctx.setTransform(FDPR, 0, 0, FDPR, 0, 0);
     fctx.clearRect(0, 0, fx.width, fx.height);
     if (ptr.has && heroFx > .02){
-      var k = reduceMotion ? 1 : Math.min(1, dt * 16);
+      var k = calmFx ? 1 : Math.min(1, dt * 16);
       ptr.sx += (ptr.x - ptr.sx) * k; ptr.sy += (ptr.y - ptr.sy) * k;
       fctx.globalAlpha = heroFx;
       fctx.strokeStyle = 'rgba(34,211,238,.75)'; fctx.lineWidth = 1;
@@ -1011,13 +1015,13 @@
     packet.visible = tSend < 1;
     route.getPointAt(u, packet.position); packet.position.y += .6;
     packet.quaternion.copy(camera.quaternion);
-    if (!reduceMotion && tSend > 0 && tSend < 1 && now - lastSend > 160){ lastSend = now; pulseNear(packet.position); }
+    if (!calmFx && tSend > 0 && tSend < 1 && now - lastSend > 160){ lastSend = now; pulseNear(packet.position); }
 
     /* receive: the mast lights up and rings ripple out */
     beacon.material.opacity = .4 + .5 * tRecv;
     mastLines.material.opacity = .45 + .45 * tRecv;
     waves.forEach(function(w, i){
-      var ph = reduceMotion ? (i + .5) / waves.length : (now * .00035 + i / waves.length) % 1;
+      var ph = calmFx ? (i + .5) / waves.length : (now * .00035 + i / waves.length) % 1;
       w.scale.setScalar(1 + ph * 14);
       w.material.opacity = tRecv * (1 - ph) * .6;
     });
@@ -1033,13 +1037,13 @@
     deskRing.material.color.copy(CYAN).lerp(AMBER, seg(tReply, .9, 1));
 
     traceUniforms.uLit.value = .08 * heroFx + .25 * tRecv + .25 * tEnd;
-    if (!reduceMotion && now - lastIdle > 300){
+    if (!calmFx && now - lastIdle > 300){
       lastIdle = now;
       var it = traces[(Math.random() * traces.length) | 0];
       addPulse(it.curve, it.amber ? AMBER : CYAN, 12);
     }
 
-    if (!reduceMotion){
+    if (!calmFx){
       var boost = 1 + tEnd * 4;
       for (var m = 0; m < MOTES; m++){
         motePos[m*3+1] += moteSpd[m] * dt * boost;
@@ -1086,7 +1090,7 @@
       termBody.textContent = '';
       for (var i = Math.max(0, n - 6); i < n; i++){
         var el = document.createElement('div');
-        el.className = 'term-line' + (LOG[i].c ? ' ' + LOG[i].c : '') + (grew && i === n - 1 && !reduceMotion ? ' typing' : '');
+        el.className = 'term-line' + (LOG[i].c ? ' ' + LOG[i].c : '') + (grew && i === n - 1 && !calmFx ? ' typing' : '');
         el.textContent = LOG[i].t;
         termBody.appendChild(el);
       }
