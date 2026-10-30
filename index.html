@@ -106,6 +106,76 @@
     .nav-cta{font-size:12px;padding:9px 16px;}
   }
 
+  /* ---------- Page menu ---------- */
+  .menu-btn{
+    display:flex;align-items:center;gap:10px;height:40px;padding:0 15px 0 13px;border-radius:999px;
+    border:1px solid rgba(255,255,255,.2);background:rgba(5,8,13,.35);color:#fff;
+    font-size:11px;font-weight:700;letter-spacing:.14em;
+    transition:border-color var(--dur-ui) ease,transform var(--dur-press) var(--ease-out);
+  }
+  .menu-btn:active{ transform:scale(.97); }
+  @media (hover:hover) and (pointer:fine){ .menu-btn:hover{ border-color:var(--cyan); } }
+  .menu-ico{ position:relative;width:16px;height:10px;flex:none; }
+  .menu-ico i{ position:absolute;left:0;right:0;height:1.5px;background:currentColor;border-radius:2px;transition:transform .3s var(--ease-out),top .3s var(--ease-out); }
+  .menu-ico i:first-child{ top:1px; } .menu-ico i:last-child{ top:7.5px; }
+  .menu-open .menu-ico i:first-child{ top:4.25px;transform:rotate(45deg); }
+  .menu-open .menu-ico i:last-child{ top:4.25px;transform:rotate(-45deg); }
+  nav a.nav-link[aria-current="page"]{ opacity:1;color:var(--amber); }
+  .site-menu{
+    position:fixed;inset:0;z-index:90;
+    background:rgba(5,8,13,.95);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+    display:flex;flex-direction:column;justify-content:center;
+    padding:calc(var(--header-h) + 16px) clamp(20px,6vw,80px) 36px;
+    opacity:0;transition:opacity .3s var(--ease-out);
+  }
+  .site-menu.open{ opacity:1; }
+  .site-menu nav{ display:block;width:100%;max-width:1100px; }
+  .site-menu[hidden]{ display:none; }
+  .menu-list{ list-style:none; }
+  .menu-list a{
+    display:grid;grid-template-columns:64px 1fr auto;align-items:center;gap:12px;
+    padding:clamp(14px,2.6vh,26px) 0;border-bottom:1px solid rgba(255,255,255,.08);
+    font-size:clamp(36px,6.4vw,76px);font-weight:600;letter-spacing:-.035em;line-height:1;
+    opacity:0;transform:translateY(18px);
+    transition:opacity .45s var(--ease-out) var(--d),transform .45s var(--ease-out) var(--d),color var(--dur-ui) ease;
+  }
+  .site-menu.open .menu-list a{ opacity:1;transform:none; }
+  .menu-list .num{ font-size:12px;font-weight:500;color:var(--cyan);letter-spacing:.1em; }
+  .menu-list .scene{ font-size:11px;font-weight:500;color:var(--ink-dim);letter-spacing:.14em; }
+  .menu-list a[aria-current="page"]{ color:var(--amber); }
+  @media (hover:hover) and (pointer:fine){ .menu-list a:hover{ color:var(--cyan); } .menu-list a:hover .scene{ color:var(--ink); } }
+  .menu-foot{ margin-top:28px;font-size:12px;color:var(--ink-dim);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px; }
+  .menu-foot a:hover{ color:var(--amber); }
+  @media (max-width:720px){ .menu-list a{ grid-template-columns:44px 1fr; } .menu-list .scene{ grid-column:2;font-size:10px;margin-top:-4px; } }
+  @media (max-width:520px){
+    .nav-cta{ display:none; }
+    .menu-lbl{ display:none; }
+    .menu-btn{ width:40px;padding:0;justify-content:center; }
+  }
+  /* page-to-page: a short fade to black, like a cut */
+  body{ transition:opacity .26s var(--ease-out); }
+  body.leaving{ opacity:0; }
+  .beat-num{ font-size:12px;font-weight:500;letter-spacing:.14em;color:var(--cyan);margin-bottom:14px; }
+  /* links out to the other pages */
+  .page-links{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1px;
+    background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.08);
+  }
+  .page-link{
+    background:var(--black);padding:36px 28px;display:flex;flex-direction:column;gap:14px;
+    transition:background var(--dur-ui) ease;
+  }
+  .page-link:hover{ background:#0b0d16; }
+  .page-link h3{ font-size:26px;font-weight:600; }
+  .page-link p{ font-size:14px;color:var(--ink-dim);line-height:1.6; }
+  .page-link .go{ margin-top:auto;padding-top:10px;font-size:12px;letter-spacing:.12em;color:var(--amber); }
+  .js .page-link.reveal{
+    transition:opacity .6s var(--ease-out) var(--d),transform .6s var(--ease-out) var(--d),background var(--dur-ui) ease;
+  }
+  .service-card ul{ list-style:none;display:flex;flex-direction:column;gap:8px;margin-top:6px; }
+  .service-card li{ font-size:13px;color:var(--ink-dim);display:flex;gap:10px; }
+  .service-card li::before{ content:'—';color:var(--amber);flex:none; }
+
   /* ---------- Build stage ---------- */
   .film-scroll{
     position:relative;
@@ -381,16 +451,18 @@
     .js .reveal, .js .service-card.reveal{ transform:none;transition:opacity .2s ease,background var(--dur-ui) ease; }
     .nav-cta, .cta, .price-btn, .big-link, .nav-cta:hover, .beat-5 .cta:hover{ transform:none !important; }
     .skip-link{ transition:none; }
+    .menu-list a, .menu-ico i{ transform:none !important; transition:opacity .2s ease,color var(--dur-ui) ease; }
+    body{ transition:none; }
     .split .ch, .js .hero-eyebrow, .js .hero-sub, .js .scroll-cue{ animation:none;transform:none;opacity:1; }
     .cue-line::after{ animation:none; }
   }
 </style>
 </head>
 <body>
-<a class="skip-link" href="#services">Skip to content</a>
+<a class="skip-link" href="#main">Skip to content</a>
 
 <header id="siteHeader">
-  <a class="logo" href="#" aria-label="Da Website Builder, back to top">
+  <a class="logo" href="index.html" aria-label="Da Website Builder, home">
     <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
       <path d="M8 6L2.5 12L8 18" stroke="#22d3ee" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
       <path d="M16 6L21.5 12L16 18" stroke="#22d3ee" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
@@ -399,12 +471,24 @@
     <span class="logo-text">DA WEBSITE BUILDER</span>
   </a>
   <nav aria-label="Main">
-    <a class="nav-link" href="#services">Services</a>
-    <a class="nav-link" href="#pricing">Pricing</a>
-    <a class="nav-link" href="#contact">Contact</a>
-    <a class="nav-cta" href="#contact">Start a project</a>
+    <a class="nav-link" href="services.html">Services</a>
+    <a class="nav-link" href="pricing.html">Pricing</a>
+    <a class="nav-link" href="contact.html">Contact</a>
+    <a class="nav-cta" href="contact.html">Start a project</a>
+    <button class="menu-btn" id="menuBtn" type="button" aria-expanded="false" aria-controls="siteMenu"><span class="menu-ico" aria-hidden="true"><i></i><i></i></span><span class="menu-lbl mono">MENU</span></button>
   </nav>
 </header>
+<div class="site-menu" id="siteMenu" hidden>
+  <nav aria-label="Pages">
+    <ol class="menu-list">
+      <li><a href="index.html" style="--d:60ms" aria-current="page"><span class="num mono">01</span>Home<span class="scene mono">SCENE · THE BUILD</span></a></li>
+      <li><a href="services.html" style="--d:110ms"><span class="num mono">02</span>Services<span class="scene mono">SCENE · FOUR STATIONS</span></a></li>
+      <li><a href="pricing.html" style="--d:160ms"><span class="num mono">03</span>Pricing<span class="scene mono">SCENE · THE TOWERS</span></a></li>
+      <li><a href="contact.html" style="--d:210ms"><span class="num mono">04</span>Contact<span class="scene mono">SCENE · THE SIGNAL</span></a></li>
+    </ol>
+    <div class="menu-foot mono"><a href="mailto:desmondbetts@ymail.com">desmondbetts@ymail.com</a><span>EACH PAGE, ITS OWN FILM</span></div>
+  </nav>
+</div>
 
 <div class="film-scroll" id="filmScroll">
   <div class="film-stage" id="stage" role="img" aria-label="A camera flies through a 3D circuit city as a website is built from blueprint to live launch while you scroll">
@@ -437,7 +521,7 @@
     <div class="beat beat-5" data-in="0.78" data-peak="0.88" data-out="2">
       <h2>Built. Deployed. Live.</h2>
       <p>See what we can build for you.</p>
-      <a class="cta" href="#contact">Start your build</a>
+      <a class="cta" href="contact.html">Start your build</a>
     </div>
     <div class="readout" id="readout">
       <div class="chapter-name mono" id="readoutName">01 — BLUEPRINT</div>
@@ -446,96 +530,37 @@
     </div>
   </div>
 </div>
-<main>
+<main id="main">
   <div class="stack" aria-label="What we build with">
     <div class="stack-track mono">
       <span>HTML5</span><span>CSS3</span><span>JAVASCRIPT</span><span>REACT</span><span>NEXT.JS</span><span>NODE</span><span>VERCEL</span><span>STRIPE</span><span>HEADLESS CMS</span><span>SEO</span><span>ANALYTICS</span><span>SCROLL MOTION</span>
       <span aria-hidden="true">HTML5</span><span aria-hidden="true">CSS3</span><span aria-hidden="true">JAVASCRIPT</span><span aria-hidden="true">REACT</span><span aria-hidden="true">NEXT.JS</span><span aria-hidden="true">NODE</span><span aria-hidden="true">VERCEL</span><span aria-hidden="true">STRIPE</span><span aria-hidden="true">HEADLESS CMS</span><span aria-hidden="true">SEO</span><span aria-hidden="true">ANALYTICS</span><span aria-hidden="true">SCROLL MOTION</span>
     </div>
   </div>
-  <section id="services">
+  <section id="explore">
     <div class="section-head reveal">
-      <div class="eyebrow mono">// SERVICES</div>
-      <h2>What we build</h2>
-      <p>Four ways we've helped clients turn an idea into a site that actually performs — picked to fit the project, not a template catalogue.</p>
+      <div class="eyebrow mono">// KEEP EXPLORING</div>
+      <h2>Every page is its own film.</h2>
     </div>
-    <div class="services-grid">
-      <div class="service-card spot reveal" style="--i:0">
+    <div class="page-links">
+      <a class="page-link spot reveal" style="--i:0" href="services.html">
         <div class="service-num mono">01</div>
-        <h3>Brochure &amp; marketing sites</h3>
-        <p>Fast, sharp, conversion-focused sites for businesses that need to look as good as they perform.</p>
-      </div>
-      <div class="service-card spot reveal" style="--i:1">
+        <h3>Services</h3>
+        <p>Brochure sites, e-commerce, scroll-film flagships and web apps. Watch each one get built.</p>
+        <span class="go mono">WATCH THE SERVICES FILM →</span>
+      </a>
+      <a class="page-link spot reveal" style="--i:1" href="pricing.html">
         <div class="service-num mono">02</div>
-        <h3>E-commerce</h3>
-        <p>Custom storefronts built around your catalogue and checkout flow — not a plugin's idea of one.</p>
-      </div>
-      <div class="service-card spot reveal" style="--i:2">
+        <h3>Pricing</h3>
+        <p>Three packages, from a sharp single-page launch to a full flagship build.</p>
+        <span class="go mono">SEE THE PACKAGES →</span>
+      </a>
+      <a class="page-link spot reveal" style="--i:2" href="contact.html">
         <div class="service-num mono">03</div>
-        <h3>Scroll-film flagships</h3>
-        <p>Cinematic, one-shot scroll experiences like this page — for launches that need to be remembered.</p>
-      </div>
-      <div class="service-card spot reveal" style="--i:3">
-        <div class="service-num mono">04</div>
-        <h3>Web apps &amp; dashboards</h3>
-        <p>Product interfaces and internal tools, engineered with the same care as a marketing site.</p>
-      </div>
-    </div>
-  </section>
-
-  <section id="pricing">
-    <div class="section-head reveal">
-      <div class="eyebrow mono">// PRICING</div>
-      <h2>Straightforward packages</h2>
-      <p>Every project is scoped for what it actually needs. These are starting points — final quotes are scoped to your project.</p>
-    </div>
-    <div class="pricing-grid">
-      <div class="price-card spot reveal" style="--i:0">
-        <div class="price-tier mono">LAUNCH</div>
-        <div class="price-amount">$2,500<span>starting at</span></div>
-        <ul>
-          <li>Single-page custom site</li>
-          <li>Custom design, no templates</li>
-          <li>Mobile-first build</li>
-          <li>2 weeks turnaround</li>
-        </ul>
-        <a class="price-btn" href="#contact">Get started</a>
-      </div>
-      <div class="price-card featured spot reveal" style="--i:1">
-        <div class="price-tier mono">GROWTH</div>
-        <div class="price-amount">$6,500<span>starting at</span></div>
-        <ul>
-          <li>Multi-page custom build</li>
-          <li>CMS &amp; content tooling</li>
-          <li>Motion &amp; interaction design</li>
-          <li>4–6 weeks turnaround</li>
-        </ul>
-        <a class="price-btn" href="#contact">Get started</a>
-      </div>
-      <div class="price-card spot reveal" style="--i:2">
-        <div class="price-tier mono">SIGNATURE</div>
-        <div class="price-amount">Custom<span>quoted per project</span></div>
-        <ul>
-          <li>Scroll-film flagship builds</li>
-          <li>Bespoke generated cinematics</li>
-          <li>Full brand + motion system</li>
-          <li>Dedicated build team</li>
-        </ul>
-        <a class="price-btn" href="#contact">Talk to us</a>
-      </div>
-    </div>
-  </section>
-
-  <section id="contact">
-    <div class="contact-wrap">
-      <div class="reveal"><div class="eyebrow mono">// START A BUILD</div><h2>Let's build your website.</h2></div>
-      <div class="contact-links reveal" style="--i:1">
-        <a class="big-link" href="mailto:desmondbetts@ymail.com">
-          <span>desmondbetts@ymail.com</span>
-          <span>→</span>
-        </a>
-        <div class="contact-meta">Tell us about your project and we'll get back to you within one business day.</div>
-      </div>
+        <h3>Contact</h3>
+        <p>Send the brief and we'll reply with a plan within one business day.</p>
+        <span class="go mono">START A BUILD →</span>
+      </a>
     </div>
   </section>
 
@@ -555,12 +580,12 @@
   /* split the hero wordmark into characters for the load reveal; "Builder" gets the accent */
   (function(){
     var c = 0;
-    document.querySelectorAll('.split .w').forEach(function(w, wi){
+    document.querySelectorAll('.split .w').forEach(function(w, wi, all){
       var txt = w.textContent; w.textContent = '';
       w.setAttribute('aria-hidden', 'true');
       for (var i = 0; i < txt.length; i++){
         var s = document.createElement('span');
-        s.className = 'ch' + (wi === 2 ? ' amber' : '');
+        s.className = 'ch' + (wi === all.length - 1 ? ' amber' : '');
         s.style.setProperty('--c', c++);
         s.textContent = txt[i];
         w.appendChild(s);
@@ -1358,6 +1383,53 @@
     else target.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth' });
     if (id !== '#') history.replaceState(null, '', id);
   });
+
+  /* ---------------- Page menu ---------------- */
+  var menuBtn = document.getElementById('menuBtn'), siteMenu = document.getElementById('siteMenu');
+  var menuLbl = menuBtn.querySelector('.menu-lbl'), menuOpen = false, menuTimer = 0;
+  function setMenu(open, refocus){
+    if (open === menuOpen) return;
+    menuOpen = open;
+    clearTimeout(menuTimer);
+    menuBtn.setAttribute('aria-expanded', String(open));
+    menuLbl.textContent = open ? 'CLOSE' : 'MENU';
+    header.classList.toggle('menu-open', open);
+    document.documentElement.style.overflow = open ? 'hidden' : '';
+    if (lenis){ if (open) lenis.stop(); else lenis.start(); }
+    if (open){
+      siteMenu.hidden = false;
+      requestAnimationFrame(function(){ requestAnimationFrame(function(){ siteMenu.classList.add('open'); }); });
+      siteMenu.querySelector('a').focus({ preventScroll: true });
+    } else {
+      siteMenu.classList.remove('open');
+      menuTimer = setTimeout(function(){ siteMenu.hidden = true; }, reduceMotion ? 0 : 300);
+      if (refocus) menuBtn.focus({ preventScroll: true });
+    }
+  }
+  menuBtn.addEventListener('click', function(){ setMenu(!menuOpen, true); });
+  siteMenu.addEventListener('click', function(e){
+    if (e.target.closest('a')) setMenu(false);
+    else if (!e.target.closest('.menu-list')) setMenu(false, true);
+  });
+  document.addEventListener('keydown', function(e){
+    if (!menuOpen) return;
+    if (e.key === 'Escape'){ setMenu(false, true); return; }
+    if (e.key !== 'Tab') return;
+    /* keep focus inside the open menu */
+    var f = [menuBtn].concat(Array.from(siteMenu.querySelectorAll('a')));
+    var i = f.indexOf(document.activeElement);
+    if (e.shiftKey && i <= 0){ e.preventDefault(); f[f.length - 1].focus(); }
+    else if (!e.shiftKey && (i === f.length - 1 || i === -1)){ e.preventDefault(); f[0].focus(); }
+  });
+  /* links to the other pages fade to black first, then cut */
+  document.addEventListener('click', function(e){
+    var a = e.target.closest && e.target.closest('a[href$=".html"]');
+    if (!a || e.defaultPrevented || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button || a.target || reduceMotion) return;
+    e.preventDefault();
+    document.body.classList.add('leaving');
+    setTimeout(function(){ location.href = a.href; }, 260);
+  });
+  window.addEventListener('pageshow', function(){ document.body.classList.remove('leaving'); setMenu(false); });
 
   /* ---------------- Boot ---------------- */
   resize();
