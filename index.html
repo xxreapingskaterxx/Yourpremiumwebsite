@@ -3,25 +3,23 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Your Premium Sites — Custom-Built Websites</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2L12 8' stroke='%237b2ff7' stroke-width='1.6'/%3E%3Cpath d='M12 16L12 22' stroke='%2339ff6a' stroke-width='1.6'/%3E%3Cpath d='M2 12L8 12' stroke='%237b2ff7' stroke-width='1.6'/%3E%3Cpath d='M16 12L22 12' stroke='%2339ff6a' stroke-width='1.6'/%3E%3Ccircle cx='12' cy='12' r='3.4' fill='%23000' stroke='%237b2ff7' stroke-width='1.6'/%3E%3C/svg%3E">
-<meta name="description" content="Your Premium Sites builds custom websites from the ground up — no templates, no shortcuts.">
-<meta name="theme-color" content="#05060a">
+<title>Da Website Builder — Custom-Built Websites</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='5' fill='%2305080d'/%3E%3Cpath d='M9 7L4 12L9 17' stroke='%2322d3ee' stroke-width='2' fill='none'/%3E%3Cpath d='M15 7L20 12L15 17' stroke='%2322d3ee' stroke-width='2' fill='none'/%3E%3Cpath d='M13.5 5L10.5 19' stroke='%23ffb224' stroke-width='2'/%3E%3C/svg%3E">
+<meta name="description" content="Da Website Builder builds custom websites from the ground up — no templates, no shortcuts.">
+<meta name="theme-color" content="#05080d">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Your Premium Sites — Custom-Built Websites">
+<meta property="og:title" content="Da Website Builder — Custom-Built Websites">
 <meta property="og:description" content="Custom websites built from the ground up — no templates, no shortcuts.">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&display=swap">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <script>document.documentElement.classList.add('js');</script>
 <style>
   :root{
-    --black:#05060a;
-    --purple:#7b2ff7;
-    --green:#39ff6a;
-    --violet:#2a0a4a;
+    --black:#05080d;
+    --cyan:#22d3ee;
+    --amber:#ffb224;
     --ink:#eef0f6;
     --ink-dim:#9aa0b4;
     --header-h:76px;
@@ -36,28 +34,28 @@
   body{
     background:var(--black);
     color:var(--ink);
-    font-family:'Inter',system-ui,sans-serif;
+    font-family:'Geist',system-ui,sans-serif;
     overflow-x:hidden;
     line-height:1.5;
     -webkit-font-smoothing:antialiased;
   }
   p{ text-wrap:pretty; }
   h1,h2,h3,.display{
-    font-family:'Clash Display',sans-serif;
+    font-family:'Geist',system-ui,sans-serif;
     font-weight:600;
-    letter-spacing:-0.02em;
-    line-height:1.05;
+    letter-spacing:-0.035em;
+    line-height:1.0;
     text-wrap:balance;
   }
   .mono{
-    font-family:'Space Mono',monospace;
+    font-family:'JetBrains Mono',monospace;
     letter-spacing:0.02em;
   }
   a{color:inherit;text-decoration:none;}
   button{font-family:inherit;cursor:pointer;}
 
   /* Keyboard focus + skip link */
-  :focus-visible{ outline:2px solid var(--green); outline-offset:3px; border-radius:4px; }
+  :focus-visible{ outline:2px solid var(--amber); outline-offset:3px; border-radius:4px; }
   .skip-link{
     position:absolute;left:16px;top:12px;z-index:200;transform:translateY(-64px);
     padding:10px 16px;border-radius:8px;background:#fff;color:#0a0a0f;font-size:13px;font-weight:600;
@@ -77,84 +75,113 @@
     backdrop-filter:none;
     transition:color .25s ease,background .3s var(--ease-out),backdrop-filter .3s var(--ease-out);
   }
-  header.on-light{ color:#0a0a0f; }
   header.in-content{
-    background:rgba(5,6,10,.72);
+    background:rgba(5,8,13,.72);
     backdrop-filter:blur(10px);
     -webkit-backdrop-filter:blur(10px);
   }
   .logo{display:flex;align-items:center;gap:10px;}
   .logo svg{width:22px;height:22px;flex:none;}
-  .logo-text{font-family:'Clash Display',sans-serif;font-weight:700;font-size:15px;letter-spacing:0.04em;white-space:nowrap;}
+  .logo-text{font-family:'Geist',system-ui,sans-serif;font-weight:700;font-size:15px;letter-spacing:0.04em;white-space:nowrap;}
   nav{display:flex;align-items:center;gap:clamp(18px,3vw,40px);}
   nav a.nav-link{font-size:13px;font-weight:500;opacity:.85;transition:opacity var(--dur-ui) ease;}
   nav a.nav-link:hover{opacity:1;}
   .nav-cta{
     font-size:13px;font-weight:600;white-space:nowrap;
     padding:10px 20px;border-radius:999px;
-    background:linear-gradient(90deg,var(--purple),var(--green));
+    background:linear-gradient(90deg,var(--cyan),var(--amber));
     color:#050608;
     transition:transform var(--dur-press) var(--ease-out),filter var(--dur-ui) ease;
   }
   /* Hover lift only where a real pointer hovers; touch fires false hovers on tap */
   @media (hover:hover) and (pointer:fine){
     .nav-cta:hover{ filter:brightness(1.08); transform:translateY(-1px); }
-    .beat-5 .cta:hover{ background:#e9ecf5; transform:translateY(-1px); }
+    .beat-5 .cta:hover{ background:#ffc457; transform:translateY(-1px); }
   }
   /* Press feedback on every pressable element */
   .nav-cta:active, .cta:active, .price-btn:active, .big-link:active{ transform:scale(.97); }
   @media (max-width:720px){
+    .beat-mid, .beat-5{ padding-bottom:9vh; }
     nav a.nav-link{display:none;}
     .nav-cta{font-size:12px;padding:9px 16px;}
   }
 
-  /* ---------- Film stage ---------- */
+  /* ---------- Build stage ---------- */
   .film-scroll{
     position:relative;
-    height:850vh; /* 170vh * 5 chapters */
+    height:780vh;
   }
   .film-stage{
     position:sticky;top:0;left:0;
     width:100%;height:100vh;
     overflow:hidden;
-    background:#000;
+    background:var(--black);
   }
   .film-stage canvas{
     position:absolute;top:0;left:0;
     width:100%;height:100%;
     display:block;
   }
-  #ambientCanvas{ pointer-events:none; z-index:1; }
   #grainVignette{
     position:absolute;inset:0;
     pointer-events:none;
-    background:radial-gradient(ellipse at center, rgba(0,0,0,0) 45%, rgba(0,0,0,.55) 100%);
-    mix-blend-mode:multiply;
+    background:
+      linear-gradient(90deg, rgba(5,8,13,.6) 0%, rgba(5,8,13,.25) 38%, rgba(5,8,13,0) 55%),
+      radial-gradient(ellipse at 60% 50%, rgba(0,0,0,0) 40%, rgba(0,0,0,.6) 100%);
     z-index:2;
   }
+  /* faint scanlines: the terminal half of the look */
   #grainVignette::after{
     content:'';
     position:absolute;inset:0;
     opacity:.05;
-    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background:repeating-linear-gradient(0deg, #fff 0 1px, transparent 1px 3px);
   }
   #bottomFade{
     position:absolute;inset:0;
-    background:var(--seam,#05060a);
+    background:var(--black);
     opacity:0;pointer-events:none;
-    z-index:4;
+    z-index:6;
   }
 
-  .loader{
-    position:absolute;inset:0;
-    display:flex;flex-direction:column;align-items:center;justify-content:center;
-    gap:16px;background:#000;z-index:5;
-    transition:opacity .5s var(--ease-out);
+  /* ---------- Terminal build log ---------- */
+  .term{
+    position:absolute;z-index:4;
+    right:clamp(20px,3vw,48px);bottom:clamp(24px,5vh,56px);
+    width:min(360px,30vw);
+    border:1px solid rgba(34,211,238,.22);border-radius:10px;
+    background:rgba(4,8,13,.86);
+    box-shadow:0 18px 50px rgba(0,0,0,.55);
+    font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.65;
+    overflow:hidden;
+    pointer-events:none;
+    transition:opacity .3s var(--ease-out);
   }
-  .loader.hidden{opacity:0;pointer-events:none;}
-  .loader-bar{width:200px;height:2px;background:rgba(255,255,255,.12);border-radius:2px;overflow:hidden;}
-  .loader-fill{height:100%;width:100%;transform:scaleX(0);transform-origin:left;background:linear-gradient(90deg,var(--purple),var(--green));transition:transform .2s var(--ease-out);}
-  .loader-label{font-size:11px;color:var(--ink-dim);font-variant-numeric:tabular-nums;}
+  .term-head{
+    display:flex;align-items:center;gap:6px;
+    padding:8px 12px;border-bottom:1px solid rgba(34,211,238,.12);
+    color:var(--ink-dim);font-size:10px;letter-spacing:.08em;
+  }
+  .term-head i{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.14);}
+  .term-head span{margin-left:8px;}
+  .term-body{padding:10px 14px 12px;min-height:calc(1.65em * 6 + 22px);display:flex;flex-direction:column;justify-content:flex-end;}
+  .term-line{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#b9c6d4;}
+  .term-line.cmd{color:var(--amber);}
+  .term-line.ok{color:var(--cyan);}
+  .term-line.live{color:var(--amber);font-weight:700;}
+  .term-line.typing{animation:type .42s steps(24,end) both;}
+  @keyframes type{ from{clip-path:inset(0 100% 0 0);} to{clip-path:inset(0 0 0 0);} }
+  .term-line:last-child::after{
+    content:'';display:inline-block;width:7px;height:13px;margin-left:4px;vertical-align:-2px;
+    background:var(--amber);animation:blink 1s steps(1) infinite;
+  }
+  @keyframes blink{ 50%{opacity:0;} }
+  @media (max-width:760px){
+    .term{left:6vw;right:6vw;width:auto;bottom:auto;top:var(--term-top,60vh);font-size:11px;}
+    .term-head{display:none;}
+    .term-body{min-height:0;padding:8px 12px;}
+    .term-line:not(:nth-last-child(-n+2)){display:none;}
+  }
 
   /* ---------- Beat overlays ---------- */
   .beat{
@@ -167,7 +194,29 @@
   .beat-1{ top:0;height:100%;display:flex;flex-direction:column;justify-content:center;align-items:flex-start; }
   .beat-1 h1{ font-size:clamp(40px,7.2vw,108px); max-width:14ch; }
   .beat p{ color:#c3c8d6 !important; text-shadow:0 1px 14px rgba(0,0,0,.85),0 0 2px rgba(0,0,0,.6); }
-  .beat-1 p{ margin-top:18px;font-size:clamp(14px,1.6vw,19px);color:var(--ink-dim);max-width:34ch; }
+  .beat-1 p{ margin-top:22px;font-size:clamp(15px,1.5vw,19px);color:var(--ink-dim);max-width:36ch; }
+  .beat-1 h1 .amber{ color:var(--amber); }
+  .hero-eyebrow{
+    display:inline-flex;align-items:center;gap:10px;margin-bottom:26px;
+    font-size:11px;letter-spacing:.14em;color:#b9c6d4;
+    padding:7px 12px;border:1px solid rgba(34,211,238,.25);border-radius:999px;background:rgba(5,8,13,.6);
+  }
+  .hero-eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--amber);box-shadow:0 0 0 3px rgba(255,178,36,.18);}
+  .scroll-cue{
+    position:absolute;left:clamp(24px,7vw,96px);bottom:5vh;
+    display:flex;align-items:center;gap:12px;font-size:10px;letter-spacing:.2em;color:var(--ink-dim);
+  }
+  .cue-line{width:42px;height:1px;background:rgba(255,255,255,.15);position:relative;overflow:hidden;}
+  .cue-line::after{content:'';position:absolute;inset:0;background:var(--cyan);transform:translateX(-100%);animation:cue 2.2s var(--ease-in-out) infinite;}
+  @keyframes cue{ 60%,100%{transform:translateX(100%);} }
+  /* hero wordmark: characters rise in on load (chars wrapped by JS; text stays whole without it) */
+  .split .ch{display:inline-block;transform:translateY(105%);opacity:0;animation:rise .9s var(--ease-out) forwards;animation-delay:calc(var(--c) * 28ms + 120ms);}
+  .split .w{display:inline-block;overflow:hidden;padding-bottom:.08em;margin-bottom:-.08em;white-space:nowrap;}
+  @keyframes rise{ to{transform:none;opacity:1;} }
+  .js .hero-eyebrow, .js .hero-sub, .js .scroll-cue{opacity:0;animation:fadeUp .8s var(--ease-out) forwards;}
+  .js .hero-eyebrow{animation-delay:.05s;} .js .hero-sub{animation-delay:.55s;} .js .scroll-cue{animation-delay:.9s;}
+  @media (max-width:720px){ .scroll-cue{ display:none; } .hero-eyebrow .opt{ display:none; } }
+  @keyframes fadeUp{ from{opacity:0;transform:translateY(10px);} to{opacity:1;transform:none;} }
 
   .beat-mid{ top:0;height:100%;display:flex;flex-direction:column;justify-content:flex-end;padding-bottom:16vh; }
   .beat-mid h2{ font-size:clamp(28px,4.4vw,58px); max-width:16ch; }
@@ -179,7 +228,7 @@
   .beat-5 .cta{
     margin-top:26px;display:inline-block;width:fit-content;
     padding:14px 28px;border-radius:999px;
-    background:#fff;color:#0a0a0f;font-size:13px;font-weight:600;
+    background:var(--amber);color:#120c02;font-size:13px;font-weight:600;
     transition:transform var(--dur-press) var(--ease-out),background var(--dur-ui) ease;
   }
 
@@ -193,19 +242,41 @@
   .readout .chapter-name{font-size:11px;font-weight:700;letter-spacing:.12em;}
   .readout .chapter-pct{font-size:11px;color:var(--ink-dim);margin-top:4px;font-variant-numeric:tabular-nums;}
   .readout-bar{width:120px;height:2px;background:rgba(255,255,255,.15);margin-top:8px;margin-left:auto;}
-  .readout-bar-fill{height:100%;width:100%;transform:scaleX(0);transform-origin:left;background:linear-gradient(90deg,var(--purple),var(--green));}
+  .readout-bar-fill{height:100%;width:100%;transform:scaleX(0);transform-origin:left;background:linear-gradient(90deg,var(--cyan),var(--amber));}
 
   /* ---------- After-film content ---------- */
   main{ position:relative; background:var(--black); z-index:2; }
   section{ padding:min(14vh,120px) clamp(20px,6vw,80px); }
   .section-head{ max-width:820px; margin-bottom:min(7vh,64px); }
   .eyebrow{
-    font-size:11px;font-weight:700;letter-spacing:.14em;color:var(--green);
+    font-size:11px;font-weight:700;letter-spacing:.14em;color:var(--amber);
     display:flex;align-items:center;gap:8px;margin-bottom:16px;
   }
-  .eyebrow::before{content:'';width:16px;height:1px;background:var(--green);}
+  .eyebrow::before{content:none;}
   .section-head h2{ font-size:clamp(30px,4.2vw,52px); }
   .section-head p{ margin-top:18px;font-size:clamp(15px,1.4vw,18px);color:var(--ink-dim);max-width:56ch; }
+
+  /* Tech stack marquee */
+  .stack{
+    border-top:1px solid rgba(255,255,255,.06);border-bottom:1px solid rgba(255,255,255,.06);
+    overflow:hidden;padding:20px 0;
+    mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);
+    -webkit-mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);
+  }
+  .stack-track{display:flex;width:max-content;animation:marquee 38s linear infinite;}
+  .stack-track span{font-size:12px;letter-spacing:.18em;color:var(--ink-dim);padding:0 28px;display:flex;align-items:center;gap:56px;}
+  .stack-track span::after{content:'';width:4px;height:4px;background:var(--cyan);opacity:.6;transform:rotate(45deg);margin-left:28px;}
+  @keyframes marquee{ to{transform:translateX(-50%);} }
+  @media (prefers-reduced-motion: reduce){ .stack-track{animation:none;} }
+
+  /* Cursor spotlight on cards: a soft glow and border light that follow the pointer */
+  .spot{ position:relative; isolation:isolate; }
+  .spot::after{
+    content:'';position:absolute;inset:-1px;border-radius:inherit;pointer-events:none;z-index:-1;
+    background:radial-gradient(420px circle at var(--mx,50%) var(--my,50%), rgba(34,211,238,.10), transparent 45%);
+    opacity:0;transition:opacity var(--dur-ui) ease;
+  }
+  .spot:hover::after{ opacity:1; }
 
   /* Services */
   .services-grid{
@@ -218,7 +289,7 @@
     transition:background var(--dur-ui) ease;
   }
   .service-card:hover{ background:#0b0d16; }
-  .service-num{ font-family:'Space Mono',monospace;font-size:12px;color:var(--purple); }
+  .service-num{ font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--cyan); }
   .service-card h3{ font-size:20px;font-weight:600; }
   .service-card p{ font-size:14px;color:var(--ink-dim);line-height:1.6; }
 
@@ -232,22 +303,24 @@
     background:linear-gradient(180deg, rgba(255,255,255,.02), transparent);
   }
   .price-card.featured{
-    border-color:transparent;
-    background:linear-gradient(180deg, rgba(123,47,247,.14), rgba(57,255,106,.05));
+    border:1px solid transparent;
+    background-clip:padding-box;
+    box-shadow:0 0 0 1px rgba(34,211,238,.35), 0 30px 80px -30px rgba(255,178,36,.25);
+    background:linear-gradient(180deg, rgba(34,211,238,.14), rgba(255,178,36,.05));
     position:relative;
   }
   .price-card.featured::before{
     content:'MOST POPULAR';
-    font-family:'Space Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.1em;
-    color:#050608;background:linear-gradient(90deg,var(--purple),var(--green));
+    font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.1em;
+    color:#050608;background:linear-gradient(90deg,var(--cyan),var(--amber));
     padding:5px 10px;border-radius:999px;position:absolute;top:-11px;left:30px;
   }
   .price-tier{ font-size:13px;color:var(--ink-dim);font-weight:600;letter-spacing:.04em; }
-  .price-amount{ font-family:'Clash Display',sans-serif;font-size:38px;font-weight:600; }
-  .price-amount span{ font-size:14px;color:var(--ink-dim);font-family:'Inter',system-ui,sans-serif;font-weight:400;margin-left:6px; }
+  .price-amount{ font-family:'Geist',system-ui,sans-serif;font-size:38px;font-weight:600; }
+  .price-amount span{ font-size:14px;color:var(--ink-dim);font-family:'Geist',system-ui,sans-serif;font-weight:400;margin-left:6px; }
   .price-card ul{ list-style:none;display:flex;flex-direction:column;gap:10px; }
   .price-card li{ font-size:14px;color:var(--ink-dim);display:flex;gap:10px;align-items:flex-start; }
-  .price-card li::before{ content:'—';color:var(--green);flex:none; }
+  .price-card li::before{ content:'—';color:var(--amber);flex:none; }
   .price-btn{
     margin-top:auto;text-align:center;padding:13px;border-radius:10px;
     border:1px solid rgba(255,255,255,.18);font-size:13px;font-weight:600;
@@ -264,12 +337,12 @@
   .contact-wrap h2{ font-size:clamp(34px,5.4vw,68px); }
   .contact-links{ display:flex;flex-direction:column;gap:22px; }
   .contact-links a.big-link{
-    font-size:clamp(20px,2.4vw,26px);font-family:'Clash Display',sans-serif;font-weight:600;
+    font-size:clamp(20px,2.4vw,26px);font-family:'Geist',system-ui,sans-serif;font-weight:600;
     border-bottom:1px solid rgba(255,255,255,.15);padding-bottom:14px;
     display:flex;justify-content:space-between;align-items:center;
     transition:border-color var(--dur-ui) ease,color var(--dur-ui) ease,transform var(--dur-press) var(--ease-out);
   }
-  .contact-links a.big-link:hover{ border-color:var(--green);color:var(--green); }
+  .contact-links a.big-link:hover{ border-color:var(--amber);color:var(--amber); }
   .contact-meta{ font-size:13px;color:var(--ink-dim); }
 
   @media (max-width:860px){
@@ -307,6 +380,8 @@
     .js .reveal, .js .service-card.reveal{ transform:none;transition:opacity .2s ease,background var(--dur-ui) ease; }
     .nav-cta, .cta, .price-btn, .big-link, .nav-cta:hover, .beat-5 .cta:hover{ transform:none !important; }
     .skip-link{ transition:none; }
+    .split .ch, .js .hero-eyebrow, .js .hero-sub, .js .scroll-cue{ animation:none;transform:none;opacity:1; }
+    .cue-line::after{ animation:none; }
   }
 </style>
 </head>
@@ -314,21 +389,13 @@
 <a class="skip-link" href="#services">Skip to content</a>
 
 <header id="siteHeader">
-  <a class="logo" href="#" aria-label="Your Premium Sites, back to top">
+  <a class="logo" href="#" aria-label="Da Website Builder, back to top">
     <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <path d="M12 2L12 8" stroke="currentColor" stroke-width="1.4"/>
-      <path d="M12 16L12 22" stroke="currentColor" stroke-width="1.4"/>
-      <path d="M2 12L8 12" stroke="currentColor" stroke-width="1.4"/>
-      <path d="M16 12L22 12" stroke="currentColor" stroke-width="1.4"/>
-      <circle cx="12" cy="12" r="3.4" stroke="url(#lg)" stroke-width="1.6"/>
-      <defs>
-        <linearGradient id="lg" x1="0" y1="0" x2="24" y2="24">
-          <stop offset="0" stop-color="#7b2ff7"/>
-          <stop offset="1" stop-color="#39ff6a"/>
-        </linearGradient>
-      </defs>
+      <path d="M8 6L2.5 12L8 18" stroke="#22d3ee" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M16 6L21.5 12L16 18" stroke="#22d3ee" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M13.6 4L10.4 20" stroke="#ffb224" stroke-width="1.8" stroke-linecap="round"/>
     </svg>
-    <span class="logo-text">YOUR PREMIUM SITES</span>
+    <span class="logo-text">DA WEBSITE BUILDER</span>
   </a>
   <nav aria-label="Main">
     <a class="nav-link" href="#services">Services</a>
@@ -339,76 +406,74 @@
 </header>
 
 <div class="film-scroll" id="filmScroll">
-  <div class="film-stage" role="img" aria-label="A wireframe draft assembling into a finished website as you scroll">
+  <div class="film-stage" id="stage" role="img" aria-label="A circuit board powers up and wires together a website, from blueprint to live launch, as you scroll">
     <canvas id="filmCanvas"></canvas>
-    <canvas id="ambientCanvas"></canvas>
     <div id="grainVignette"></div>
+    <div class="term" id="term" aria-hidden="true">
+      <div class="term-head"><i></i><i></i><i></i><span>dwb — build</span></div>
+      <div class="term-body" id="termBody"></div>
+    </div>
     <div id="bottomFade"></div>
-
-    <div class="beat beat-1" data-in="-0.1" data-peak="0" data-out="0.16">
-      <h1>Your Premium Sites</h1>
-      <p>Custom-built websites, drafted and assembled from the ground up — no templates, no shortcuts.</p>
+    <div class="beat beat-1" data-in="-0.1" data-peak="0" data-out="0.13">
+      <div class="hero-eyebrow mono"><span class="dot"></span>WEBSITE BUILD STUDIO<span class="opt">&nbsp;· OPEN FOR PROJECTS</span></div>
+      <h1 class="split" aria-label="Da Website Builder"><span class="w">Da</span> <span class="w">Website</span> <span class="w">Builder</span></h1>
+      <p class="hero-sub">Custom websites engineered from the ground up. Blueprint to launch, no templates.</p>
+      <div class="scroll-cue mono" aria-hidden="true"><span class="cue-line"></span>SCROLL TO BUILD</div>
     </div>
-
-    <div class="beat beat-mid" data-in="0.16" data-peak="0.235" data-out="0.38">
-      <h2>We start with structure.</h2>
-      <p>Every project begins as a blueprint — architecture before pixels.</p>
+    <div class="beat beat-mid" data-in="0.13" data-peak="0.2" data-out="0.31">
+      <h2>Blueprint first.</h2>
+      <p>Every build starts as a system plan: pages, flows and structure mapped before a single pixel.</p>
     </div>
-
-    <div class="beat beat-mid" data-in="0.38" data-peak="0.455" data-out="0.58">
-      <h2>Then it comes together.</h2>
-      <p>Design and code, built in tandem, panel by panel.</p>
+    <div class="beat beat-mid" data-in="0.31" data-peak="0.38" data-out="0.49">
+      <h2>Then the foundation.</h2>
+      <p>Hosting, data and performance get laid down first, so everything on top stays fast and solid.</p>
     </div>
-
-    <div class="beat beat-mid" data-in="0.58" data-peak="0.655" data-out="0.78">
-      <h2>No templates. No shortcuts.</h2>
-      <p>Just a site engineered for exactly what you need.</p>
+    <div class="beat beat-mid" data-in="0.49" data-peak="0.58" data-out="0.76">
+      <h2>Framed. Wired. Connected.</h2>
+      <p>The layout snaps into place, then every section gets wired to the systems that power it.</p>
     </div>
-
-    <div class="beat beat-5" data-in="0.78" data-peak="0.86" data-out="2">
-      <h2>This is what premium looks like.</h2>
+    <div class="beat beat-5" data-in="0.78" data-peak="0.88" data-out="2">
+      <h2>Built. Deployed. Live.</h2>
       <p>See what we can build for you.</p>
-      <a class="cta" href="#contact">Start your project</a>
+      <a class="cta" href="#contact">Start your build</a>
     </div>
-
     <div class="readout" id="readout">
-      <div class="chapter-name mono" id="readoutName">01 — DRAFT</div>
+      <div class="chapter-name mono" id="readoutName">01 — BLUEPRINT</div>
       <div class="chapter-pct mono" id="readoutPct">0%</div>
       <div class="readout-bar"><div class="readout-bar-fill" id="readoutFill"></div></div>
     </div>
-
-    <div class="loader" id="loader">
-      <div class="logo-text" style="font-size:13px;letter-spacing:.1em;color:#9aa0b4;">LOADING FILM</div>
-      <div class="loader-bar"><div class="loader-fill" id="loaderFill"></div></div>
-      <div class="loader-label mono" id="loaderLabel">0 / 301</div>
-    </div>
   </div>
 </div>
-
 <main>
+  <div class="stack" aria-label="What we build with">
+    <div class="stack-track mono">
+      <span>HTML5</span><span>CSS3</span><span>JAVASCRIPT</span><span>REACT</span><span>NEXT.JS</span><span>NODE</span><span>VERCEL</span><span>STRIPE</span><span>HEADLESS CMS</span><span>SEO</span><span>ANALYTICS</span><span>SCROLL MOTION</span>
+      <span aria-hidden="true">HTML5</span><span aria-hidden="true">CSS3</span><span aria-hidden="true">JAVASCRIPT</span><span aria-hidden="true">REACT</span><span aria-hidden="true">NEXT.JS</span><span aria-hidden="true">NODE</span><span aria-hidden="true">VERCEL</span><span aria-hidden="true">STRIPE</span><span aria-hidden="true">HEADLESS CMS</span><span aria-hidden="true">SEO</span><span aria-hidden="true">ANALYTICS</span><span aria-hidden="true">SCROLL MOTION</span>
+    </div>
+  </div>
   <section id="services">
     <div class="section-head reveal">
-      <div class="eyebrow">SERVICES</div>
+      <div class="eyebrow mono">// SERVICES</div>
       <h2>What we build</h2>
       <p>Four ways we've helped clients turn an idea into a site that actually performs — picked to fit the project, not a template catalogue.</p>
     </div>
     <div class="services-grid">
-      <div class="service-card reveal" style="--i:0">
+      <div class="service-card spot reveal" style="--i:0">
         <div class="service-num mono">01</div>
         <h3>Brochure &amp; marketing sites</h3>
         <p>Fast, sharp, conversion-focused sites for businesses that need to look as good as they perform.</p>
       </div>
-      <div class="service-card reveal" style="--i:1">
+      <div class="service-card spot reveal" style="--i:1">
         <div class="service-num mono">02</div>
         <h3>E-commerce</h3>
         <p>Custom storefronts built around your catalogue and checkout flow — not a plugin's idea of one.</p>
       </div>
-      <div class="service-card reveal" style="--i:2">
+      <div class="service-card spot reveal" style="--i:2">
         <div class="service-num mono">03</div>
         <h3>Scroll-film flagships</h3>
         <p>Cinematic, one-shot scroll experiences like this page — for launches that need to be remembered.</p>
       </div>
-      <div class="service-card reveal" style="--i:3">
+      <div class="service-card spot reveal" style="--i:3">
         <div class="service-num mono">04</div>
         <h3>Web apps &amp; dashboards</h3>
         <p>Product interfaces and internal tools, engineered with the same care as a marketing site.</p>
@@ -418,23 +483,23 @@
 
   <section id="pricing">
     <div class="section-head reveal">
-      <div class="eyebrow">PRICING</div>
+      <div class="eyebrow mono">// PRICING</div>
       <h2>Straightforward packages</h2>
       <p>Every project is scoped for what it actually needs. These are starting points — final quotes are scoped to your project.</p>
     </div>
     <div class="pricing-grid">
-      <div class="price-card reveal" style="--i:0">
+      <div class="price-card spot reveal" style="--i:0">
         <div class="price-tier mono">LAUNCH</div>
         <div class="price-amount">$2,500<span>starting at</span></div>
         <ul>
-          <li>Single-page premium site</li>
+          <li>Single-page custom site</li>
           <li>Custom design, no templates</li>
           <li>Mobile-first build</li>
           <li>2 weeks turnaround</li>
         </ul>
         <a class="price-btn" href="#contact">Get started</a>
       </div>
-      <div class="price-card featured reveal" style="--i:1">
+      <div class="price-card featured spot reveal" style="--i:1">
         <div class="price-tier mono">GROWTH</div>
         <div class="price-amount">$6,500<span>starting at</span></div>
         <ul>
@@ -445,7 +510,7 @@
         </ul>
         <a class="price-btn" href="#contact">Get started</a>
       </div>
-      <div class="price-card reveal" style="--i:2">
+      <div class="price-card spot reveal" style="--i:2">
         <div class="price-tier mono">SIGNATURE</div>
         <div class="price-amount">Custom<span>quoted per project</span></div>
         <ul>
@@ -461,10 +526,10 @@
 
   <section id="contact">
     <div class="contact-wrap">
-      <h2 class="reveal">Let's build something premium.</h2>
+      <div class="reveal"><div class="eyebrow mono">// START A BUILD</div><h2>Let's build your website.</h2></div>
       <div class="contact-links reveal" style="--i:1">
-        <a class="big-link" href="mailto:hello@yourpremiumsites.com">
-          <span>hello@yourpremiumsites.com</span>
+        <a class="big-link" href="mailto:desmondbetts@ymail.com">
+          <span>desmondbetts@ymail.com</span>
           <span>→</span>
         </a>
         <div class="contact-meta">Tell us about your project and we'll get back to you within one business day.</div>
@@ -473,8 +538,8 @@
   </section>
 
   <footer>
-    <div>&copy; <span id="year"></span> Your Premium Sites. All rights reserved.</div>
-    <a href="mailto:hello@yourpremiumsites.com">hello@yourpremiumsites.com</a>
+    <div>&copy; <span id="year"></span> Da Website Builder. All rights reserved.</div>
+    <a href="mailto:desmondbetts@ymail.com">desmondbetts@ymail.com</a>
   </footer>
 </main>
 
@@ -484,227 +549,571 @@
   "use strict";
   document.getElementById('year').textContent = new Date().getFullYear();
 
+  /* split the hero wordmark into characters for the load reveal; "Builder" gets the accent */
+  (function(){
+    var c = 0;
+    document.querySelectorAll('.split .w').forEach(function(w, wi){
+      var txt = w.textContent; w.textContent = '';
+      w.setAttribute('aria-hidden', 'true');
+      for (var i = 0; i < txt.length; i++){
+        var s = document.createElement('span');
+        s.className = 'ch' + (wi === 2 ? ' amber' : '');
+        s.style.setProperty('--c', c++);
+        s.textContent = txt[i];
+        w.appendChild(s);
+      }
+    });
+  })();
+
   var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  /* ---------------- Dev contract ---------------- */
+  /* ---------------- Dev contract ----------------
+     ?jump=<scrollY> lands pre-scrolled; window.__ready fires once the first frame is drawn. */
   var params = new URLSearchParams(location.search);
   var JUMP = params.get('jump');
   if (JUMP !== null) { history.scrollRestoration = 'manual'; }
 
-  /* ---------------- Frame loading ----------------
-     Frames are kept as compressed JPEG Blobs (~17 MB for all 301) and only a small
-     window around the playhead is ever decoded. Holding 301 decoded <img> elements
-     (~1.1 GB of pixels at 1280x720) is what crashed phones, mobile Safari especially. */
-  var FRAME_COUNT = 301;
-  var FRAME_W = 1280, FRAME_H = 720;
-  function framePath(i){
-    return 'frames/f_' + String(i+1).padStart(4,'0') + '.jpg';
-  }
-  var blobs = new Array(FRAME_COUNT).fill(null);
-  var loadedCount = 0;
-  var loaderFill = document.getElementById('loaderFill');
-  var loaderLabel = document.getElementById('loaderLabel');
-  var loader = document.getElementById('loader');
+  var CYAN = '34,211,238', AMBER = '255,178,36';
+  function rgba(c, a){ return 'rgba(' + c + ',' + a + ')'; }
+  function clamp(v, a, b){ return v < a ? a : v > b ? b : v; }
+  function seg(p, a, b){ return clamp((p - a) / (b - a), 0, 1); }
+  function easeOut(t){ return 1 - Math.pow(1 - t, 3); }
 
-  function loadFrame(i){
-    return fetch(framePath(i)).then(function(r){
-      if (!r.ok) throw new Error(r.status);
-      return r.blob();
-    }).then(function(b){
-      blobs[i] = b;
-      /* a frame inside the current decode window just arrived: let the next pass pick it up */
-      if (Math.abs(i - bmpCenter) <= B_AHEAD) ensureDirty = true;
-    }).catch(function(){}).then(function(){ loadedCount++; updateLoader(); });
-  }
-  function updateLoader(){
-    var pct = Math.round((loadedCount/FRAME_COUNT)*100);
-    loaderFill.style.transform = 'scaleX(' + (pct/100) + ')';
-    loaderLabel.textContent = loadedCount + ' / ' + FRAME_COUNT;
-  }
-
-  /* Download order: the opening frames first (so the page can show right away), then
-     coarse-to-fine passes over the whole film so a scrub anywhere has a nearby frame
-     early, then everything left. */
-  var START_FRAMES = 12;
-  function loadOrder(){
-    var order = [], seen = new Uint8Array(FRAME_COUNT);
-    function add(i){ if (i >= 0 && i < FRAME_COUNT && !seen[i]){ seen[i] = 1; order.push(i); } }
-    for (var i = 0; i < START_FRAMES; i++) add(i);
-    [32, 16, 8, 4, 2, 1].forEach(function(step){ for (var j = 0; j < FRAME_COUNT; j += step) add(j); });
-    return order;
-  }
-
-  var CONCURRENCY = 6;
-  var loadQueue = loadOrder();
-  function loadAll(){
-    return new Promise(function(resolve){
-      var active = 0, done = 0;
-      function pump(){
-        while (active < CONCURRENCY && loadQueue.length){
-          active++;
-          loadFrame(loadQueue.shift()).then(function(){
-            active--; done++;
-            if (done === FRAME_COUNT) resolve();
-            else pump();
-          });
-        }
-      }
-      pump();
-    });
-  }
-  /* Move frames around `center` to the front of the download queue (used for ?jump). */
-  function prioritize(center){
-    var near = [];
-    loadQueue = loadQueue.filter(function(i){
-      if (Math.abs(i - center) <= 4){ near.push(i); return false; }
-      return true;
-    });
-    loadQueue = near.concat(loadQueue);
-  }
-
-  /* ---------------- Canvas + bounded decoded-frame cache ---------------- */
+  /* ---------------- Canvas ----------------
+     The whole scene is drawn in code: no image frames to download or decode, so memory
+     stays flat on phones (the old 301-frame film is what used to crash them). */
   var canvas = document.getElementById('filmCanvas');
   var ctx = canvas.getContext('2d');
-  var stage = canvas.parentNode;
+  var stage = document.getElementById('stage');
   var DPR = Math.min(window.devicePixelRatio || 1, 1.5);
+  var W = 0, H = 0, MOBILE = false;
 
-  /* The stage is 100vh, which stays put when mobile browser bars show/hide, so size the
-     backing store from the stage and skip no-op resizes. Reallocating a canvas clears it
-     and costs memory, and iOS fires resize constantly while scrolling. */
+  /* Static layers, rebuilt only on resize: the dim board and a fully lit copy of it that
+     the cursor spotlight and the wiring stage reveal. */
+  var baseLayer = document.createElement('canvas'), litLayer = document.createElement('canvas');
+  var spot = document.createElement('canvas'), sctx = spot.getContext('2d');
+  var SPOT_R = 170;
+
+  var traces = [], links = [], chips = [], win = null, blocks = [];
+
+  /* small seeded RNG so the board layout is stable between resizes */
+  function rng(seed){
+    return function(){
+      seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+      var t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+      t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+  }
+
+  function makePath(pts){
+    var lens = [0], total = 0;
+    for (var i = 1; i < pts.length; i++){
+      total += Math.hypot(pts[i][0] - pts[i-1][0], pts[i][1] - pts[i-1][1]);
+      lens.push(total);
+    }
+    return { pts: pts, lens: lens, len: total };
+  }
+  function pointAt(path, d){
+    d = clamp(d, 0, path.len);
+    for (var i = 1; i < path.pts.length; i++){
+      if (d <= path.lens[i]){
+        var a = path.pts[i-1], b = path.pts[i];
+        var t = (d - path.lens[i-1]) / Math.max(1e-6, path.lens[i] - path.lens[i-1]);
+        return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
+      }
+    }
+    return path.pts[path.pts.length - 1];
+  }
+  /* stroke the first `d` px of a path */
+  function strokePartial(c, path, d){
+    if (d <= 0) return;
+    c.beginPath();
+    c.moveTo(path.pts[0][0], path.pts[0][1]);
+    for (var i = 1; i < path.pts.length; i++){
+      if (d >= path.lens[i]){ c.lineTo(path.pts[i][0], path.pts[i][1]); continue; }
+      var q = pointAt(path, d); c.lineTo(q[0], q[1]); break;
+    }
+    c.stroke();
+  }
+
+  function layout(){
+    MOBILE = W < 760;
+    MAX_BITS = MOBILE ? 60 : 140;
+    var ww, wh, wx, wy;
+    if (MOBILE){
+      ww = W * 0.88; wh = ww * 0.62; wx = (W - ww) / 2; wy = Math.max(176, H * 0.22);
+    } else {
+      ww = Math.min(W * 0.46, 720); wh = ww * 0.62; wx = W * 0.95 - ww; wy = H * 0.45 - wh / 2;
+    }
+    win = { x: wx, y: wy, w: ww, h: wh };
+
+    /* "foundation" chips under the browser window */
+    chips = [];
+    var labels = ['SERVER', 'DATABASE', 'CDN'];
+    var cw = MOBILE ? ww * 0.27 : ww * 0.145, chh = MOBILE ? 34 : Math.min(H * 0.065, 52);
+    var cy = wy + wh + (MOBILE ? 22 : Math.min(H * 0.08, 64));
+    var span = MOBILE ? ww : ww * 0.5;
+    var gap = (span - cw * 3) / 2;
+    for (var i = 0; i < 3; i++) chips.push({ x: wx + i * (cw + gap), y: cy, w: cw, h: chh, label: labels[i] });
+    if (MOBILE) document.documentElement.style.setProperty('--term-top', Math.round(cy + chh + 16) + 'px');
+
+    /* wires from each chip up into the window */
+    links = chips.map(function(c, i){
+      var x0 = c.x + c.w / 2, x1 = wx + ww * (0.18 + i * 0.22);
+      var yTop = wy + wh, yMid = c.y - (c.y - yTop) * 0.5;
+      return makePath([[x0, c.y], [x0, yMid + 6], [x1, yMid - 6], [x1, yTop]]);
+    });
+
+    /* the site that gets framed inside the window, as fractions of the window */
+    blocks = [
+      { k: 'nav',  x: .04, y: .14, w: .92, h: .08 },
+      { k: 'hero', x: .04, y: .26, w: .92, h: .34 },
+      { k: 'card', x: .04, y: .64, w: .29, h: .25 },
+      { k: 'card', x: .355, y: .64, w: .29, h: .25 },
+      { k: 'card', x: .67, y: .64, w: .29, h: .25 }
+    ];
+
+    /* PCB traces: short runs of orthogonal + 45° segments on a grid, ending in vias */
+    var r = rng(7), G = MOBILE ? 22 : 28;
+    var n = clamp(Math.round(W * H / 21000), 26, 80);
+    var dirs = [[1,0],[1,1],[0,1],[-1,1],[-1,0],[-1,-1],[0,-1],[1,-1]];
+    traces = [];
+    for (var t = 0; t < n; t++){
+      var x = Math.round(r() * W / G) * G, y = Math.round(r() * H / G) * G;
+      var d = Math.floor(r() * 4) * 2; /* start orthogonal */
+      var pts = [[x, y]], segs = 3 + Math.floor(r() * 4);
+      for (var s = 0; s < segs; s++){
+        var L = (2 + Math.floor(r() * 6)) * G;
+        if (d % 2) L = L * 0.7;
+        x += dirs[d][0] * L; y += dirs[d][1] * L;
+        if (x < -G || x > W + G || y < -G || y > H + G) break;
+        pts.push([x, y]);
+        d = (d + (r() < 0.5 ? 1 : 7)) % 8;
+      }
+      if (pts.length > 1){ var p = makePath(pts); p.amber = r() < 0.35; traces.push(p); }
+    }
+  }
+
+  function buildLayers(){
+    [baseLayer, litLayer].forEach(function(cv){ cv.width = canvas.width; cv.height = canvas.height; });
+    var b = baseLayer.getContext('2d'), l = litLayer.getContext('2d');
+    b.setTransform(DPR, 0, 0, DPR, 0, 0); l.setTransform(DPR, 0, 0, DPR, 0, 0);
+
+    /* dot grid */
+    var G = MOBILE ? 22 : 28;
+    b.fillStyle = 'rgba(140,170,200,.10)';
+    l.fillStyle = rgba(CYAN, .45);
+    for (var gx = 0; gx <= W; gx += G) for (var gy = 0; gy <= H; gy += G){
+      b.fillRect(gx, gy, 1, 1); l.fillRect(gx - .5, gy - .5, 2, 2);
+    }
+    traces.forEach(function(p){
+      b.strokeStyle = 'rgba(140,170,200,.13)'; b.lineWidth = 1;
+      l.strokeStyle = rgba(p.amber ? AMBER : CYAN, .95); l.lineWidth = 1.5;
+      [b, l].forEach(function(c){
+        strokePartial(c, p, p.len);
+        var e = p.pts[p.pts.length - 1], s0 = p.pts[0];
+        c.beginPath(); c.arc(e[0], e[1], 3, 0, Math.PI * 2); c.stroke();
+        c.fillStyle = c === b ? 'rgba(140,170,200,.13)' : rgba(p.amber ? AMBER : CYAN, .95);
+        c.fillRect(s0[0] - 2.5, s0[1] - 2.5, 5, 5);
+      });
+    });
+    spot.width = spot.height = Math.ceil(SPOT_R * 2 * DPR);
+  }
+
   var sizedW = 0, sizedH = 0, resizeTimer = 0;
-  function resizeCanvas(){
+  function resize(){
     var w = stage.clientWidth || window.innerWidth, h = stage.clientHeight || window.innerHeight;
     if (w === sizedW && h === sizedH) return false;
-    sizedW = w; sizedH = h;
-    canvas.width = Math.round(w*DPR);
-    canvas.height = Math.round(h*DPR);
+    sizedW = W = w; sizedH = H = h;
+    canvas.width = Math.round(w * DPR);
+    canvas.height = Math.round(h * DPR);
+    layout();
+    buildLayers();
     return true;
   }
+  /* debounced: iOS fires resize constantly while its toolbars move */
   window.addEventListener('resize', function(){
     clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(function(){
-      if (!resizeCanvas()) return;
-      resizeAmbient();
-      drawFrame(displayed, true);
-    }, 150);
+    resizeTimer = setTimeout(resize, 150);
   });
-  resizeCanvas();
 
-  /* Each decoded 1280x720 frame is ~3.7 MB. Phones get a smaller window. */
-  var SMALL = Math.min(screen.width, screen.height) < 768 || matchMedia('(pointer: coarse)').matches;
-  var bitmaps = new Map(), decoding = new Set();
-  var B_AHEAD = SMALL ? 6 : 12, B_KEEP = SMALL ? 8 : 16;
-  var MAX_BITMAPS = 2*B_KEEP + 1; /* hard cap, whatever the scroll does */
-  var DECODE_CONCURRENCY = SMALL ? 3 : 6; /* caps in-flight decodes so erratic/fast
-    scrolling (fast scrollbar drags, flicking) can't queue a pile of decodes at once and
-    lock up the render thread */
-  var ENSURE_THROTTLE_MS = 90; /* the full scan+decode+evict pass is real work (GPU bitmap
-    churn); cap how often it can run so a fast/erratic scroll can't trigger it on every
-    single animation frame (~60/sec) and starve the render thread */
-  var bmpCenter = -999, lastEnsureAt = -1, ensureDirty = false;
-  var displayed = 0;
-  var lastDrawn = null; /* last decoded frame shown, kept as the fallback while the target decodes */
+  /* ---------------- Pointer: glow, code trail, signal pulses ---------------- */
+  var ptr = { x: -9999, y: -9999, tx: -9999, ty: -9999, has: false, lastX: 0, lastY: 0, lastPulse: 0 };
+  var bits = [], pulses = [];
+  var GLYPHS = ['0','1','0','1','{','}','</>','/','*',';','#'];
+  var MAX_BITS = 140, MAX_PULSES = 40;
 
-  function release(src){ if (src && src.close) src.close(); }
-
-  function decode(idx){
-    if (window.createImageBitmap) return createImageBitmap(blobs[idx]);
-    /* older Safari: decode through an <img> backed by an object URL */
-    return new Promise(function(resolve, reject){
-      var url = URL.createObjectURL(blobs[idx]);
-      var img = new Image();
-      img.onload = function(){ URL.revokeObjectURL(url); resolve(img); };
-      img.onerror = function(){ URL.revokeObjectURL(url); reject(); };
-      img.src = url;
-    });
-  }
-
-  function evict(center){
-    for (var k of Array.from(bitmaps.keys())){
-      if (k < center - B_KEEP || k > center + B_KEEP){ release(bitmaps.get(k)); bitmaps.delete(k); }
+  function spawnBits(x, y, n, vy){
+    for (var i = 0; i < n && bits.length < MAX_BITS; i++){
+      bits.push({
+        x: x + (Math.random() - .5) * 14, y: y + (Math.random() - .5) * 14,
+        vx: (Math.random() - .5) * 30, vy: (vy || -18) + (Math.random() - .5) * 20,
+        life: 1, g: GLYPHS[(Math.random() * GLYPHS.length) | 0], amber: Math.random() < .4,
+        size: 10 + Math.random() * 5
+      });
     }
-    if (bitmaps.size <= MAX_BITMAPS) return;
-    var keys = Array.from(bitmaps.keys()).sort(function(a, b){ return Math.abs(b - center) - Math.abs(a - center); });
-    for (var j = 0; bitmaps.size > MAX_BITMAPS; j++){ release(bitmaps.get(keys[j])); bitmaps.delete(keys[j]); }
+  }
+  /* send a signal down the trace nearest the pointer, starting where it is closest */
+  function pulseNear(x, y){
+    var best = null, bestD = 90, bestAt = 0;
+    for (var i = 0; i < traces.length; i++){
+      var p = traces[i];
+      for (var k = 0; k < p.pts.length; k++){
+        var d = Math.hypot(p.pts[k][0] - x, p.pts[k][1] - y);
+        if (d < bestD){ bestD = d; best = p; bestAt = p.lens[k]; }
+      }
+    }
+    if (best) addPulse(best, bestAt, best.amber ? AMBER : CYAN, 320);
+  }
+  function addPulse(path, at, color, speed, loop){
+    if (pulses.length >= MAX_PULSES) pulses.shift();
+    pulses.push({ path: path, d: at || 0, color: color, speed: speed, loop: !!loop });
   }
 
-  function ensureBitmaps(center){
-    if (!ensureDirty && Math.abs(center - bmpCenter) < 3) return;
+  function onMove(x, y){
+    var r = stage.getBoundingClientRect();
+    x -= r.left; y -= r.top;
+    if (!ptr.has){ ptr.x = x; ptr.y = y; ptr.lastX = x; ptr.lastY = y; ptr.has = true; }
+    ptr.tx = x; ptr.ty = y;
+    if (reduceMotion || heroFx <= 0.02) return;
+    var dist = Math.hypot(x - ptr.lastX, y - ptr.lastY);
+    if (dist > 12){
+      spawnBits(x, y, Math.min(3, Math.floor(dist / 12)));
+      ptr.lastX = x; ptr.lastY = y;
+    }
     var now = performance.now();
-    if (lastEnsureAt >= 0 && now - lastEnsureAt < ENSURE_THROTTLE_MS) return;
-    lastEnsureAt = now;
-    bmpCenter = center;
-    ensureDirty = false;
-    evict(center);
-    var lo = Math.max(0, center - B_AHEAD), hi = Math.min(FRAME_COUNT-1, center + B_AHEAD);
-    var candidates = [];
-    for (var i = lo; i <= hi; i++){
-      if (bitmaps.has(i) || decoding.has(i) || !blobs[i]) continue;
-      candidates.push(i);
+    if (now - ptr.lastPulse > 110){ ptr.lastPulse = now; pulseNear(x, y); }
+  }
+  stage.addEventListener('pointermove', function(e){ onMove(e.clientX, e.clientY); });
+  stage.addEventListener('pointerdown', function(e){
+    onMove(e.clientX, e.clientY);
+    if (!reduceMotion && heroFx > 0.02){ spawnBits(ptr.tx, ptr.ty, 10); pulseNear(ptr.tx, ptr.ty); }
+  });
+  /* touch scrolling cancels pointer events, so follow the finger directly while it scrolls */
+  stage.addEventListener('touchmove', function(e){
+    var t = e.touches[0]; if (t) onMove(t.clientX, t.clientY);
+  }, { passive: true });
+  stage.addEventListener('pointerleave', function(e){ if (e.pointerType === 'mouse') ptr.has = false; });
+
+  /* scrolling also kicks bits off the cursor, drifting against the scroll direction */
+  var lastScrollY = window.scrollY;
+  window.addEventListener('scroll', function(){
+    var dy = window.scrollY - lastScrollY; lastScrollY = window.scrollY;
+    if (reduceMotion || !ptr.has || heroFx <= 0.02 || !dy) return;
+    spawnBits(ptr.tx, ptr.ty, Math.min(3, 1 + Math.abs(dy) / 40 | 0), -clamp(dy, -60, 60) * 2.2);
+  }, { passive: true });
+
+  /* ---------------- Terminal build log ---------------- */
+  var LOG = [
+    { at: 0.00, t: '$ dwb init your-site', c: 'cmd' },
+    { at: 0.13, t: '→ drafting blueprint…' },
+    { at: 0.26, t: '✓ sitemap + architecture locked', c: 'ok' },
+    { at: 0.32, t: '→ provisioning server, database, cdn…' },
+    { at: 0.45, t: '✓ foundation online', c: 'ok' },
+    { at: 0.50, t: '→ framing layout grid…' },
+    { at: 0.61, t: '✓ 5 sections placed', c: 'ok' },
+    { at: 0.64, t: '→ wiring apis + forms…' },
+    { at: 0.76, t: '✓ all systems connected', c: 'ok' },
+    { at: 0.80, t: '→ applying design tokens…' },
+    { at: 0.88, t: '$ dwb deploy --prod', c: 'cmd' },
+    { at: 0.93, t: '✓ LIVE. built from scratch.', c: 'live' }
+  ];
+  var termBody = document.getElementById('termBody'), term = document.getElementById('term');
+  var shownLines = -1;
+  function updateTerm(p){
+    var n = 0;
+    while (n < LOG.length && LOG[n].at <= p) n++;
+    if (n !== shownLines){
+      var grew = n === shownLines + 1;
+      termBody.textContent = '';
+      for (var i = Math.max(0, n - 6); i < n; i++){
+        var el = document.createElement('div');
+        el.className = 'term-line' + (LOG[i].c ? ' ' + LOG[i].c : '') + (grew && i === n - 1 && !reduceMotion ? ' typing' : '');
+        el.textContent = LOG[i].t;
+        termBody.appendChild(el);
+      }
+      shownLines = n;
     }
-    candidates.sort(function(a, b){ return Math.abs(a - center) - Math.abs(b - center); });
-    for (var c = 0; c < candidates.length && decoding.size < DECODE_CONCURRENCY; c++){
-      let idx = candidates[c];
-      decoding.add(idx);
-      decode(idx).then(function(b){
-        decoding.delete(idx);
-        if (Math.abs(idx - bmpCenter) > B_KEEP){ release(b); return; }
-        bitmaps.set(idx, b);
-        evict(bmpCenter);
-        if (idx === displayed) drawFrame(idx, true);
-        else if (!bitmaps.has(displayed)) drawFrame(displayed, true);
-      }).catch(function(){ decoding.delete(idx); });
+    /* on phones the log sits over the hero headline, so it waits for the first scroll */
+    term.style.opacity = MOBILE ? seg(p, 0.1, 0.14) : 1;
+  }
+
+  /* ---------------- Scene ---------------- */
+  var heroFx = 1;
+
+  function roundRect(c, x, y, w, h, r){
+    c.beginPath();
+    c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r);
+    c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath();
+  }
+
+  function drawWindow(p, now){
+    var t1 = seg(p, .12, .30),  /* blueprint */
+        t3 = seg(p, .46, .62),  /* framing */
+        t5 = seg(p, .78, .92),  /* finishes */
+        t6 = seg(p, .9, .95);  /* live */
+    if (t1 <= 0) return;
+    var x = win.x, y = win.y, w = win.w, h = win.h;
+
+    /* body */
+    ctx.fillStyle = 'rgba(6,11,18,' + (0.82 * t1 + 0.16 * t5) + ')';
+    roundRect(ctx, x, y, w, h, 10); ctx.fill();
+
+    /* blueprint outline: dashed, drawing itself around the perimeter, solid once finished */
+    var per = makePath([[x, y], [x + w, y], [x + w, y + h], [x, y + h], [x, y]]);
+    ctx.lineWidth = 1.2;
+    ctx.setLineDash(t5 > 0 ? [] : [6, 5]);
+    ctx.strokeStyle = t6 > 0 ? rgba(AMBER, .5 + .5 * t6) : rgba(CYAN, .85);
+    strokePartial(ctx, per, per.len * easeOut(t1));
+    ctx.setLineDash([]);
+    if (t6 > 0){ /* glow as wide faint strokes: shadowBlur is too expensive per frame */
+      ctx.strokeStyle = rgba(AMBER, .12 * t6); ctx.lineWidth = 8; roundRect(ctx, x, y, w, h, 10); ctx.stroke();
+      ctx.strokeStyle = rgba(AMBER, .07 * t6); ctx.lineWidth = 18; roundRect(ctx, x, y, w, h, 10); ctx.stroke();
+      ctx.lineWidth = 1.2;
     }
-    /* a slot freed up but the window still has work: try again next pass */
-    if (candidates.length > c) ensureDirty = true;
+
+    /* blueprint annotations: corner crosshairs + dimension lines, fading as it's finished */
+    var ann = t1 * (1 - t5) * (MOBILE ? 0 : 1);
+    if (ann > 0){
+      ctx.strokeStyle = rgba(CYAN, .55 * ann); ctx.fillStyle = rgba(CYAN, .7 * ann);
+      ctx.lineWidth = 1;
+      [[x, y], [x + w, y], [x, y + h], [x + w, y + h]].forEach(function(c){
+        ctx.beginPath(); ctx.moveTo(c[0] - 10, c[1]); ctx.lineTo(c[0] + 10, c[1]);
+        ctx.moveTo(c[0], c[1] - 10); ctx.lineTo(c[0], c[1] + 10); ctx.stroke();
+      });
+      var dy = y - 18;
+      ctx.beginPath(); ctx.moveTo(x, dy); ctx.lineTo(x + w, dy);
+      ctx.moveTo(x, dy - 5); ctx.lineTo(x, dy + 5); ctx.moveTo(x + w, dy - 5); ctx.lineTo(x + w, dy + 5); ctx.stroke();
+      ctx.font = '10px "JetBrains Mono", monospace'; ctx.textAlign = 'center';
+      ctx.fillStyle = 'rgba(5,8,13,1)'; ctx.fillRect(x + w / 2 - 34, dy - 7, 68, 14);
+      ctx.fillStyle = rgba(CYAN, .8 * ann); ctx.fillText('1440 PX', x + w / 2, dy + 4);
+      ctx.textAlign = 'left';
+    }
+
+    if (t3 <= 0) return;
+    /* browser chrome */
+    var barH = h * 0.1;
+    ctx.globalAlpha = seg(t3, 0, .15);
+    ctx.strokeStyle = rgba(CYAN, .35); ctx.beginPath(); ctx.moveTo(x, y + barH); ctx.lineTo(x + w, y + barH); ctx.stroke();
+    var dotCols = t5 > 0 ? ['255,95,87', '254,188,46', '40,200,64'] : [CYAN, CYAN, CYAN];
+    for (var i = 0; i < 3; i++){
+      ctx.fillStyle = rgba(dotCols[i], t5 > 0 ? .4 + .6 * t5 : .5);
+      ctx.beginPath(); ctx.arc(x + 14 + i * 13, y + barH / 2, 3.6, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.strokeStyle = rgba(CYAN, .3);
+    roundRect(ctx, x + w * .3, y + barH * .22, w * .4, barH * .56, barH * .28); ctx.stroke();
+    ctx.fillStyle = rgba(CYAN, .7); ctx.font = Math.max(9, Math.round(barH * .32)) + 'px "JetBrains Mono", monospace';
+    ctx.textAlign = 'center'; ctx.fillText(t6 > 0 ? 'your-site.live' : 'localhost:3000', x + w / 2, y + barH * .6); ctx.textAlign = 'left';
+    ctx.globalAlpha = 1;
+
+    /* the site's sections snap in one by one */
+    var nb = blocks.length;
+    for (var b = 0; b < nb; b++){
+      var local = clamp((t3 - (b + 1) / (nb + 1)) * (nb + 1), 0, 1);
+      if (local <= 0) continue;
+      var bl = blocks[b], s = 1 + 0.08 * (1 - easeOut(local));
+      var bw = bl.w * w, bh = bl.h * h, bx = x + bl.x * w + bw / 2, by = y + bl.y * h + bh / 2;
+      bw *= s; bh *= s;
+      var rx = bx - bw / 2, ry = by - bh / 2;
+      ctx.globalAlpha = local;
+      /* finish: fill with real design */
+      if (t5 > 0){
+        if (bl.k === 'hero'){
+          var g = ctx.createLinearGradient(rx, ry, rx + bw, ry + bh);
+          g.addColorStop(0, rgba(CYAN, .32 * t5)); g.addColorStop(1, rgba(AMBER, .28 * t5));
+          ctx.fillStyle = g;
+        } else ctx.fillStyle = 'rgba(255,255,255,' + (.05 * t5) + ')';
+        roundRect(ctx, rx, ry, bw, bh, 6); ctx.fill();
+      }
+      ctx.strokeStyle = rgba(CYAN, .6 * (1 - t5 * .6)); ctx.lineWidth = 1;
+      roundRect(ctx, rx, ry, bw, bh, 6); ctx.stroke();
+      /* content placeholders, which turn into "text" as the finish lands */
+      ctx.fillStyle = t5 > 0 ? 'rgba(232,238,245,' + (.25 + .55 * t5) + ')' : rgba(CYAN, .22);
+      if (bl.k === 'hero'){
+        ctx.fillRect(rx + bw * .06, ry + bh * .28, bw * .5, bh * .12);
+        ctx.fillRect(rx + bw * .06, ry + bh * .48, bw * .36, bh * .07);
+        ctx.fillStyle = t5 > 0 ? rgba(AMBER, .4 + .6 * t5) : rgba(CYAN, .22);
+        roundRect(ctx, rx + bw * .06, ry + bh * .66, bw * .16, bh * .14, bh * .07); ctx.fill();
+      } else if (bl.k === 'nav'){
+        ctx.fillRect(rx + 8, ry + bh * .35, bw * .1, bh * .3);
+        for (var q = 0; q < 3; q++) ctx.fillRect(rx + bw * (.62 + q * .11), ry + bh * .4, bw * .07, bh * .2);
+      } else {
+        ctx.fillStyle = t5 > 0 ? rgba(b % 2 ? CYAN : AMBER, .3 + .5 * t5) : rgba(CYAN, .22);
+        ctx.fillRect(rx + bw * .1, ry + bh * .18, bw * .22, bh * .16);
+        ctx.fillStyle = t5 > 0 ? 'rgba(232,238,245,' + (.2 + .4 * t5) + ')' : rgba(CYAN, .18);
+        ctx.fillRect(rx + bw * .1, ry + bh * .5, bw * .7, bh * .08);
+        ctx.fillRect(rx + bw * .1, ry + bh * .66, bw * .5, bh * .08);
+      }
+      ctx.globalAlpha = 1;
+    }
+
+    /* LIVE badge */
+    if (t6 > 0){
+      ctx.globalAlpha = t6;
+      var bwid = 64, bx2 = x + w - bwid - 10, by2 = y + barH * .2;
+      ctx.fillStyle = rgba(AMBER, .16); roundRect(ctx, bx2, by2, bwid, barH * .6, barH * .3); ctx.fill();
+      ctx.fillStyle = rgba(AMBER, 1);
+      var blinkOn = reduceMotion || Math.sin(now * .006) > -.3;
+      if (blinkOn){ ctx.beginPath(); ctx.arc(bx2 + 12, by2 + barH * .3, 3.5, 0, Math.PI * 2); ctx.fill(); }
+      ctx.font = 'bold 10px "JetBrains Mono", monospace'; ctx.fillText('LIVE', bx2 + 22, by2 + barH * .3 + 4);
+      ctx.globalAlpha = 1;
+    }
   }
 
-  function nearestBitmap(i){
-    var best = null, bestD = Infinity;
-    bitmaps.forEach(function(b, k){ var d = Math.abs(k - i); if (d < bestD){ bestD = d; best = b; } });
-    return best;
+  function drawChips(p, now){
+    var t2 = seg(p, .30, .46), t4 = seg(p, .62, .78);
+    if (t2 <= 0) return;
+    ctx.font = (MOBILE ? 8 : 9) + 'px "JetBrains Mono", monospace';
+    for (var i = 0; i < chips.length; i++){
+      var local = clamp((t2 - i * .25) / .5, 0, 1);
+      if (local <= 0) continue;
+      var c = chips[i];
+      ctx.globalAlpha = local;
+      var lift = (1 - easeOut(local)) * 14;
+      var cx = c.x, cy = c.y + lift;
+      /* pins */
+      ctx.strokeStyle = rgba(AMBER, .7); ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      for (var k = 1; k < 7; k++){
+        var px = cx + c.w * k / 7;
+        ctx.moveTo(px, cy - 5); ctx.lineTo(px, cy); ctx.moveTo(px, cy + c.h); ctx.lineTo(px, cy + c.h + 5);
+      }
+      ctx.stroke();
+      ctx.fillStyle = '#0b1119'; roundRect(ctx, cx, cy, c.w, c.h, 4); ctx.fill();
+      ctx.strokeStyle = rgba(AMBER, .55); ctx.lineWidth = 1; roundRect(ctx, cx, cy, c.w, c.h, 4); ctx.stroke();
+      ctx.fillStyle = rgba(AMBER, .9); ctx.textAlign = 'center';
+      ctx.fillText(c.label, cx + c.w / 2, cy + c.h / 2 + 3);
+      ctx.textAlign = 'left';
+      /* status LED: blinks while booting, steady once wired */
+      var on = t4 >= 1 || reduceMotion || Math.sin(now * .008 + i * 2) > 0;
+      ctx.fillStyle = on ? rgba(CYAN, 1) : rgba(CYAN, .25);
+      ctx.beginPath(); ctx.arc(cx + c.w - 7, cy + 7, 2.4, 0, Math.PI * 2); ctx.fill();
+      ctx.globalAlpha = 1;
+    }
   }
 
-  window.__frameStats = function(){
-    return { decoded: bitmaps.size, decoding: decoding.size, downloaded: blobs.filter(Boolean).length, maxDecoded: MAX_BITMAPS };
-  };
-
-  function drawSource(src, w, h){
-    var cw = canvas.width, ch = canvas.height;
-    var scale = Math.max(cw/w, ch/h);
-    var dw = w*scale, dh = h*scale;
-    var dx = (cw-dw)/2, dy = (ch-dh)/2;
-    ctx.drawImage(src, dx, dy, dw, dh);
+  var lastLinkPulse = 0;
+  function drawWiring(p, now){
+    var t4 = seg(p, .62, .78);
+    /* the whole board lights up as everything gets connected */
+    var boardLit = 0.06 * heroFx + 0.3 * t4 * (1 - seg(p, .9, 1) * .5);
+    if (boardLit > 0.005){
+      ctx.globalAlpha = boardLit;
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.drawImage(litLayer, 0, 0);
+      ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+      ctx.globalAlpha = 1;
+    }
+    if (t4 <= 0) return;
+    ctx.strokeStyle = rgba(AMBER, .85); ctx.lineWidth = 1.6;
+    links.forEach(function(l){ strokePartial(ctx, l, l.len * easeOut(t4)); });
+    if (t4 >= 1 && !reduceMotion && now - lastLinkPulse > 260){
+      lastLinkPulse = now;
+      addPulse(links[(Math.random() * links.length) | 0], 0, CYAN, 220);
+      addPulse(traces[(Math.random() * traces.length) | 0], 0, Math.random() < .5 ? CYAN : AMBER, 260);
+    }
   }
 
-  function drawFrame(idx, force){
-    if (!force && idx === displayed && bitmaps.has(idx)) return;
-    displayed = idx;
-    var bmp = bitmaps.get(idx) || nearestBitmap(idx);
-    if (!bmp && lastDrawn && lastDrawn.width) bmp = lastDrawn; /* closed bitmaps report width 0 */
-    if (!bmp) return;
-    lastDrawn = bmp;
-    drawSource(bmp, bmp.width || FRAME_W, bmp.height || FRAME_H);
+  function drawPulses(dt){
+    for (var i = pulses.length - 1; i >= 0; i--){
+      var pu = pulses[i];
+      pu.d += pu.speed * dt;
+      if (pu.d > pu.path.len + 40){ pulses.splice(i, 1); continue; }
+      for (var k = 0; k < 6; k++){
+        var d = pu.d - k * 7;
+        if (d < 0 || d > pu.path.len) continue;
+        var q = pointAt(pu.path, d);
+        ctx.fillStyle = rgba(pu.color, (1 - k / 6) * .95);
+        ctx.beginPath(); ctx.arc(q[0], q[1], k === 0 ? 2.6 : 2 - k * .25, 0, Math.PI * 2); ctx.fill();
+      }
+    }
   }
 
-  /* ---------------- Film progress + lerped playhead ---------------- */
+  function drawPointerFx(dt){
+    if (!ptr.has) return;
+    ptr.x += (ptr.tx - ptr.x) * (reduceMotion ? 1 : Math.min(1, dt * 14));
+    ptr.y += (ptr.ty - ptr.y) * (reduceMotion ? 1 : Math.min(1, dt * 14));
+    var strength = Math.max(heroFx, .3);
+
+    /* spotlight: the lit board shows through a soft circle around the cursor */
+    var size = spot.width, sx = (ptr.x - SPOT_R) * DPR, sy = (ptr.y - SPOT_R) * DPR;
+    sctx.globalCompositeOperation = 'source-over';
+    sctx.clearRect(0, 0, size, size);
+    sctx.drawImage(litLayer, sx, sy, size, size, 0, 0, size, size);
+    sctx.globalCompositeOperation = 'destination-in';
+    var g = sctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+    g.addColorStop(0, 'rgba(0,0,0,1)'); g.addColorStop(.55, 'rgba(0,0,0,.45)'); g.addColorStop(1, 'rgba(0,0,0,0)');
+    sctx.fillStyle = g; sctx.fillRect(0, 0, size, size);
+    ctx.globalAlpha = strength;
+    ctx.drawImage(spot, ptr.x - SPOT_R, ptr.y - SPOT_R, SPOT_R * 2, SPOT_R * 2);
+
+    /* soft cyan bloom + crosshair cursor */
+    var bloom = ctx.createRadialGradient(ptr.x, ptr.y, 0, ptr.x, ptr.y, 90);
+    bloom.addColorStop(0, rgba(CYAN, .14)); bloom.addColorStop(1, rgba(CYAN, 0));
+    ctx.fillStyle = bloom; ctx.fillRect(ptr.x - 90, ptr.y - 90, 180, 180);
+    ctx.globalAlpha = heroFx;
+    if (heroFx > 0.02){
+      ctx.strokeStyle = rgba(CYAN, .7); ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(ptr.x - 14, ptr.y); ctx.lineTo(ptr.x - 5, ptr.y); ctx.moveTo(ptr.x + 5, ptr.y); ctx.lineTo(ptr.x + 14, ptr.y);
+      ctx.moveTo(ptr.x, ptr.y - 14); ctx.lineTo(ptr.x, ptr.y - 5); ctx.moveTo(ptr.x, ptr.y + 5); ctx.lineTo(ptr.x, ptr.y + 14);
+      ctx.stroke();
+      ctx.fillStyle = rgba(AMBER, .8); ctx.font = '10px "JetBrains Mono", monospace';
+      ctx.fillText(Math.round(ptr.x) + ',' + Math.round(ptr.y), ptr.x + 12, ptr.y + 22);
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  function drawBits(dt){
+    for (var i = bits.length - 1; i >= 0; i--){
+      var b = bits[i];
+      b.life -= dt * 1.3;
+      if (b.life <= 0){ bits.splice(i, 1); continue; }
+      b.x += b.vx * dt; b.y += b.vy * dt; b.vy *= 0.985;
+      ctx.globalAlpha = b.life * b.life;
+      ctx.fillStyle = rgba(b.amber ? AMBER : CYAN, 1);
+      ctx.font = Math.round(b.size) + 'px "JetBrains Mono", monospace';
+      ctx.fillText(b.g, b.x, b.y);
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  /* idle signals so the hero board feels alive before anyone touches it */
+  var lastIdle = 0;
+  function idlePulses(now){
+    if (reduceMotion || heroFx <= 0.05 || !traces.length || now - lastIdle < 380) return;
+    lastIdle = now;
+    var tr = traces[(Math.random() * traces.length) | 0];
+    addPulse(tr, 0, tr.amber ? AMBER : CYAN, 180);
+  }
+
+  function drawScene(p, now, dt){
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.fillStyle = '#05080d'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(baseLayer, 0, 0);
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    drawWiring(p, now);
+    idlePulses(now);
+    drawPulses(dt);
+    drawChips(p, now);
+    drawWindow(p, now);
+    drawPointerFx(dt);
+    drawBits(dt);
+  }
+
+  /* ---------------- Scroll progress ---------------- */
   var filmScroll = document.getElementById('filmScroll');
-  var currentFrame = 0, targetFrame = 0;
-
   function getProgress(){
     var r = filmScroll.getBoundingClientRect();
     var p = -r.top / (r.height - window.innerHeight);
     return Math.max(0, Math.min(1, p));
   }
+  function stageVisible(){ return filmScroll.getBoundingClientRect().bottom > 0; }
 
   /* ---------------- Beat overlays ---------------- */
   var beats = Array.from(document.querySelectorAll('.beat')).map(function(el){
-    return {
-      el: el,
-      in: parseFloat(el.dataset.in),
-      peak: parseFloat(el.dataset.peak),
-      out: parseFloat(el.dataset.out)
-    };
+    return { el: el, in: parseFloat(el.dataset.in), peak: parseFloat(el.dataset.peak), out: parseFloat(el.dataset.out) };
   });
   function beatAlpha(b, p){
     if (p < b.in || p > b.out) return 0;
@@ -716,17 +1125,18 @@
     beats.forEach(function(b){
       var a = beatAlpha(b, p);
       b.el.style.opacity = a;
-      if (!reduceMotion) b.el.style.transform = 'translateY(' + ((1-a)*14) + 'px)';
+      b.el.style.pointerEvents = a > .5 ? 'auto' : 'none';
+      if (!reduceMotion) b.el.style.transform = 'translateY(' + ((1 - a) * 14) + 'px)';
     });
   }
 
   /* ---------------- Chapter readout ---------------- */
   var CHAPTERS = [
-    {name:'01 — DRAFT', from:0, to:0.2},
-    {name:'02 — STRUCTURE', from:0.2, to:0.4},
-    {name:'03 — ASSEMBLY', from:0.4, to:0.6},
-    {name:'04 — REFINEMENT', from:0.6, to:0.8},
-    {name:'05 — LAUNCH', from:0.8, to:1.0}
+    { name: '01 — BLUEPRINT', to: 0.30 },
+    { name: '02 — FOUNDATION', to: 0.46 },
+    { name: '03 — FRAMING', to: 0.62 },
+    { name: '04 — WIRING', to: 0.78 },
+    { name: '05 — LAUNCH', to: 1.01 }
   ];
   var readout = document.getElementById('readout');
   var readoutName = document.getElementById('readoutName');
@@ -735,122 +1145,53 @@
   function updateReadout(p){
     if (p <= 0.001 || p >= 0.999){ readout.classList.remove('show'); return; }
     readout.classList.add('show');
-    var ch = CHAPTERS[CHAPTERS.length-1];
-    for (var i=0;i<CHAPTERS.length;i++){ if (p < CHAPTERS[i].to){ ch = CHAPTERS[i]; break; } }
+    var ch = CHAPTERS[CHAPTERS.length - 1];
+    for (var i = 0; i < CHAPTERS.length; i++){ if (p < CHAPTERS[i].to){ ch = CHAPTERS[i]; break; } }
     readoutName.textContent = ch.name;
-    var pct = Math.round(p*100);
-    readoutPct.textContent = pct + '%';
-    readoutFill.style.transform = 'scaleX(' + (pct/100) + ')';
+    var pct = Math.round(p * 100);
+    readoutPct.textContent = 'BUILD ' + pct + '%';
+    readoutFill.style.transform = 'scaleX(' + (pct / 100) + ')';
   }
 
-  /* ---------------- Adaptive header ---------------- */
   var header = document.getElementById('siteHeader');
-  var sampleCanvas = document.createElement('canvas');
-  sampleCanvas.width = 16; sampleCanvas.height = 4;
-  var sampleCtx = sampleCanvas.getContext('2d', {willReadFrequently:true});
-  var lastSample = 0;
-  function sampleHeaderLuminance(now){
-    if (now - lastSample < 180) return;
-    lastSample = now;
-    try{
-      sampleCtx.drawImage(canvas, 0, 0, canvas.width, Math.round(canvas.height*0.12), 0, 0, 16, 4);
-      var data = sampleCtx.getImageData(0,0,16,4).data;
-      var sum=0, n=data.length/4;
-      for (var i=0;i<data.length;i+=4){ sum += 0.299*data[i]+0.587*data[i+1]+0.114*data[i+2]; }
-      var avg = sum/n;
-      header.classList.toggle('on-light', avg > 138);
-    }catch(e){}
-  }
-
-  /* ---------------- Seam handoff ---------------- */
   var bottomFade = document.getElementById('bottomFade');
   var grainVignette = document.getElementById('grainVignette');
-  var SEAM_COLOR = '#000000';
-  document.documentElement.style.setProperty('--seam', SEAM_COLOR);
-
-  /* ---------------- Ambient hero particle layer ---------------- */
-  var ambientCanvas = document.getElementById('ambientCanvas');
-  var actx = ambientCanvas.getContext('2d');
-  var particles = [];
-  var sprite = null;
-  function buildSprite(){
-    var s = document.createElement('canvas');
-    s.width = 32; s.height = 32;
-    var sc = s.getContext('2d');
-    var g = sc.createRadialGradient(16,16,0,16,16,16);
-    g.addColorStop(0, 'rgba(255,255,255,0.9)');
-    g.addColorStop(0.4, 'rgba(180,140,255,0.5)');
-    g.addColorStop(1, 'rgba(180,140,255,0)');
-    sc.fillStyle = g;
-    sc.fillRect(0,0,32,32);
-    return s;
-  }
-  function resizeAmbient(){
-    var sx = canvas.width / (ambientCanvas.width || canvas.width), sy = canvas.height / (ambientCanvas.height || canvas.height);
-    ambientCanvas.width = canvas.width; ambientCanvas.height = canvas.height;
-    particles.forEach(function(pt){ pt.x *= sx; pt.y *= sy; });
-  }
-  function initParticles(){
-    ambientCanvas.width = canvas.width; ambientCanvas.height = canvas.height;
-    sprite = buildSprite();
-    particles = [];
-    var n = 46;
-    for (var i=0;i<n;i++){
-      particles.push({
-        x: Math.random()*ambientCanvas.width,
-        y: Math.random()*ambientCanvas.height,
-        size: 6 + Math.random()*20,
-        speed: 0.08 + Math.random()*0.25,
-        phase: Math.random()*Math.PI*2,
-        depth: 0.3 + Math.random()*0.7,
-        green: Math.random() > 0.5
-      });
-    }
-  }
-  var ambientAlpha = 1;
-  function drawAmbient(p, now){
-    ambientAlpha = Math.max(0, 1 - p/0.07);
-    if (ambientAlpha <= 0 || !sprite){ actx.clearRect(0,0,ambientCanvas.width,ambientCanvas.height); return; }
-    actx.clearRect(0,0,ambientCanvas.width,ambientCanvas.height);
-    for (var i=0;i<particles.length;i++){
-      var pt = particles[i];
-      pt.y -= pt.speed * pt.depth;
-      if (pt.y < -20) pt.y = ambientCanvas.height + 20;
-      var twinkle = 0.5 + 0.5*Math.sin(now*0.001 + pt.phase);
-      actx.globalAlpha = ambientAlpha * (0.25 + 0.5*twinkle) * pt.depth;
-      var sz = pt.size * pt.depth;
-      actx.drawImage(sprite, pt.x - sz/2, pt.y - sz/2, sz, sz);
-    }
-    actx.globalAlpha = 1;
-  }
 
   /* ---------------- Main render loop ---------------- */
   var lastTime = performance.now();
-  var settled = false;
+  var smoothP = 0;
 
   function tick(now){
+    var dt = Math.min(0.05, (now - lastTime) / 1000);
     lastTime = now;
-
     var p = getProgress();
-    targetFrame = p * (FRAME_COUNT - 1);
-    currentFrame += (targetFrame - currentFrame) * 0.14;
-    if (Math.abs(targetFrame - currentFrame) < 0.05) currentFrame = targetFrame;
+    smoothP += (p - smoothP) * (reduceMotion ? 1 : 0.18);
+    if (Math.abs(p - smoothP) < 0.0005) smoothP = p;
+    heroFx = 1 - seg(smoothP, 0.06, 0.16);
 
-    var idx = Math.round(currentFrame);
-    ensureBitmaps(idx);
-    drawFrame(idx);
-
-    updateBeats(p);
-    updateReadout(p);
+    /* skip all drawing once the stage has scrolled away */
+    if (stageVisible()){
+      drawScene(smoothP, now, dt);
+      updateBeats(p);
+      updateReadout(p);
+      updateTerm(smoothP);
+      var fadeP = Math.max(0, (p - 0.965) / 0.035);
+      bottomFade.style.opacity = fadeP;
+      grainVignette.style.opacity = 1 - fadeP * 0.85;
+    }
     header.classList.toggle('in-content', p >= 0.999);
-    if (p < 0.999) sampleHeaderLuminance(now);
-    if (!reduceMotion) drawAmbient(p, now);
-
-    var fadeP = Math.max(0, (p - 0.92) / 0.08);
-    bottomFade.style.opacity = fadeP;
-    grainVignette.style.opacity = 1 - fadeP*0.85;
-
     requestAnimationFrame(tick);
+  }
+
+  /* ---------------- Card spotlight ---------------- */
+  if (matchMedia('(hover:hover) and (pointer:fine)').matches){
+    document.querySelectorAll('.spot').forEach(function(el){
+      el.addEventListener('pointermove', function(e){
+        var r = el.getBoundingClientRect();
+        el.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+        el.style.setProperty('--my', (e.clientY - r.top) + 'px');
+      });
+    });
   }
 
   /* ---------------- Scroll reveal ---------------- */
@@ -861,7 +1202,7 @@
       entries.forEach(function(e){
         if (e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); }
       });
-    }, { rootMargin:'0px 0px -10% 0px' });
+    }, { rootMargin: '0px 0px -10% 0px' });
     els.forEach(function(el){ io.observe(el); });
   })();
 
@@ -887,63 +1228,17 @@
     if (id !== '#') history.replaceState(null, '', id);
   });
 
-  /* ---------------- Boot ----------------
-     Show the film as soon as the opening frames are in (or after START_TIMEOUT_MS on a
-     slow connection) instead of waiting for all 17 MB; the rest streams in behind it. */
-  var START_TIMEOUT_MS = 6000;
-  var jumpY = JUMP !== null ? (+JUMP || 0) : 0;
-  function jumpFrame(){
-    var r = filmScroll.getBoundingClientRect(), top = r.top + window.scrollY;
-    var p = Math.max(0, Math.min(1, (jumpY - top) / (r.height - window.innerHeight)));
-    return Math.round(p*(FRAME_COUNT-1));
-  }
-  var startFrame = JUMP !== null ? jumpFrame() : 0;
-  if (startFrame > 0) prioritize(startFrame);
-
-  function waitFor(cond, ms){
-    return new Promise(function(resolve){
-      var t0 = performance.now();
-      (function poll(){
-        if (cond() || performance.now() - t0 > ms) resolve();
-        else setTimeout(poll, 30);
-      })();
-    });
-  }
-
-  var startedAt = performance.now();
-  loadAll();
-  waitFor(function(){
-    for (var i = Math.max(0, startFrame - 2); i <= Math.min(FRAME_COUNT-1, startFrame + 2); i++) if (!blobs[i]) return false;
-    return true;
-  }, START_TIMEOUT_MS).then(function(){
-    ensureBitmaps(startFrame);
-    /* wait (briefly) for the first decode so the loader never reveals a black canvas */
-    return waitFor(function(){ return bitmaps.size > 0; }, Math.max(500, START_TIMEOUT_MS - (performance.now() - startedAt)));
-  }).then(function(){
-    initParticles();
-    if (JUMP === null) initLenis(); /* dev contract: skip smooth-scroll init on a forced jump */
-    drawFrame(startFrame, true);
-
-    loader.classList.add('hidden');
-
-    if (JUMP !== null){
-      window.scrollTo(0, jumpY);
-      var p = getProgress();
-      currentFrame = targetFrame = p*(FRAME_COUNT-1);
-      var idx = Math.round(currentFrame);
-      ensureBitmaps(idx);
-      drawFrame(idx, true);
-      updateBeats(p);
-      updateReadout(p);
-    }
-
-    requestAnimationFrame(function(){
-      requestAnimationFrame(function(){
-        settled = true;
-        window.__ready = true;
-        requestAnimationFrame(tick);
-      });
-    });
+  /* ---------------- Boot ---------------- */
+  resize();
+  if (JUMP !== null) window.scrollTo(0, +JUMP || 0);
+  else initLenis();
+  smoothP = getProgress();
+  /* redraw once web fonts land so canvas labels use JetBrains Mono */
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(function(){ buildLayers(); });
+  requestAnimationFrame(function(t){
+    lastTime = t;
+    tick(t);
+    requestAnimationFrame(function(){ window.__ready = true; });
   });
 })();
 </script>
