@@ -1362,7 +1362,7 @@
   function onMove(cx, cy){
     var r = stage.getBoundingClientRect();
     var x = cx - r.left, y = cy - r.top;
-    if (!ptr.has){ ptr.has = true; ptr.lastX = x; ptr.lastY = y; ptr.sx = x; ptr.sy = y; }
+    if (!ptr.has){ ptr.has = true; ptr.fresh = true; ptr.lastX = x; ptr.lastY = y; ptr.sx = x; ptr.sy = y; }
     ptr.x = x; ptr.y = y;
     ptr.nx = (x / r.width) * 2 - 1; ptr.ny = -(y / r.height) * 2 + 1;
     if (calmFx || heroFx <= .02) return;
@@ -1569,7 +1569,12 @@
     /* cursor on the board: a light pool + brighter traces under it */
     hitValid = false;
     if (ptr.has){
-      ndc.set(ptr.nx, ptr.ny);
+      /* glide toward the finger instead of jumping to each touch sample: phones deliver touches unevenly,
+         and at lower frame rates the light would hop between them */
+      if (ptr.fresh){ ptr.fresh = false; ptr.snx = ptr.nx; ptr.sny = ptr.ny; }
+      var kp = 1 - Math.exp(-dt * 14);
+      ptr.snx += (ptr.nx - ptr.snx) * kp; ptr.sny += (ptr.ny - ptr.sny) * kp;
+      ndc.set(ptr.snx, ptr.sny);
       raycaster.setFromCamera(ndc, camera);
       hitValid = !!raycaster.ray.intersectPlane(groundPlane, hit);
     }
