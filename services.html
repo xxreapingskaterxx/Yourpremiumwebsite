@@ -1412,8 +1412,8 @@
     camU = snap || reduceMotion ? target : camU + (target - camU) * Math.min(1, dt * 5);
     posCurve.getPoint(camU, camPos);
     lookCurve.getPoint(camU, camLook);
-    /* subtle pointer parallax on real pointers only */
-    if (finePointer && !reduceMotion && ptr.has){
+    /* the scene leans toward the pointer, a finger as well as a mouse, so phones feel like the desktop site */
+    if (!reduceMotion && ptr.has){
       par.x += (ptr.nx - par.x) * Math.min(1, dt * 3); par.y += (ptr.ny - par.y) * Math.min(1, dt * 3);
       tmpV.set(par.x * 1.4, par.y * .8, 0).applyQuaternion(camera.quaternion);
       camPos.add(tmpV);
