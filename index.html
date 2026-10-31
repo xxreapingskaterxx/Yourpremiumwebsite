@@ -667,8 +667,7 @@
 
   /* ---------------- Renderer, scene, camera ---------------- */
   var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: !SMALL, powerPreference: 'high-performance' });
-  /* phones: the monitor, keyboard and towers make this film heavier than the other pages, so it renders a little softer to keep the same speed */
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, SMALL ? 1.25 : 1.75));
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.75));
   renderer.outputEncoding = THREE.sRGBEncoding;
   renderer.setClearColor(BG, 1);
 
@@ -737,7 +736,7 @@
   };
   (function buildTraces(){
     var dirs = [[1,0],[1,1],[0,1],[-1,1],[-1,0],[-1,-1],[0,-1],[1,-1]];
-    var n = SMALL ? 120 : 190, pos = [], amb = [];
+    var n = 190, pos = [], amb = [];
     for (var t = 0; t < n; t++){
       var x = Math.round((R() * 2 - 1) * EXT / G) * G, z = Math.round((R() * 2 - 1) * EXT / G) * G;
       /* keep the build pad in the middle clear */
@@ -827,11 +826,8 @@
   var ALU = { color: 0x3e4650, roughness: .42, metalness: .85, envMapIntensity: .9 };
   function fadeMat(o){ var m = new THREE.MeshStandardMaterial(o); m.transparent = true; m.opacity = 0; return m; }
   /* a warm rim from behind and a cool fill so the hardware has highlights and form */
-  /* phones skip these: every extra light makes each lit pixel more expensive */
-  if (!SMALL){
-    var rimLight = new THREE.DirectionalLight(0xffc56a, .2); rimLight.position.set(14, 12, -16); scene.add(rimLight);
-    var fillLight = new THREE.DirectionalLight(0x7fd6ff, .3); fillLight.position.set(10, 6, 22); scene.add(fillLight);
-  }
+  var rimLight = new THREE.DirectionalLight(0xffc56a, .2); rimLight.position.set(14, 12, -16); scene.add(rimLight);
+  var fillLight = new THREE.DirectionalLight(0x7fd6ff, .3); fillLight.position.set(10, 6, 22); scene.add(fillLight);
 
   /* the frame becomes a big monitor: thin bezel, a rear shell, an aluminium arm and foot */
   var HW = FW + .7, HH = FH + .7;
@@ -1035,8 +1031,6 @@
 
   var liveGlow = glowSprite(AMBER, 34, 0);
   liveGlow.position.set(0, 3.2 + FH / 2, -1.5);
-  /* phones: a screen-filling additive sprite costs fill rate and its edges get clipped into a hard amber box */
-  liveGlow.visible = !SMALL;
   scene.add(liveGlow);
 
   /* ---------------- Foundation: server, database, CDN as three PC towers ---------------- */
@@ -1064,7 +1058,7 @@
     fan.add(blades);
     /* drawn after the grille so the fans never drop out behind it */
     fan.traverse(function(o){ o.renderOrder = 2; });
-    if (!SMALL) fan.add(glowSprite(color, radius * 3.2, glowAmt));
+    fan.add(glowSprite(color, radius * 3.2, glowAmt));
     return { g: fan, blades: blades };
   }
   var towers = [];
@@ -1112,8 +1106,6 @@
     rear.g.rotation.y = side * Math.PI / 2; rear.g.position.set(sx, h * .78, -d / 2 + .65); g.add(rear.g); fans.push(rear.blades);
     var glass = new THREE.Mesh(new THREE.PlaneGeometry(d - .2, h - .2), new THREE.MeshStandardMaterial({ color: 0x88b8cc, roughness: .05, metalness: .9, envMapIntensity: 1.6, transparent: true, opacity: .14, side: THREE.DoubleSide, depthWrite: false }));
     glass.rotation.y = side * Math.PI / 2; glass.position.set(side * (w / 2 + .085), h / 2 + .12, 0); g.add(glass);
-    /* phones barely see the side window, so they skip what's behind it */
-    if (SMALL) board.visible = gpu.visible = gpuLine.visible = glass.visible = rear.g.visible = edge.visible = false;
     var lbl = textSprite(t[0], '#ffb224', .38); lbl.position.set(0, h + .75, 0); g.add(lbl);
     g.position.set(t[1], 0, 7.4);
     g.scale.set(1, .001, 1);
@@ -1138,7 +1130,7 @@
   });
 
   /* ---------------- Data motes drifting up through the scene ---------------- */
-  var MOTES = SMALL ? 260 : 700;
+  var MOTES = 700;
   var motePos = new Float32Array(MOTES * 3), moteCol = new Float32Array(MOTES * 3), moteSpd = new Float32Array(MOTES);
   for (var m = 0; m < MOTES; m++){
     motePos[m*3] = (Math.random() * 2 - 1) * 45; motePos[m*3+1] = Math.random() * 30; motePos[m*3+2] = (Math.random() * 2 - 1) * 45;
@@ -1153,7 +1145,7 @@
   scene.add(motes);
 
   /* ---------------- Signal pulses ---------------- */
-  var pulses = [], MAX_PULSES = SMALL ? 24 : 48;
+  var pulses = [], MAX_PULSES = 48;
   var pulsePool = [];
   function getSprite(color){
     var s = pulsePool.pop() || glowSprite(color, 1.1, 1);

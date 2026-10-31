@@ -35,7 +35,6 @@
 
   function create(renderer, scene, camera, opts){
     opts = opts || {};
-    var small = !!opts.small;
     var gl2 = renderer.capabilities.isWebGL2;
     var TYPE = gl2 ? THREE.HalfFloatType : THREE.UnsignedByteType;
     var bg = (opts.background || new THREE.Color(0x05080d)).clone();
@@ -43,11 +42,14 @@
 
     scene.environment = buildEnv(renderer);
 
+    /* phones get the same antialiasing and mirror floor as desktop: on their tile-based GPUs MSAA is nearly free,
+       and without the reflections the board under the build looks flat. */
+    var msaa = gl2 && (renderer.extensions.has('EXT_color_buffer_float') || renderer.extensions.has('EXT_color_buffer_half_float'));
     function rt(samples){
-      return new THREE.WebGLRenderTarget(1, 1, { type: TYPE, samples: gl2 ? samples : 0, depthBuffer: true });
+      return new THREE.WebGLRenderTarget(1, 1, { type: TYPE, samples: msaa ? samples : 0, depthBuffer: true });
     }
-    var main = rt(small ? 0 : 4);
-    var mirror = small ? null : rt(0);
+    var main = rt(4);
+    var mirror = rt(0);
     var lv = [rt(0), rt(0), rt(0), rt(0), rt(0), rt(0)]; /* three bloom levels, ping-pong pairs */
     lv.forEach(function(r){ r.depthBuffer = false; });
 
