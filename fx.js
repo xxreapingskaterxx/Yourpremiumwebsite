@@ -35,7 +35,6 @@
 
   function create(renderer, scene, camera, opts){
     opts = opts || {};
-    var small = !!opts.small;
     var gl2 = renderer.capabilities.isWebGL2;
     var TYPE = gl2 ? THREE.HalfFloatType : THREE.UnsignedByteType;
     var bg = (opts.background || new THREE.Color(0x05080d)).clone();
@@ -43,11 +42,14 @@
 
     scene.environment = buildEnv(renderer);
 
+    /* phones get the same antialiasing and mirror floor as desktop: on their tile-based GPUs MSAA is nearly free,
+       and without the reflections the board under the build looks flat. */
+    var msaa = gl2 && (renderer.extensions.has('EXT_color_buffer_float') || renderer.extensions.has('EXT_color_buffer_half_float'));
     function rt(samples){
-      return new THREE.WebGLRenderTarget(1, 1, { type: TYPE, samples: gl2 ? samples : 0, depthBuffer: true });
+      return new THREE.WebGLRenderTarget(1, 1, { type: TYPE, samples: msaa ? samples : 0, depthBuffer: true });
     }
-    var main = rt(small ? 0 : 4);
-    var mirror = small ? null : rt(0);
+    var main = rt(4);
+    var mirror = rt(0);
     var lv = [rt(0), rt(0), rt(0), rt(0), rt(0), rt(0)]; /* three bloom levels, ping-pong pairs */
     lv.forEach(function(r){ r.depthBuffer = false; });
 
@@ -81,7 +83,9 @@
       '  c += b * uStrength;',
       /* soft shoulder so stacked additive glows roll off instead of clipping to flat white */
       '  c = c / (1. + max(vec3(0.), c - .85) * .6);',
-      '  gl_FragColor = vec4(toSRGB(c), 1.); }'
+      /* a little noise so dark glow gradients don't break into visible bands on phone screens */
+      '  float n = fract(sin(dot(gl_FragCoord.xy, vec2(12.9898, 78.233))) * 43758.5453);',
+      '  gl_FragColor = vec4(toSRGB(c) + (n - .5) / 255., 1.); }'
     ].join('\n'), { tScene: { value: null }, tB0: { value: null }, tB1: { value: null }, tB2: { value: null }, uStrength: { value: opts.strength || .75 } });
 
     /* glossy floor: blurred planar reflection, fresnel-weighted, fogged like the rest of the scene */
@@ -91,7 +95,10 @@
         tMirror: { value: mirror ? mirror.texture : null }, uTexMat: { value: texMat },
         uBase: { value: bgLinear.clone().multiplyScalar(1.6) }, uFogColor: { value: bgLinear },
         uFog: { value: scene.fog ? scene.fog.density : 0 }, uStrength: { value: mirror ? (opts.reflect || .55) : 0 },
-        uTexel: { value: new THREE.Vector2(1, 1) }
+        uTexel: { value: new THREE.Vector2(1, 1) },
+        /* two soft pools of light painted straight into the floor (x, z, radius, strength) */
+        uGlowA: { value: new THREE.Vector4(0, 0, 1, 0) }, uGlowColA: { value: new THREE.Color() },
+        uGlowB: { value: new THREE.Vector4(0, 0, 1, 0) }, uGlowColB: { value: new THREE.Color() }
       },
       vertexShader: [
         'uniform mat4 uTexMat; varying vec4 vM; varying vec3 vW; varying float vD;',
@@ -100,7 +107,9 @@
       ].join('\n'),
       fragmentShader: [
         'uniform sampler2D tMirror; uniform vec3 uBase, uFogColor; uniform float uFog, uStrength; uniform vec2 uTexel;',
+        'uniform vec4 uGlowA, uGlowB; uniform vec3 uGlowColA, uGlowColB;',
         'varying vec4 vM; varying vec3 vW; varying float vD;',
+        'vec3 pool(vec4 g, vec3 c){ if (g.w <= 0.) return vec3(0.); vec2 d = (vW.xz - g.xy) / g.z; return c * g.w * exp(-dot(d, d) * 3.); }',
         'void main(){',
         '  vec3 col = uBase;',
         '  if (uStrength > 0.){',
@@ -114,6 +123,7 @@
         '    float fres = .35 + .65 * pow(1. - max(v.y, 0.), 4.);',
         '    col += r * uStrength * fres;',
         '  }',
+        '  col += pool(uGlowA, uGlowColA) + pool(uGlowB, uGlowColB);',
         '  float f = 1. - exp(-uFog * uFog * vD * vD);',
         '  gl_FragColor = vec4(mix(col, uFogColor, f), 1.);',
         '}'
