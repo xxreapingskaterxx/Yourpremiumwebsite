@@ -1222,13 +1222,15 @@
   scene.add(cursorGlow);
   var bits = [], MAX_BITS = SMALL ? 60 : 140;
   var GLYPHS = ['0','1','0','1','{','}','</>','/','*',';','#'];
+  /* past the hero the trail keeps its code symbols but drops the numbers */
+  var SYMBOLS = ['{','}','</>','/','*',';','#'];
   var heroFx = 1;
 
   function spawnBits(x, y, n, vy){
     for (var i = 0; i < n && bits.length < MAX_BITS; i++){
       bits.push({ x: x + (Math.random() - .5) * 14, y: y + (Math.random() - .5) * 14,
         vx: (Math.random() - .5) * 30, vy: (vy || -18) + (Math.random() - .5) * 20, life: 1,
-        g: GLYPHS[(Math.random() * GLYPHS.length) | 0], amber: Math.random() < .4, size: 10 + Math.random() * 5 });
+        g: heroFx > .5 ? GLYPHS[(Math.random() * GLYPHS.length) | 0] : SYMBOLS[(Math.random() * SYMBOLS.length) | 0], amber: Math.random() < .4, size: 10 + Math.random() * 5 });
     }
   }
   function onMove(cx, cy, mouse){
