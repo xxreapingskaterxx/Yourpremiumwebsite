@@ -297,6 +297,8 @@
   /* ---------- Terminal build log ---------- */
   .term{
     position:absolute;z-index:4;
+    /* display only: a finger landing on a log line must not lose its touch when the line is rewritten */
+    pointer-events:none;
     right:clamp(20px,3vw,48px);bottom:clamp(24px,5vh,56px);
     width:min(360px,30vw);
     border:1px solid rgba(34,211,238,.22);border-radius:10px;
@@ -1435,7 +1437,12 @@
     grainVignette.style.opacity = 1 - fadeP * .85;
   }
 
+  /* one bad frame must never stop the loop, or the film and the finger trail freeze where they are */
   function tick(now){
+    requestAnimationFrame(tick);
+    try { step(now); } catch (err) { console.error(err); }
+  }
+  function step(now){
     var dt = Math.min(.05, (now - lastTime) / 1000);
     lastTime = now;
     var p = getProgress();
@@ -1444,7 +1451,6 @@
     /* stop rendering entirely once the stage has scrolled away */
     if (stageVisible()) frame(p, now, dt, false);
     header.classList.toggle('in-content', p >= .999);
-    requestAnimationFrame(tick);
   }
 
   /* ---------------- Card spotlight ---------------- */

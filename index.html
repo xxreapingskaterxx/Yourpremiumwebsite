@@ -298,6 +298,8 @@
   /* ---------- Terminal build log ---------- */
   .term{
     position:absolute;z-index:4;
+    /* display only: a finger landing on a log line must not lose its touch when the line is rewritten */
+    pointer-events:none;
     right:clamp(20px,3vw,48px);bottom:clamp(24px,5vh,56px);
     width:min(360px,30vw);
     border:1px solid rgba(34,211,238,.22);border-radius:10px;
@@ -1260,8 +1262,15 @@
   /* touch scrolling cancels pointer events, so follow the finger directly while it scrolls */
   window.addEventListener('touchmove', function(e){ var t = e.touches[0]; if (t) onMove(t.clientX, t.clientY, false); }, { passive: true });
   /* a new touch starts where the finger lands, not where the last one lifted */
+  /* a touch keeps reporting to the element it started on; if that element is rebuilt mid-scroll
+     its moves no longer reach the window, so listen on the element itself as well */
+  var touchEl = null;
+  function onTouchMoveEl(e){ var t = e.touches[0]; if (t && !e.__seen) onMove(t.clientX, t.clientY, false); }
+  window.addEventListener('touchmove', function(e){ e.__seen = true; }, { passive: true, capture: true });
   window.addEventListener('touchstart', function(e){
     var t = e.touches[0]; if (!t) return;
+    if (touchEl) touchEl.removeEventListener('touchmove', onTouchMoveEl);
+    touchEl = e.target; touchEl.addEventListener('touchmove', onTouchMoveEl, { passive: true });
     ptr.has = false;
     onMove(t.clientX, t.clientY, false);
     if (!calmFx) spawnBits(ptr.x, ptr.y, 4);
@@ -1632,7 +1641,12 @@
     grainVignette.style.opacity = 1 - fadeP * .85;
   }
 
+  /* one bad frame must never stop the loop, or the film and the finger trail freeze where they are */
   function tick(now){
+    requestAnimationFrame(tick);
+    try { step(now); } catch (err) { console.error(err); }
+  }
+  function step(now){
     var dt = Math.min(.05, (now - lastTime) / 1000);
     lastTime = now;
     var p = getProgress();
@@ -1645,7 +1659,6 @@
     if (!stageVisible()) hitValid = false;
     drawFx(dt);
     header.classList.toggle('in-content', p >= .999);
-    requestAnimationFrame(tick);
   }
 
   /* ---------------- Card spotlight ---------------- */
