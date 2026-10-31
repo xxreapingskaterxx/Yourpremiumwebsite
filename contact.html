@@ -1278,7 +1278,7 @@
     smoothP += (p - smoothP) * (reduceMotion ? 1 : Math.min(1, dt * 9));
     if (Math.abs(p - smoothP) < .0003) smoothP = p;
     /* stop rendering entirely once the stage has scrolled away */
-    if (stageVisible()) frame(p, now, dt, false);
+    if (stageVisible()){ frame(p, now, dt, false); FX.adapt(dt, now); }
     header.classList.toggle('in-content', p >= .999);
   }
 

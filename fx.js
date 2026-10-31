@@ -49,7 +49,7 @@
     }
     /* phones get 2x MSAA: 4x half-float buffers at phone resolution can push iOS Safari into dropping the context */
     var main = rt(opts.small ? 2 : 4);
-    var mirror = rt(0);
+    var mirror = rt(0), mirrorOn = true;
     var lv = [rt(0), rt(0), rt(0), rt(0), rt(0), rt(0)]; /* three bloom levels, ping-pong pairs */
     lv.forEach(function(r){ r.depthBuffer = false; });
 
@@ -139,7 +139,7 @@
       var w = Math.max(1, size.x), h = Math.max(1, size.y);
       main.setSize(w, h);
       bright.uniforms.uTexel.value.set(1 / w, 1 / h);
-      if (mirror){ mirror.setSize(Math.ceil(w / 2), Math.ceil(h / 2)); floorMat.uniforms.uTexel.value.set(2 / w, 2 / h); }
+      if (mirrorOn){ mirror.setSize(Math.ceil(w / 2), Math.ceil(h / 2)); floorMat.uniforms.uTexel.value.set(2 / w, 2 / h); }
       for (var i = 0; i < 3; i++){
         var d = Math.pow(2, i + 1);
         lv[i * 2].setSize(Math.ceil(w / d), Math.ceil(h / d));
@@ -153,7 +153,7 @@
       var alpha = renderer.getClearAlpha();
       renderer.setClearColor(bgLinear, 1);
 
-      if (mirror && ground){
+      if (mirrorOn && ground){
         mirrorCam.copy(camera);
         mirrorCam.position.set(camera.position.x, -camera.position.y, camera.position.z);
         mirrorCam.up.set(0, -1, 0);
@@ -188,7 +188,23 @@
       renderer.setClearColor(clear, alpha);
     }
 
-    return { floorMaterial: floorMat, resize: resize, render: render };
+    /* keep the frame rate up on slower phones: when frames run long, give up the least visible quality first —
+       sharpness down to one pixel per CSS pixel, then antialiasing, then the floor reflection, then a little more sharpness */
+    var maxPr = Math.min(window.devicePixelRatio || 1, opts.small ? 1.5 : 1.75), pr = maxPr;
+    var frameAvg = 1 / 60, lastQ = performance.now() + 1500, cssSize = new THREE.Vector2();
+    function setPr(v){ pr = v; renderer.getSize(cssSize); renderer.setPixelRatio(v); renderer.setSize(cssSize.x, cssSize.y, false); resize(); }
+    function adapt(dt, now){
+      frameAvg += (dt - frameAvg) * .06;
+      if (now - lastQ < 1000 || frameAvg < 1 / 45) return;
+      lastQ = now; frameAvg = 1 / 50;
+      if (pr > 1) setPr(Math.max(1, pr - .25));
+      else if (main.samples > 0){ main.samples = 0; main.dispose(); }
+      else if (mirrorOn){ mirrorOn = false; floorMat.uniforms.uStrength.value = 0; mirror.dispose(); }
+      else if (pr > .75) setPr(.75);
+    }
+    function quality(){ return 'res ' + pr.toFixed(2) + ' aa ' + main.samples + (mirrorOn ? ' mirror' : ''); }
+
+    return { floorMaterial: floorMat, resize: resize, render: render, adapt: adapt, quality: quality };
   }
 
   window.DWBFX = { create: create };
