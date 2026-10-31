@@ -1214,7 +1214,7 @@
     fctx.setTransform(FDPR, 0, 0, FDPR, 0, 0);
     fctx.clearRect(0, 0, fx.width, fx.height);
     if (ptr.has && heroFx > .02){
-      var k = calmFx ? 1 : Math.min(1, dt * 16);
+      var k = calmFx ? 1 : Math.min(1, dt * 40);
       ptr.sx += (ptr.x - ptr.sx) * k; ptr.sy += (ptr.y - ptr.sy) * k;
       fctx.globalAlpha = heroFx;
       fctx.strokeStyle = 'rgba(34,211,238,.75)'; fctx.lineWidth = 1;
@@ -1427,7 +1427,7 @@
       /* glide toward the finger instead of jumping to each touch sample: phones deliver touches unevenly,
          and at lower frame rates the light would hop between them */
       if (ptr.fresh){ ptr.fresh = false; ptr.snx = ptr.nx; ptr.sny = ptr.ny; }
-      var kp = 1 - Math.exp(-dt * 28);
+      var kp = 1 - Math.exp(-dt * 60);
       ptr.snx += (ptr.nx - ptr.snx) * kp; ptr.sny += (ptr.ny - ptr.sny) * kp;
       ndc.set(ptr.snx, ptr.sny);
       raycaster.setFromCamera(ndc, camera);
