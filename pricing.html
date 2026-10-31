@@ -513,7 +513,7 @@
       <li><a href="pricing.html" style="--d:160ms" aria-current="page"><span class="num mono">03</span>Pricing<span class="scene mono">SCENE · THE TOWERS</span></a></li>
       <li><a href="contact.html" style="--d:210ms"><span class="num mono">04</span>Contact<span class="scene mono">SCENE · THE SIGNAL</span></a></li>
     </ol>
-    <div class="menu-foot mono"><a href="mailto:desmondbetts@ymail.com">desmondbetts@ymail.com</a><span>EACH PAGE, ITS OWN FILM</span></div>
+    <div class="menu-foot mono"><a href="mailto:dbetts@dawebsitebuilder.com">dbetts@dawebsitebuilder.com</a><span>EACH PAGE, ITS OWN FILM</span></div>
   </nav>
 </div>
 
@@ -660,15 +660,16 @@
           <p class="field-hint">Pages, features, sites you like, deadline. Rough notes are fine.</p>
           <p class="field-err" id="cfDetailsErr"></p>
         </div>
+        <input type="text" name="_honey" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
         <div class="field wide form-foot">
           <button class="cta form-send" type="submit">Send my request</button>
-          <p class="field-hint" id="cfStatus" role="status">Opens your email app with everything filled in, addressed to desmondbetts@ymail.com.</p>
+          <p class="field-hint" id="cfStatus" role="status">Goes straight to our inbox. We reply within one business day.</p>
         </div>
       </form>
     </div>
   </section>
 <script>
-/* custom build request: validates, then hands a filled-in email to the visitor's mail app */
+/* custom build request: validates, then sends it to the inbox through FormSubmit; falls back to the visitor's mail app */
 (function(){
   var form = document.getElementById('customForm');
   var checks = {
@@ -692,20 +693,35 @@
     e.preventDefault();
     var bad = Object.keys(checks).filter(function(id){ return !check(id); });
     if (bad.length){ document.getElementById(bad[0]).focus(); return; }
-    var f = form.elements;
-    var body = [
-      'Name: ' + f.name.value.trim(),
-      'Email: ' + f.email.value.trim(),
-      'Business / project: ' + (f.business.value.trim() || '-'),
-      'Need: ' + f.type.value,
-      'Budget: ' + f.budget.value,
-      'Timeline: ' + f.timeline.value,
-      '',
-      f.details.value.trim()
-    ].join('\n');
-    location.href = 'mailto:desmondbetts@ymail.com?subject=' + encodeURIComponent('Custom build request: ' + f.name.value.trim())
-      + '&body=' + encodeURIComponent(body);
-    document.getElementById('cfStatus').textContent = "Your email app should open with the request ready to send. If it didn't, email desmondbetts@ymail.com directly.";
+    var f = form.elements, status = document.getElementById('cfStatus'), btn = form.querySelector('.form-send');
+    if (f._honey.value) return;
+    var data = {
+      name: f.name.value.trim(),
+      email: f.email.value.trim(),
+      business: f.business.value.trim() || '-',
+      need: f.type.value,
+      budget: f.budget.value,
+      timeline: f.timeline.value,
+      details: f.details.value.trim(),
+      _subject: 'Custom build request: ' + f.name.value.trim(),
+      _template: 'table'
+    };
+    function fallback(){
+      var body = ['Name: ' + data.name, 'Email: ' + data.email, 'Business / project: ' + data.business,
+        'Need: ' + data.need, 'Budget: ' + data.budget, 'Timeline: ' + data.timeline, '', data.details].join('\n');
+      location.href = 'mailto:dbetts@dawebsitebuilder.com?subject=' + encodeURIComponent(data._subject) + '&body=' + encodeURIComponent(body);
+      status.textContent = "We couldn't send it from here, so your email app should open with the request filled in. If it didn't, email dbetts@dawebsitebuilder.com directly.";
+    }
+    btn.disabled = true; btn.textContent = 'Sending…'; status.textContent = 'Sending your request…';
+    fetch('https://formsubmit.co/ajax/dbetts@dawebsitebuilder.com', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify(data)
+    }).then(function(r){ return r.json(); }).then(function(res){
+      if (String(res.success) !== 'true') throw new Error(res.message || 'not sent');
+      form.reset();
+      status.textContent = "Sent. Thanks, " + data.name + ". We'll reply to " + data.email + " within one business day.";
+    }).catch(fallback).then(function(){ btn.disabled = false; btn.textContent = 'Send my request'; });
   });
 })();
 </script>
@@ -714,8 +730,8 @@
     <div class="contact-wrap">
       <div class="reveal"><div class="eyebrow mono">// START A BUILD</div><h2>Let's build your website.</h2></div>
       <div class="contact-links reveal" style="--i:1">
-        <a class="big-link" href="mailto:desmondbetts@ymail.com">
-          <span>desmondbetts@ymail.com</span>
+        <a class="big-link" href="mailto:dbetts@dawebsitebuilder.com">
+          <span>dbetts@dawebsitebuilder.com</span>
           <span>→</span>
         </a>
         <div class="contact-meta">Tell us about your project and we'll get back to you within one business day.</div>
@@ -752,7 +768,7 @@
 
   <footer>
     <div>&copy; <span id="year"></span> Da Website Builder. All rights reserved.</div>
-    <a href="mailto:desmondbetts@ymail.com">desmondbetts@ymail.com</a>
+    <a href="mailto:dbetts@dawebsitebuilder.com">dbetts@dawebsitebuilder.com</a>
   </footer>
 </main>
 
