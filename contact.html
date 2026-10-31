@@ -1002,6 +1002,8 @@
   var heroFx = 1;
 
   function spawnBits(x, y, n, vy){
+    /* the code symbols belong to the hero only */
+    if (heroFx <= .5) return;
     for (var i = 0; i < n && bits.length < MAX_BITS; i++){
       bits.push({ x: x + (Math.random() - .5) * 14, y: y + (Math.random() - .5) * 14,
         vx: (Math.random() - .5) * 30, vy: (vy || -18) + (Math.random() - .5) * 20, life: 1,

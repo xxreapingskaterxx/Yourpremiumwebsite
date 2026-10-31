@@ -1228,12 +1228,10 @@
   var bits = [], MAX_BITS = SMALL ? 60 : 140;
   var GLYPHS = ['0','1','0','1','{','}','</>','/','*',';','#'];
   var heroFx = 1;
-  /* 1 while the film fills the screen, fading to 0 as it scrolls away: the cursor effect lives for the whole film */
-  var filmFx = 1;
 
   function spawnBits(x, y, n, vy){
-    /* the code-symbol trail runs for the whole film, not the sections after it */
-    if (filmFx <= .5) return;
+    /* the code symbols belong to the hero only; past it the finger trail is the light on the board */
+    if (heroFx <= .5) return;
     for (var i = 0; i < n && bits.length < MAX_BITS; i++){
       bits.push({ x: x + (Math.random() - .5) * 14, y: y + (Math.random() - .5) * 14,
         vx: (Math.random() - .5) * 30, vy: (vy || -18) + (Math.random() - .5) * 20, life: 1,
@@ -1323,11 +1321,11 @@
     lastFont = '';
     fctx.setTransform(FDPR, 0, 0, FDPR, 0, 0);
     fctx.clearRect(0, 0, fx.width, fx.height);
-    /* the crosshair and x/z readout run for the whole film, not the sections after it */
-    if (ptr.has && filmFx > .02){
+    /* the crosshair and x/z readout belong to the hero only */
+    if (ptr.has && heroFx > .02){
       var k = calmFx ? 1 : Math.min(1, dt * 16);
       ptr.sx += (ptr.x - ptr.sx) * k; ptr.sy += (ptr.y - ptr.sy) * k;
-      fctx.globalAlpha = filmFx;
+      fctx.globalAlpha = heroFx;
       fctx.strokeStyle = 'rgba(34,211,238,.75)'; fctx.lineWidth = 1;
       fctx.beginPath();
       fctx.moveTo(ptr.sx - 14, ptr.sy); fctx.lineTo(ptr.sx - 5, ptr.sy); fctx.moveTo(ptr.sx + 5, ptr.sy); fctx.lineTo(ptr.sx + 14, ptr.sy);
@@ -1653,7 +1651,6 @@
     smoothP += (p - smoothP) * (reduceMotion ? 1 : Math.min(1, dt * 9));
     if (Math.abs(p - smoothP) < .0003) smoothP = p;
     /* stop rendering entirely once the stage has scrolled away */
-    filmFx = clamp(filmScroll.getBoundingClientRect().bottom / window.innerHeight * 2 - 1, 0, 1);
     if (stageVisible()){ frame(p, now, dt, false); adaptQuality(dt, now); }
     /* the cursor effect keeps going after the film has scrolled away */
     if (!stageVisible()) hitValid = false;
