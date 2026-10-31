@@ -1226,7 +1226,7 @@
 
   /* ---------------- Pointer: light, pulses, code-glyph trail ---------------- */
   var fx = document.getElementById('fxCanvas'), fctx = fx.getContext('2d'), FDPR = Math.min(window.devicePixelRatio || 1, 1.5);
-  var ptr = { x: 0, y: 0, nx: 0, ny: 0, sx: 0, sy: 0, has: false, lastX: 0, lastY: 0, lastPulse: 0 };
+  var ptr = { x: 0, y: 0, nx: 0, ny: 0, sx: 0, sy: 0, vx: 0, vy: 0, t0: 0, has: false, lastX: 0, lastY: 0, lastPulse: 0 };
   var raycaster = new THREE.Raycaster(), ndc = new THREE.Vector2(), groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
   var hit = new THREE.Vector3(), hitValid = false;
   var cursorLight = new THREE.PointLight(0x22d3ee, 0, 22, 1.6);
@@ -1249,11 +1249,26 @@
         g: GLYPHS[(Math.random() * GLYPHS.length) | 0], amber: Math.random() < .4, size: 10 + Math.random() * 5 });
     }
   }
+  /* a touch screen reports the finger a frame or two late; lead by the finger's recent speed, fading out once it stops,
+     so the crosshair sits under the finger the way it sits on a mouse cursor */
+  function lead(){
+    if (ptr.mouse) return 0;
+    var age = performance.now() - ptr.t0;
+    return age > 60 ? 0 : 28 * (1 - age / 60);
+  }
+  function clampLead(v){ return Math.max(-60, Math.min(60, v)); }
   function onMove(cx, cy, mouse){
     ptr.mouse = !!mouse; ptr.moveT = performance.now();
     var r = stage.getBoundingClientRect();
     var x = cx, y = cy;
     if (!ptr.has){ ptr.has = true; ptr.fresh = true; ptr.lastX = x; ptr.lastY = y; ptr.sx = x; ptr.sy = y; }
+    /* finger speed in px/ms, so the crosshair and light can lead to where the finger already is */
+    var t = ptr.moveT;
+    if (!mouse && !ptr.fresh && t - ptr.t0 < 80){
+      var ms = Math.max(4, t - ptr.t0);
+      ptr.vx += ((x - ptr.x) / ms - ptr.vx) * .5; ptr.vy += ((y - ptr.y) / ms - ptr.vy) * .5;
+    } else { ptr.vx = 0; ptr.vy = 0; }
+    ptr.t0 = t;
     ptr.x = x; ptr.y = y;
     ptr.nx = ((x - r.left) / r.width) * 2 - 1; ptr.ny = -((y - r.top) / r.height) * 2 + 1;
     if (calmFx) return;
@@ -1334,8 +1349,10 @@
     fctx.clearRect(0, 0, fx.width, fx.height);
     /* the crosshair and x/z readout belong to the hero only */
     if (ptr.has && heroFx > .02){
-      var k = calmFx ? 1 : Math.min(1, dt * 40);
-      ptr.sx += (ptr.x - ptr.sx) * k; ptr.sy += (ptr.y - ptr.sy) * k;
+      /* a mouse cursor gets a little easing; a finger is drawn right where it is (plus its lead), like a cursor would be */
+      var k = calmFx || !ptr.mouse ? 1 : Math.min(1, dt * 40);
+      var ld = lead();
+      ptr.sx += (ptr.x + clampLead(ptr.vx * ld) - ptr.sx) * k; ptr.sy += (ptr.y + clampLead(ptr.vy * ld) - ptr.sy) * k;
       fctx.globalAlpha = heroFx;
       fctx.strokeStyle = 'rgba(34,211,238,.75)'; fctx.lineWidth = 1;
       fctx.beginPath();
@@ -1618,7 +1635,9 @@
          and at lower frame rates the light would hop between them */
       if (ptr.fresh){ ptr.fresh = false; ptr.snx = ptr.nx; ptr.sny = ptr.ny; }
       var kp = 1 - Math.exp(-dt * 60);
-      ptr.snx += (ptr.nx - ptr.snx) * kp; ptr.sny += (ptr.ny - ptr.sny) * kp;
+      var ldn = lead();
+      ptr.snx += (ptr.nx + clampLead(ptr.vx * ldn) * 2 / sizedW - ptr.snx) * kp;
+      ptr.sny += (ptr.ny - clampLead(ptr.vy * ldn) * 2 / sizedH - ptr.sny) * kp;
       ndc.set(ptr.snx, ptr.sny);
       raycaster.setFromCamera(ndc, camera);
       hitValid = !!raycaster.ray.intersectPlane(groundPlane, hit);
