@@ -526,7 +526,7 @@
     <a class="nav-link" href="services.html">Services</a>
     <a class="nav-link" href="pricing.html">Pricing</a>
     <a class="nav-link" href="contact.html" aria-current="page">Contact</a>
-    <a class="nav-cta" href="mailto:dbetts@dawebsitebuilder.com">Start a project</a>
+    <a class="nav-cta" href="pricing.html#pricing">Start a project</a>
     <button class="menu-btn" id="menuBtn" type="button" aria-expanded="false" aria-controls="siteMenu"><span class="menu-ico" aria-hidden="true"><i></i><i></i></span><span class="menu-lbl mono">MENU</span></button>
   </nav>
 </header>
@@ -611,7 +611,7 @@
         <p>Brochure sites, e-commerce, scroll-film flagships and web apps. Watch each one get built.</p>
         <span class="go mono">WATCH THE SERVICES FILM →</span>
       </a>
-      <a class="page-link spot reveal" style="--i:1" href="pricing.html">
+      <a class="page-link spot reveal" style="--i:1" href="pricing.html#pricing">
         <div class="service-num mono">02</div>
         <h3>Pricing</h3>
         <p>From $300 basic sites to fully custom builds starting at $5,000.</p>
@@ -1303,7 +1303,7 @@
   });
   /* links to the other pages fade to black first, then cut */
   document.addEventListener('click', function(e){
-    var a = e.target.closest && e.target.closest('a[href$=".html"]');
+    var a = e.target.closest && e.target.closest('a[href$=".html"], a[href*=".html#"]');
     if (!a || e.defaultPrevented || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button || a.target || reduceMotion) return;
     e.preventDefault();
     document.body.classList.add('leaving');
