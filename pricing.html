@@ -181,6 +181,7 @@
   .custom-form{ display:grid;grid-template-columns:repeat(3,1fr);gap:20px 22px; }
   .custom-form .field{ display:flex;flex-direction:column;gap:8px;min-width:0; }
   .custom-form .field.wide{ grid-column:1 / -1; }
+  .custom-form .field.span2{ grid-column:span 2; }
   .custom-form label{ font-size:13px;font-weight:600; }
   .custom-form .opt-tag{ font-weight:400;color:var(--ink-dim);margin-left:4px; }
   .custom-form input, .custom-form select, .custom-form textarea{
@@ -205,7 +206,7 @@
   }
   .form-send:active{ transform:scale(.97); }
   @media (hover:hover) and (pointer:fine){ .form-send:hover{ background:#ffc457; } }
-  @media (max-width:760px){ .custom-form{ grid-template-columns:1fr; } }
+  @media (max-width:760px){ .custom-form{ grid-template-columns:1fr; } .custom-form .field.span2{ grid-column:auto; } }
 
   /* ---------- Build stage ---------- */
   .film-scroll{
@@ -623,6 +624,12 @@
           <p class="field-err" id="cfEmailErr"></p>
         </div>
         <div class="field">
+          <label for="cfPhone">Phone <span class="opt-tag">optional</span></label>
+          <input id="cfPhone" name="phone" type="tel" autocomplete="tel" inputmode="tel">
+          <p class="field-hint">If you'd rather we call or text you back.</p>
+          <p class="field-err" id="cfPhoneErr"></p>
+        </div>
+        <div class="field span2">
           <label for="cfBiz">Business or project name <span class="opt-tag">optional</span></label>
           <input id="cfBiz" name="business" type="text" autocomplete="organization">
         </div>
@@ -645,7 +652,7 @@
             <option>Not sure yet</option>
           </select>
         </div>
-        <div class="field">
+        <div class="field span2">
           <label for="cfTime">Timeline</label>
           <select id="cfTime" name="timeline">
             <option>Flexible</option>
@@ -675,6 +682,7 @@
   var checks = {
     cfName: function(v){ return v ? '' : 'Add your name so we know who to reply to.'; },
     cfEmail: function(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) ? '' : 'Add an email like name@example.com.'; },
+    cfPhone: function(v){ return !v || v.replace(/\D/g, '').length >= 10 ? '' : 'Add a full number with area code, like 214 555 0123.'; },
     cfDetails: function(v){ return v.length >= 10 ? '' : 'Add a line or two about what you want built.'; }
   };
   function check(id){
@@ -698,6 +706,7 @@
     var data = {
       name: f.name.value.trim(),
       email: f.email.value.trim(),
+      phone: f.phone.value.trim() || '-',
       business: f.business.value.trim() || '-',
       need: f.type.value,
       budget: f.budget.value,
@@ -707,7 +716,7 @@
       _template: 'table'
     };
     function fallback(){
-      var body = ['Name: ' + data.name, 'Email: ' + data.email, 'Business / project: ' + data.business,
+      var body = ['Name: ' + data.name, 'Email: ' + data.email, 'Phone: ' + data.phone, 'Business / project: ' + data.business,
         'Need: ' + data.need, 'Budget: ' + data.budget, 'Timeline: ' + data.timeline, '', data.details].join('\n');
       location.href = 'mailto:dbetts@dawebsitebuilder.com?subject=' + encodeURIComponent(data._subject) + '&body=' + encodeURIComponent(body);
       status.textContent = "We couldn't send it from here, so your email app should open with the request filled in. If it didn't, email dbetts@dawebsitebuilder.com directly.";
