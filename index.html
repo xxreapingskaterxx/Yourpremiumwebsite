@@ -776,57 +776,99 @@
   site.position.set(0, 3.2, 0);
   scene.add(site);
 
-  /* the frame becomes a big monitor: housing behind the screen, a neck and a foot */
-  var HW = FW + 1.1, HH = FH + 1.1;
-  var monitorMat = new THREE.MeshStandardMaterial({ color: 0x0b1119, roughness: .28, metalness: .85, envMapIntensity: 1.1, transparent: true, opacity: 0 });
-  var monitorEdgeMat = new THREE.LineBasicMaterial({ color: AMBER, transparent: true, opacity: 0 });
+  /* ---------------- Hardware: monitor, keyboard and PC towers ---------------- */
+  /* rounded shapes so the hardware reads as real objects, not boxes */
+  function roundRect(w, h, r){
+    var sh = new THREE.Shape(), x = -w / 2, y = -h / 2;
+    sh.moveTo(x + r, y); sh.lineTo(x + w - r, y); sh.quadraticCurveTo(x + w, y, x + w, y + r);
+    sh.lineTo(x + w, y + h - r); sh.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    sh.lineTo(x + r, y + h); sh.quadraticCurveTo(x, y + h, x, y + h - r);
+    sh.lineTo(x, y + r); sh.quadraticCurveTo(x, y, x + r, y);
+    return sh;
+  }
+  /* a plate facing +z: w x h face with rounded corners, d deep, centred */
+  function plate(w, h, d, r, bevel){
+    var bv = bevel || 0;
+    var g = new THREE.ExtrudeGeometry(roundRect(w - 2 * bv, h - 2 * bv, Math.max(.01, r - bv)), { depth: Math.max(.01, d - 2 * bv), bevelEnabled: bv > 0, bevelSize: bv, bevelThickness: bv, bevelSegments: 2, curveSegments: 6 });
+    g.center(); return g;
+  }
+  /* a slab lying flat: w wide (x), l long (z), t thick (y), base at y = 0 */
+  function slab(w, l, t, r, bevel){
+    var g = plate(w, l, t, r, bevel); g.rotateX(-Math.PI / 2); g.translate(0, t / 2, 0); return g;
+  }
+  var PLASTIC = { color: 0x0d1117, roughness: .5, metalness: .25, envMapIntensity: .8 };
+  var ALU = { color: 0x3e4650, roughness: .42, metalness: .85, envMapIntensity: .9 };
+  function fadeMat(o){ var m = new THREE.MeshStandardMaterial(o); m.transparent = true; m.opacity = 0; return m; }
+  /* a warm rim from behind and a cool fill so the hardware has highlights and form */
+  var rimLight = new THREE.DirectionalLight(0xffc56a, .2); rimLight.position.set(14, 12, -16); scene.add(rimLight);
+  var fillLight = new THREE.DirectionalLight(0x7fd6ff, .3); fillLight.position.set(10, 6, 22); scene.add(fillLight);
+
+  /* the frame becomes a big monitor: thin bezel, a rear shell, an aluminium arm and foot */
+  var HW = FW + .7, HH = FH + .7;
+  var monitorMat = fadeMat(PLASTIC);
+  var standMat = fadeMat(ALU);
+  var monitorEdgeMat = new THREE.LineBasicMaterial({ color: 0x9aa7b4, transparent: true, opacity: 0 });
   var monitor = new THREE.Group();
   (function(){
-    function part(geo, x, y, z){
-      var m = new THREE.Mesh(geo, monitorMat); m.position.set(x, y, z); monitor.add(m);
-      var e = new THREE.LineSegments(new THREE.EdgesGeometry(geo), monitorEdgeMat); e.position.copy(m.position); monitor.add(e);
-    }
-    part(new THREE.BoxGeometry(HW, HH, .7), 0, 3.2 + FH / 2, -.47);         /* housing */
-    part(new THREE.BoxGeometry(1.3, 2.9, .55), 0, 1.55, -1.25);            /* neck */
-    part(new THREE.BoxGeometry(6.5, .18, 3.4), 0, .09, -1.35);             /* foot */
-    /* power light on the bottom bezel */
-    var pwr = new THREE.Mesh(new THREE.CircleGeometry(.09, 16), new THREE.MeshBasicMaterial({ color: CYAN, transparent: true, opacity: 0 }));
-    pwr.position.set(HW / 2 - .7, 3.2 - .3, -.1); monitor.add(pwr);
+    var bezel = new THREE.Mesh(plate(HW, HH, .32, .3, .05), monitorMat);
+    bezel.position.set(0, 3.2 + FH / 2, -.24); monitor.add(bezel);
+    var shell = new THREE.Mesh(plate(HW * .62, HH * .58, .5, .9, .12), monitorMat);
+    shell.position.set(0, 3.2 + FH * .52, -.62); monitor.add(shell);
+    var chin = new THREE.Mesh(plate(HW, .32, .34, .12, .04), monitorMat);
+    chin.position.set(0, 3.2 - .2, -.22); monitor.add(chin);
+    var ring = new THREE.LineSegments(new THREE.EdgesGeometry(bezel.geometry, 40), monitorEdgeMat);
+    ring.position.copy(bezel.position); monitor.add(ring);
+    /* stand: a tilted arm from the shell down to a flat oval foot */
+    var arm = new THREE.Mesh(plate(1.5, 4.4, .2, .2, .04), standMat);
+    arm.position.set(0, 2.15, -1.45); arm.rotation.x = -.28; monitor.add(arm);
+    var foot = new THREE.Mesh(slab(5.4, 3.2, .12, 1.4, .04), standMat);
+    foot.position.set(0, 0, -1.2); monitor.add(foot);
+    /* power light on the chin */
+    var pwr = new THREE.Mesh(new THREE.CircleGeometry(.06, 16), new THREE.MeshBasicMaterial({ color: CYAN, transparent: true, opacity: 0 }));
+    pwr.position.set(HW / 2 - .6, 3.2 - .2, -.04); monitor.add(pwr);
     monitor.userData.pwr = pwr;
   })();
   scene.add(monitor);
 
-  /* the pad underneath becomes a keyboard: body, backlight and a full grid of keys */
-  var KB_W = 14.6, KB_D = 4.6;
-  var pad = new THREE.Mesh(new THREE.BoxGeometry(KB_W, .36, KB_D), new THREE.MeshStandardMaterial({ color: 0x0c131c, roughness: .32, metalness: .75, envMapIntensity: .9, transparent: true, opacity: 0 }));
-  pad.position.set(0, .18, 3.6);
+  /* the pad underneath becomes a keyboard: aluminium case, staggered keycaps, RGB underglow */
+  var KB_W = 14.4, KB_D = 4.7;
+  var pad = new THREE.Mesh(slab(KB_W, KB_D, .32, .35, .06), fadeMat(ALU));
+  pad.position.set(0, 0, 3.6); pad.rotation.x = .05;
   scene.add(pad);
-  var padEdge = new THREE.LineSegments(new THREE.EdgesGeometry(pad.geometry), new THREE.LineBasicMaterial({ color: AMBER, transparent: true, opacity: 0 }));
-  padEdge.position.copy(pad.position);
+  var padEdge = new THREE.LineSegments(new THREE.EdgesGeometry(pad.geometry, 40), new THREE.LineBasicMaterial({ color: 0xc7d0da, transparent: true, opacity: 0 }));
+  padEdge.position.copy(pad.position); padEdge.rotation.copy(pad.rotation);
   scene.add(padEdge);
   var keyboard = (function(){
-    var COLS = 15, ROWS = 5, PX = .92, PZ = .84, layout = [];
-    for (var r = 0; r < ROWS; r++){
-      if (r === ROWS - 1){
-        /* bottom row: modifiers either side of a long space bar */
-        [[0, 1.3], [1.3, 1.2], [2.5, 1.2], [3.7, 7.3], [11, 1.3], [12.3, 1.35], [13.65, 1.35]].forEach(function(k){ layout.push([r, k[0], k[1]]); });
-      } else for (var c = 0; c < COLS; c++) layout.push([r, c, 1]);
-    }
-    var n = layout.length, dummy = new THREE.Object3D();
-    var caps = new THREE.InstancedMesh(new THREE.BoxGeometry(1, .22, .7), new THREE.MeshStandardMaterial({ color: 0x18222f, roughness: .4, metalness: .6, transparent: true, opacity: 0 }), n);
-    var glyphs = new THREE.InstancedMesh(new THREE.PlaneGeometry(.26, .26), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0, depthWrite: false }), n);
-    var x0 = -COLS * PX / 2, z0 = pad.position.z - ROWS * PZ / 2 + PZ / 2, base = new THREE.Color(0x1e5b66);
+    /* a 60% layout in key units: every row adds up to 15 */
+    var ROWS = [
+      [1,1,1,1,1,1,1,1,1,1,1,1,1,2],
+      [1.5,1,1,1,1,1,1,1,1,1,1,1,1,1.5],
+      [1.75,1,1,1,1,1,1,1,1,1,1,1,2.25],
+      [2.25,1,1,1,1,1,1,1,1,1,1,2.75],
+      [1.25,1.25,1.25,6.25,1.25,1.25,1.25,1.25]
+    ];
+    var U = .88, PZ = .84, layout = [];
+    ROWS.forEach(function(row, r){ var c = 0; row.forEach(function(wu){ layout.push([r, c, wu]); c += wu; }); });
+    var n = layout.length, dummy = new THREE.Object3D(), plateGroup = new THREE.Group();
+    plateGroup.position.copy(pad.position); plateGroup.rotation.copy(pad.rotation);
+    var capGeo = slab(1, .7, .22, .1, .035);
+    var caps = new THREE.InstancedMesh(capGeo, fadeMat({ color: 0x151b23, roughness: .75, metalness: .05, envMapIntensity: .4 }), n);
+    var glyphs = new THREE.InstancedMesh(new THREE.PlaneGeometry(.2, .2), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0, depthWrite: false }), n);
+    var x0 = -15 * U / 2, z0 = -ROWS.length * PZ / 2 + PZ / 2, base = new THREE.Color(0x1e5b66);
     layout.forEach(function(k, i){
-      var w = k[2] * PX - .14, x = x0 + k[1] * PX + k[2] * PX / 2, z = z0 + k[0] * PZ;
-      dummy.position.set(x, .47, z); dummy.rotation.set(0, 0, 0); dummy.scale.set(w, 1, 1); dummy.updateMatrix();
+      var w = k[2] * U - .1, x = x0 + k[1] * U + k[2] * U / 2, z = z0 + k[0] * PZ;
+      dummy.position.set(x, .3, z); dummy.rotation.set(0, 0, 0); dummy.scale.set(w, 1, 1); dummy.updateMatrix();
       caps.setMatrixAt(i, dummy.matrix);
-      dummy.position.set(x - (k[2] > 2 ? 0 : w / 2 - .22), .585, z - .12); dummy.rotation.set(-Math.PI / 2, 0, 0); dummy.scale.set(k[2] > 2 ? w * 2.4 : 1, k[2] > 2 ? .25 : 1, 1); dummy.updateMatrix();
+      var wide = k[2] > 2;
+      dummy.position.set(wide ? x : x - w / 2 + .2, .525, z - (wide ? 0 : .14)); dummy.rotation.set(-Math.PI / 2, 0, 0);
+      dummy.scale.set(wide ? w * 2.6 : 1, wide ? .2 : 1, 1); dummy.updateMatrix();
       glyphs.setMatrixAt(i, dummy.matrix);
       glyphs.setColorAt(i, base);
     });
-    var glow = new THREE.Mesh(new THREE.PlaneGeometry(KB_W - .4, KB_D - .4), new THREE.MeshBasicMaterial({ color: CYAN, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending }));
-    glow.rotation.x = -Math.PI / 2; glow.position.set(0, .37, pad.position.z);
-    scene.add(glow, caps, glyphs);
+    var glow = new THREE.Mesh(new THREE.PlaneGeometry(KB_W * 1.5, KB_D * 2.2), new THREE.MeshBasicMaterial({ color: CYAN, map: GLOW, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending }));
+    glow.rotation.x = -Math.PI / 2; glow.position.set(0, .02, pad.position.z);
+    plateGroup.add(caps, glyphs);
+    scene.add(glow, plateGroup);
     return { caps: caps, glyphs: glyphs, glow: glow, n: n, base: base, heat: new Float32Array(n), lastKey: 0 };
   })();
 
@@ -966,49 +1008,77 @@
   scene.add(liveGlow);
 
   /* ---------------- Foundation: server, database, CDN as three PC towers ---------------- */
+  /* front mesh grille texture: a fine dot grid */
+  var MESH_TEX = (function(){
+    var c = document.createElement('canvas'); c.width = c.height = 64;
+    var g = c.getContext('2d'); g.fillStyle = '#0a0e13'; g.fillRect(0, 0, 64, 64); g.fillStyle = '#26303b';
+    for (var y = 4; y < 64; y += 8) for (var x = (y / 8 % 2) * 4 + 4; x < 64; x += 8){ g.beginPath(); g.arc(x, y, 2.2, 0, 7); g.fill(); }
+    var t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(5, 9); t.encoding = THREE.sRGBEncoding; return t;
+  })();
+  function fanMesh(radius, color, glowAmt){
+    var fan = new THREE.Group();
+    fan.add(new THREE.Mesh(new THREE.RingGeometry(radius * .86, radius, 40), new THREE.MeshBasicMaterial({ color: color, transparent: true, opacity: .95, side: THREE.DoubleSide })));
+    var hub = new THREE.Mesh(new THREE.CircleGeometry(radius * .22, 20), new THREE.MeshBasicMaterial({ color: 0x0b0f14, side: THREE.DoubleSide }));
+    hub.position.z = .004; fan.add(hub);
+    var blades = new THREE.Group();
+    for (var b = 0; b < 7; b++){
+      var bl = new THREE.Mesh(new THREE.PlaneGeometry(radius * .62, radius * .2), new THREE.MeshBasicMaterial({ color: color, transparent: true, opacity: .32, side: THREE.DoubleSide, depthWrite: false }));
+      bl.position.x = radius * .5; bl.rotation.x = .5;
+      var arm = new THREE.Group(); arm.rotation.z = b / 7 * Math.PI * 2; arm.add(bl); blades.add(arm);
+    }
+    fan.add(blades);
+    var halo = glowSprite(color, radius * 3.2, glowAmt); fan.add(halo);
+    return { g: fan, blades: blades };
+  }
   var towers = [];
   [['SERVER', -7.5], ['DATABASE', 0], ['CDN', 7.5]].forEach(function(t, i){
-    var g = new THREE.Group(), h = 3.1, w = 1.7, d = 2.7;
-    var body = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), new THREE.MeshStandardMaterial({ color: 0x1a2533, roughness: .22, metalness: .9, envMapIntensity: 1.3 }));
-    body.position.y = h / 2; g.add(body);
-    var edge = new THREE.LineSegments(new THREE.EdgesGeometry(body.geometry), new THREE.LineBasicMaterial({ color: AMBER, transparent: true, opacity: .7 }));
-    edge.position.copy(body.position); g.add(edge);
-    /* front panel: light strip, power button, drive lights and vents */
-    var strip = new THREE.Mesh(new THREE.PlaneGeometry(.07, h - .7), new THREE.MeshBasicMaterial({ color: CYAN, transparent: true, opacity: .85 }));
-    strip.position.set(-w / 2 + .28, h / 2, d / 2 + .01); g.add(strip);
-    var power = new THREE.Mesh(new THREE.RingGeometry(.12, .17, 24), new THREE.MeshBasicMaterial({ color: AMBER }));
-    power.position.set(.25, h - .38, d / 2 + .01); g.add(power);
+    var g = new THREE.Group(), h = 3.3, w = 1.6, d = 3;
+    var side = i === 2 ? -1 : 1, fans = [];
+    /* chassis: matte black body on four feet */
+    var body = new THREE.Mesh(plate(d, h, w, .12, .05), new THREE.MeshStandardMaterial(PLASTIC));
+    body.rotation.y = Math.PI / 2;
+    body.position.y = h / 2 + .12; g.add(body);
+    [[-1,-1],[1,-1],[1,1],[-1,1]].forEach(function(c){
+      var ft = new THREE.Mesh(new THREE.CylinderGeometry(.11, .13, .12, 12), new THREE.MeshStandardMaterial(ALU));
+      ft.position.set(c[0] * (w / 2 - .22), .06, c[1] * (d / 2 - .3)); g.add(ft);
+    });
+    var edge = new THREE.LineSegments(new THREE.EdgesGeometry(body.geometry, 40), new THREE.LineBasicMaterial({ color: 0x8c99a6, transparent: true, opacity: .18 }));
+    edge.position.copy(body.position); edge.rotation.copy(body.rotation); g.add(edge);
+    /* front: mesh grille with three intake fans glowing through it, a top I/O strip */
+    var fz = d / 2 + .062, top = h + .12;
+    var grille = new THREE.Mesh(new THREE.PlaneGeometry(w - .3, h - .85), new THREE.MeshStandardMaterial({ map: MESH_TEX, roughness: .7, metalness: .4, transparent: true, opacity: .92 }));
+    grille.position.set(0, .12 + (h - .85) / 2 + .2, fz + .01); g.add(grille);
+    [0, 1, 2].forEach(function(k){
+      var f = fanMesh(.48, k === 1 ? AMBER : CYAN, .28);
+      f.g.position.set(0, .12 + .55 + k * .82, fz - .02); g.add(f.g); fans.push(f.blades);
+    });
+    var strip = new THREE.Mesh(new THREE.PlaneGeometry(w - .3, .035), new THREE.MeshBasicMaterial({ color: CYAN, transparent: true, opacity: .85 }));
+    strip.position.set(0, top - .5, fz + .012); g.add(strip);
+    var power = new THREE.Mesh(new THREE.RingGeometry(.07, .1, 24), new THREE.MeshBasicMaterial({ color: AMBER }));
+    power.position.set(w / 2 - .32, top - .27, fz + .012); g.add(power);
     var leds = [];
     for (var k = 0; k < 4; k++){
-      var led = new THREE.Mesh(new THREE.BoxGeometry(.13, .13, .04), new THREE.MeshBasicMaterial({ color: CYAN }));
-      led.position.set(.08 + k * .2, h - .78, d / 2 + .02); g.add(led); leds.push(led);
+      var led = new THREE.Mesh(new THREE.CircleGeometry(.035, 12), new THREE.MeshBasicMaterial({ color: CYAN }));
+      led.position.set(-w / 2 + .3 + k * .14, top - .27, fz + .012); g.add(led); leds.push(led);
     }
-    for (var v = 0; v < 6; v++){
-      var vent = new THREE.Mesh(new THREE.PlaneGeometry(.9, .05), new THREE.MeshBasicMaterial({ color: AMBER, transparent: true, opacity: .45 }));
-      vent.position.set(.2, .45 + v * .2, d / 2 + .01); g.add(vent);
-    }
-    /* glass side facing the middle, with two glowing fans behind it */
-    var side = i === 2 ? -1 : 1, fans = [];
-    var glass = new THREE.Mesh(new THREE.PlaneGeometry(d - .4, h - .5), new THREE.MeshBasicMaterial({ color: CYAN, transparent: true, opacity: .07, side: THREE.DoubleSide, depthWrite: false }));
-    glass.rotation.y = side * Math.PI / 2; glass.position.set(side * (w / 2 + .01), h / 2, 0); g.add(glass);
-    [h * .68, h * .3].forEach(function(fy){
-      var fan = new THREE.Group();
-      fan.add(new THREE.Mesh(new THREE.RingGeometry(.48, .55, 32), new THREE.MeshBasicMaterial({ color: CYAN, transparent: true, opacity: .9, side: THREE.DoubleSide })));
-      var blades = new THREE.Group();
-      for (var b = 0; b < 5; b++){
-        var bl = new THREE.Mesh(new THREE.PlaneGeometry(.38, .12), new THREE.MeshBasicMaterial({ color: CYAN, transparent: true, opacity: .45, side: THREE.DoubleSide, depthWrite: false }));
-        bl.position.x = .22; var arm = new THREE.Group(); arm.rotation.z = b / 5 * Math.PI * 2; arm.add(bl); blades.add(arm);
-      }
-      fan.add(blades);
-      fan.rotation.y = side * Math.PI / 2; fan.position.set(side * (w / 2 + .02), fy, 0);
-      g.add(fan); fans.push(blades);
-    });
-    var lbl = textSprite(t[0], '#ffb224', .38); lbl.position.set(0, h + .55, 0); g.add(lbl);
+    /* tempered glass side facing the middle: board, GPU with its own glow, and a rear exhaust fan */
+    var sx = side * (w / 2 + .07);
+    var board = new THREE.Mesh(new THREE.PlaneGeometry(d - .5, h - .6), new THREE.MeshStandardMaterial({ color: 0x0f1a22, roughness: .6, metalness: .3 }));
+    board.rotation.y = side * Math.PI / 2; board.position.set(side * (w / 2 + .055), h / 2 + .15, 0); g.add(board);
+    var gpu = new THREE.Mesh(new THREE.BoxGeometry(.02, .32, d - 1), new THREE.MeshStandardMaterial({ color: 0x232c36, roughness: .35, metalness: .8 }));
+    gpu.position.set(sx, h * .45, .1); g.add(gpu);
+    var gpuLine = new THREE.Mesh(new THREE.PlaneGeometry(d - 1.1, .03), new THREE.MeshBasicMaterial({ color: AMBER }));
+    gpuLine.rotation.y = side * Math.PI / 2; gpuLine.position.set(sx + side * .012, h * .45 - .12, .1); g.add(gpuLine);
+    var rear = fanMesh(.42, CYAN, .22);
+    rear.g.rotation.y = side * Math.PI / 2; rear.g.position.set(sx, h * .78, -d / 2 + .65); g.add(rear.g); fans.push(rear.blades);
+    var glass = new THREE.Mesh(new THREE.PlaneGeometry(d - .2, h - .2), new THREE.MeshStandardMaterial({ color: 0x88b8cc, roughness: .05, metalness: .9, envMapIntensity: 1.6, transparent: true, opacity: .14, side: THREE.DoubleSide, depthWrite: false }));
+    glass.rotation.y = side * Math.PI / 2; glass.position.set(side * (w / 2 + .085), h / 2 + .12, 0); g.add(glass);
+    var lbl = textSprite(t[0], '#ffb224', .38); lbl.position.set(0, h + .75, 0); g.add(lbl);
     var lamp = new THREE.PointLight(0xffb224, 0, 9, 2); lamp.position.set(0, h + 1, 1.5); g.add(lamp);
     g.position.set(t[1], 0, 7.4);
     g.scale.set(1, .001, 1);
     scene.add(g);
-    towers.push({ g: g, leds: leds, lamp: lamp, label: lbl, h: h, fans: fans, strip: strip });
+    towers.push({ g: g, leds: leds, lamp: lamp, label: lbl, h: h + .12, fans: fans, strip: strip });
   });
 
   /* ---------------- Wiring: cables from towers up into the frame ---------------- */
@@ -1204,13 +1274,13 @@
 
     /* foundation: pad pours in, towers rise one after another */
     pad.material.opacity = .95 * easeOut(t2);
-    padEdge.material.opacity = .55 * t2 * (1 - t5 * .6);
-    monitorMat.opacity = .97 * easeOut(t2);
-    monitorEdgeMat.opacity = .6 * t2 * (1 - t5 * .4);
+    padEdge.material.opacity = .25 * t2;
+    monitorMat.opacity = standMat.opacity = .97 * easeOut(t2);
+    monitorEdgeMat.opacity = .22 * t2;
     monitor.userData.pwr.material.opacity = t2 * (t6 > 0 ? 1 : .5);
     keyboard.caps.material.opacity = .97 * easeOut(t2);
     keyboard.glyphs.material.opacity = t2;
-    keyboard.glow.material.opacity = (.04 + .1 * t6) * t2;
+    keyboard.glow.material.opacity = (.035 + .09 * t6) * t2;
     /* keys tap away while the site is framed, wired and finished */
     if (!calmFx && t3 > 0 && t6 < 1 && now - keyboard.lastKey > 70){
       keyboard.lastKey = now;
@@ -1227,7 +1297,7 @@
       var local = clamp((t2 - i * .22) / .56, 0, 1);
       t.g.scale.y = Math.max(.001, easeOutBack(local));
       t.g.visible = local > 0;
-      t.lamp.intensity = 1.6 * local;
+      t.lamp.intensity = .45 * local;
       t.strip.material.opacity = .4 + .5 * (calmFx ? 1 : .5 + .5 * Math.sin(now * .003 + i));
       var spin = (calmFx ? 0 : 2 + 10 * t4) * dt;
       t.fans.forEach(function(f){ f.rotation.z += spin; });
