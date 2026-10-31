@@ -1226,7 +1226,7 @@
 
   /* ---------------- Pointer: light, pulses, code-glyph trail ---------------- */
   var fx = document.getElementById('fxCanvas'), fctx = fx.getContext('2d'), FDPR = Math.min(window.devicePixelRatio || 1, 1.5);
-  var ptr = { x: 0, y: 0, nx: 0, ny: 0, sx: 0, sy: 0, has: false, lastX: 0, lastY: 0, lastPulse: 0 };
+  var ptr = { x: 0, y: 0, nx: 0, ny: 0, sx: 0, sy: 0, vx: 0, vy: 0, t0: 0, has: false, lastX: 0, lastY: 0, lastPulse: 0 };
   var raycaster = new THREE.Raycaster(), ndc = new THREE.Vector2(), groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
   var hit = new THREE.Vector3(), hitValid = false;
   var cursorLight = new THREE.PointLight(0x22d3ee, 0, 22, 1.6);
@@ -1249,11 +1249,26 @@
         g: GLYPHS[(Math.random() * GLYPHS.length) | 0], amber: Math.random() < .4, size: 10 + Math.random() * 5 });
     }
   }
+  /* a touch screen reports the finger a frame or two late; lead by the finger's recent speed, fading out once it stops,
+     so the crosshair sits under the finger the way it sits on a mouse cursor */
+  function lead(){
+    if (ptr.mouse) return 0;
+    var age = performance.now() - ptr.t0;
+    return age > 60 ? 0 : 28 * (1 - age / 60);
+  }
+  function clampLead(v){ return Math.max(-60, Math.min(60, v)); }
   function onMove(cx, cy, mouse){
     ptr.mouse = !!mouse; ptr.moveT = performance.now();
     var r = stage.getBoundingClientRect();
     var x = cx, y = cy;
-    if (!ptr.has){ ptr.has = true; ptr.lastX = x; ptr.lastY = y; ptr.sx = x; ptr.sy = y; }
+    if (!ptr.has){ ptr.has = true; ptr.fresh = true; ptr.lastX = x; ptr.lastY = y; ptr.sx = x; ptr.sy = y; }
+    /* finger speed in px/ms, so the crosshair and light can lead to where the finger already is */
+    var t = ptr.moveT;
+    if (!mouse && !ptr.fresh && t - ptr.t0 < 80){
+      var ms = Math.max(4, t - ptr.t0);
+      ptr.vx += ((x - ptr.x) / ms - ptr.vx) * .5; ptr.vy += ((y - ptr.y) / ms - ptr.vy) * .5;
+    } else { ptr.vx = 0; ptr.vy = 0; }
+    ptr.t0 = t;
     ptr.x = x; ptr.y = y;
     ptr.nx = ((x - r.left) / r.width) * 2 - 1; ptr.ny = -((y - r.top) / r.height) * 2 + 1;
     if (calmFx) return;
@@ -1334,8 +1349,10 @@
     fctx.clearRect(0, 0, fx.width, fx.height);
     /* the crosshair and x/z readout belong to the hero only */
     if (ptr.has && heroFx > .02){
-      var k = calmFx ? 1 : Math.min(1, dt * 16);
-      ptr.sx += (ptr.x - ptr.sx) * k; ptr.sy += (ptr.y - ptr.sy) * k;
+      /* a mouse cursor gets a little easing; a finger is drawn right where it is (plus its lead), like a cursor would be */
+      var k = calmFx || !ptr.mouse ? 1 : Math.min(1, dt * 40);
+      var ld = lead();
+      ptr.sx += (ptr.x + clampLead(ptr.vx * ld) - ptr.sx) * k; ptr.sy += (ptr.y + clampLead(ptr.vy * ld) - ptr.sy) * k;
       fctx.globalAlpha = heroFx;
       fctx.strokeStyle = 'rgba(34,211,238,.75)'; fctx.lineWidth = 1;
       fctx.beginPath();
@@ -1510,16 +1527,6 @@
     camera.updateProjectionMatrix();
     fx.width = Math.round(innerWidth * FDPR); fx.height = Math.round(innerHeight * FDPR);
   }
-  /* keep the frame rate up by trading sharpness: if the device can't keep up, the film steps its resolution
-     down (never below one pixel per CSS pixel) so the finger trail stays smooth; the look is otherwise unchanged */
-  var MAX_PR = Math.min(window.devicePixelRatio || 1, SMALL ? 1.5 : 1.75), MIN_PR = Math.min(MAX_PR, 1), pr = MAX_PR;
-  var frameAvg = 1 / 60, lastQ = performance.now() + 1500;
-  function adaptQuality(dt, now){
-    frameAvg += (dt - frameAvg) * .06;
-    if (now - lastQ < 1000 || frameAvg < 1 / 45 || pr <= MIN_PR) return;
-    lastQ = now; pr = Math.max(MIN_PR, pr - .25); frameAvg = 1 / 50;
-    renderer.setPixelRatio(pr); renderer.setSize(sizedW, sizedH, false); FX.resize();
-  }
   /* debounced: iOS fires resize constantly while its toolbars move */
   window.addEventListener('resize', function(){ clearTimeout(resizeTimer); resizeTimer = setTimeout(resize, 150); });
 
@@ -1612,8 +1619,8 @@
     camU = snap || reduceMotion ? target : camU + (target - camU) * Math.min(1, dt * 5);
     posCurve.getPoint(camU, camPos);
     lookCurve.getPoint(camU, camLook);
-    /* subtle pointer parallax on real pointers only */
-    if (finePointer && !reduceMotion && ptr.has){
+    /* the scene leans toward the pointer, a finger as well as a mouse, so phones feel like the desktop site */
+    if (!reduceMotion && ptr.has){
       par.x += (ptr.nx - par.x) * Math.min(1, dt * 3); par.y += (ptr.ny - par.y) * Math.min(1, dt * 3);
       tmpV.set(par.x * 1.4, par.y * .8, 0).applyQuaternion(camera.quaternion);
       camPos.add(tmpV);
@@ -1624,7 +1631,14 @@
     /* cursor on the board: a light pool + brighter traces under it */
     hitValid = false;
     if (ptr.has){
-      ndc.set(ptr.nx, ptr.ny);
+      /* glide toward the finger instead of jumping to each touch sample: phones deliver touches unevenly,
+         and at lower frame rates the light would hop between them */
+      if (ptr.fresh){ ptr.fresh = false; ptr.snx = ptr.nx; ptr.sny = ptr.ny; }
+      var kp = 1 - Math.exp(-dt * 60);
+      var ldn = lead();
+      ptr.snx += (ptr.nx + clampLead(ptr.vx * ldn) * 2 / sizedW - ptr.snx) * kp;
+      ptr.sny += (ptr.ny - clampLead(ptr.vy * ldn) * 2 / sizedH - ptr.sny) * kp;
+      ndc.set(ptr.snx, ptr.sny);
       raycaster.setFromCamera(ndc, camera);
       hitValid = !!raycaster.ray.intersectPlane(groundPlane, hit);
     }
@@ -1654,7 +1668,7 @@
   function tick(now){
     requestAnimationFrame(tick);
     try { step(now); } catch (err) { console.error(err); window.__lastErr = String(err && err.message || err); }
-    if (dbg){ dbgN++; if (now - dbgT > 1000){ dbg.textContent = 'fps ' + dbgN + '  res ' + pr.toFixed(2) + '  gl lost ' + (window.__glLost || 0) + (window.__lastErr ? '  err ' + window.__lastErr : ''); dbgN = 0; dbgT = now; } }
+    if (dbg){ dbgN++; if (now - dbgT > 1000){ dbg.textContent = 'fps ' + dbgN + '  ' + FX.quality() + '  gl lost ' + (window.__glLost || 0) + (window.__lastErr ? '  err ' + window.__lastErr : ''); dbgN = 0; dbgT = now; } }
   }
   /* ?debug puts a small readout in the corner, so a freeze on a real phone can be told apart from a dropped context */
   var dbg = /[?&]debug/.test(location.search) ? document.body.appendChild(document.createElement('div')) : null, dbgN = 0, dbgT = 0;
@@ -1666,7 +1680,7 @@
     smoothP += (p - smoothP) * (reduceMotion ? 1 : Math.min(1, dt * 9));
     if (Math.abs(p - smoothP) < .0003) smoothP = p;
     /* stop rendering entirely once the stage has scrolled away */
-    if (stageVisible()){ frame(p, now, dt, false); adaptQuality(dt, now); }
+    if (stageVisible()){ frame(p, now, dt, false); FX.adapt(dt, now); }
     /* the cursor effect keeps going after the film has scrolled away */
     if (!stageVisible()) hitValid = false;
     drawFx(dt);
