@@ -696,12 +696,6 @@
     s.scale.set(size, size, 1);
     return s;
   }
-  /* a glow lying flat on the board: a standing sprite this close to the floor gets sliced in half by it */
-  function groundGlow(color, size, opacity){
-    var m = new THREE.Mesh(new THREE.PlaneGeometry(size, size), new THREE.MeshBasicMaterial({ map: GLOW, color: color, transparent: true, opacity: opacity, blending: THREE.AdditiveBlending, depthWrite: false }));
-    m.rotation.x = -Math.PI / 2;
-    return m;
-  }
   function textSprite(text, color, h){
     var c = document.createElement('canvas'), g = c.getContext('2d');
     var fs = 64;
@@ -1021,7 +1015,7 @@
     });
     var cg = new THREE.BufferGeometry(); cg.setAttribute('position', new THREE.Float32BufferAttribute(corners, 3));
     var cl = new THREE.LineSegments(cg, new THREE.LineBasicMaterial({ color: CYAN, transparent: true, opacity: .8 }));
-    marker.add(ring, ring2, cl, groundGlow(AMBER, 14, .18));
+    marker.add(ring, ring2, cl);
     marker.rotation.x = 0;
     ring.rotation.x = ring2.rotation.x = -Math.PI / 2;
     marker.position.set(0, .05, 1);
@@ -1218,15 +1212,20 @@
   var hit = new THREE.Vector3(), hitValid = false;
   var cursorLight = new THREE.PointLight(0x22d3ee, 0, 22, 1.6);
   scene.add(cursorLight);
-  var cursorGlow = groundGlow(CYAN, 7, 0);
-  scene.add(cursorGlow);
+  /* the pools under the hero marker and under the cursor are painted by the floor shader itself,
+     so they stay perfectly smooth instead of being a textured card lying on the board */
+  var poolA = FX.floorMaterial.uniforms.uGlowA.value, poolB = FX.floorMaterial.uniforms.uGlowB.value;
+  FX.floorMaterial.uniforms.uGlowColA.value.copy(AMBER).convertSRGBToLinear();
+  FX.floorMaterial.uniforms.uGlowColB.value.copy(CYAN).convertSRGBToLinear();
   var bits = [], MAX_BITS = SMALL ? 60 : 140;
   var GLYPHS = ['0','1','0','1','{','}','</>','/','*',';','#'];
   var heroFx = 1;
+  /* 1 while the film fills the screen, fading to 0 as it scrolls away: the cursor effect lives for the whole film */
+  var filmFx = 1;
 
   function spawnBits(x, y, n, vy){
-    /* the code-symbol trail belongs to the hero only */
-    if (heroFx <= .5) return;
+    /* the code-symbol trail runs for the whole film, not the sections after it */
+    if (filmFx <= .5) return;
     for (var i = 0; i < n && bits.length < MAX_BITS; i++){
       bits.push({ x: x + (Math.random() - .5) * 14, y: y + (Math.random() - .5) * 14,
         vx: (Math.random() - .5) * 30, vy: (vy || -18) + (Math.random() - .5) * 20, life: 1,
@@ -1309,11 +1308,11 @@
     lastFont = '';
     fctx.setTransform(FDPR, 0, 0, FDPR, 0, 0);
     fctx.clearRect(0, 0, fx.width, fx.height);
-    /* the crosshair and x/z readout belong to the hero only; the code symbols keep going everywhere */
-    if (ptr.has && heroFx > .02){
+    /* the crosshair and x/z readout run for the whole film, not the sections after it */
+    if (ptr.has && filmFx > .02){
       var k = calmFx ? 1 : Math.min(1, dt * 16);
       ptr.sx += (ptr.x - ptr.sx) * k; ptr.sy += (ptr.y - ptr.sy) * k;
-      fctx.globalAlpha = heroFx;
+      fctx.globalAlpha = filmFx;
       fctx.strokeStyle = 'rgba(34,211,238,.75)'; fctx.lineWidth = 1;
       fctx.beginPath();
       fctx.moveTo(ptr.sx - 14, ptr.sy); fctx.lineTo(ptr.sx - 5, ptr.sy); fctx.moveTo(ptr.sx + 5, ptr.sy); fctx.lineTo(ptr.sx + 14, ptr.sy);
@@ -1443,13 +1442,13 @@
     /* hero marker pulses, then hands over to the blueprint */
     var mk = 1 - seg(p, .08, .22);
     marker.visible = mk > 0;
+    poolA.set(marker.position.x, marker.position.z, 6, .22 * mk);
     if (marker.visible){
       var pulse = calmFx ? .5 : (now * .0006) % 1;
       marker.userData.ring.scale.setScalar(1 + pulse * .25);
       marker.userData.ring.material.opacity = .8 * (1 - pulse) * mk;
       marker.userData.ring2.material.opacity = .45 * mk;
       marker.children[2].material.opacity = .8 * mk;
-      marker.children[3].material.opacity = .18 * mk;
     }
 
     /* launch */
@@ -1610,10 +1609,10 @@
     if (hitValid){
       traceUniforms.uP.value.copy(hit);
       cursorLight.position.set(hit.x, 3, hit.z);
-      cursorGlow.position.set(hit.x, .04, hit.z);
+      poolB.x = hit.x; poolB.y = hit.z;
     }
     cursorLight.intensity = 3 * traceUniforms.uPtr.value;
-    cursorGlow.material.opacity = .35 * traceUniforms.uPtr.value;
+    poolB.z = 3.2; poolB.w = .35 * traceUniforms.uPtr.value;
     updateScreen(dt, now);
 
     updateWorld(smoothP, now, dt);
@@ -1634,6 +1633,7 @@
     smoothP += (p - smoothP) * (reduceMotion ? 1 : Math.min(1, dt * 9));
     if (Math.abs(p - smoothP) < .0003) smoothP = p;
     /* stop rendering entirely once the stage has scrolled away */
+    filmFx = clamp(filmScroll.getBoundingClientRect().bottom / window.innerHeight * 2 - 1, 0, 1);
     if (stageVisible()){ frame(p, now, dt, false); adaptQuality(dt, now); }
     /* the cursor effect keeps going after the film has scrolled away */
     if (!stageVisible()) hitValid = false;
