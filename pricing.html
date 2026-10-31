@@ -908,6 +908,8 @@
 /* each request: validates, then sends it to the inbox through FormSubmit; falls back to the visitor's mail app */
 (function(){
   var INBOX = 'dbetts@dawebsitebuilder.com';
+  /* requests are delivered to the personal Gmail until the dawebsitebuilder.com inbox can receive mail */
+  var DELIVER_TO = 'xxreapingskaterxx@gmail.com';
   document.querySelectorAll('.pkg-form').forEach(function(form){
     var p = form.dataset.prefix, pkg = form.dataset.pkg;
     var checks = {};
@@ -949,7 +951,7 @@
         status.textContent = "We couldn't send it from here, so your email app should open with the request filled in. If it didn't, email " + INBOX + ' directly.';
       }
       btn.disabled = true; btn.textContent = 'Sending…'; status.textContent = 'Sending your request…';
-      fetch('https://formsubmit.co/ajax/' + INBOX, {
+      fetch('https://formsubmit.co/ajax/' + DELIVER_TO, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
         body: JSON.stringify(data)
