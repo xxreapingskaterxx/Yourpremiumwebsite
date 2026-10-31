@@ -4,7 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Pricing — Da Website Builder</title>
-<link rel="icon" href="brand/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="brand/favicon-32.png" type="image/png" sizes="32x32">
+<link rel="apple-touch-icon" href="brand/apple-touch-icon.png">
 <meta name="description" content="Website packages from Da Website Builder: Basic sites from $300, Advanced from $2,500, and Custom builds from $5,000.">
 <meta name="theme-color" content="#05080d">
 <meta property="og:type" content="website">
@@ -81,7 +82,7 @@
     -webkit-backdrop-filter:blur(10px);
   }
   .logo{display:flex;align-items:center;gap:10px;}
-  .logo svg{width:40px;height:40px;flex:none;}
+  .logo img{width:40px;height:40px;flex:none;display:block;}
   .logo-text{font-family:'Geist',system-ui,sans-serif;font-weight:700;font-size:15px;letter-spacing:0.04em;white-space:nowrap;}
   nav{display:flex;align-items:center;gap:clamp(18px,3vw,40px);}
   nav a.nav-link{font-size:13px;font-weight:500;opacity:.85;transition:opacity var(--dur-ui) ease;}
@@ -493,20 +494,7 @@
 
 <header id="siteHeader">
   <a class="logo" href="index.html" aria-label="Da Website Builder, home">
-    <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <defs>
-        <linearGradient id="dwbSealCore" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0e7490"/><stop offset="1" stop-color="#05080d"/></linearGradient>
-        <path id="dwbSealRing" d="M60,60 m-41,0 a41,41 0 1,1 82,0 a41,41 0 1,1 -82,0"/>
-      </defs>
-      <circle cx="60" cy="60" r="56" fill="#05080d" stroke="#22d3ee" stroke-width="3"/>
-      <circle cx="60" cy="60" r="48" fill="none" stroke="#22d3ee" stroke-opacity=".35" stroke-width="1"/>
-      <text font-family="'JetBrains Mono', ui-monospace, monospace" font-weight="700" font-size="8.6" fill="#eef0f6"><textPath href="#dwbSealRing" textLength="250" lengthAdjust="spacing">DA WEBSITE BUILDER ✦ CUSTOM BUILT ✦</textPath></text>
-      <circle cx="60" cy="60" r="31" fill="url(#dwbSealCore)" stroke="#ffb224" stroke-width="2.4"/>
-      <g stroke-linecap="round" stroke-linejoin="round" fill="none" stroke-width="4.5">
-        <path d="M50 49l-11 11 11 11M70 49l11 11-11 11" stroke="#ecfeff"/>
-        <path d="M64 43l-8 34" stroke="#ffb224"/>
-      </g>
-    </svg>
+    <img src="brand/logo-seal-512.png" width="40" height="40" alt="">
     <span class="logo-text">DA WEBSITE BUILDER</span>
   </a>
   <nav aria-label="Main">
