@@ -1572,7 +1572,7 @@
       /* glide toward the finger instead of jumping to each touch sample: phones deliver touches unevenly,
          and at lower frame rates the light would hop between them */
       if (ptr.fresh){ ptr.fresh = false; ptr.snx = ptr.nx; ptr.sny = ptr.ny; }
-      var kp = 1 - Math.exp(-dt * 14);
+      var kp = 1 - Math.exp(-dt * 28);
       ptr.snx += (ptr.nx - ptr.snx) * kp; ptr.sny += (ptr.ny - ptr.sny) * kp;
       ndc.set(ptr.snx, ptr.sny);
       raycaster.setFromCamera(ndc, camera);
