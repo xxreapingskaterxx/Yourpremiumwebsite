@@ -94,6 +94,48 @@
     color:#050608;
     transition:transform var(--dur-press) var(--ease-out),filter var(--dur-ui) ease;
   }
+  /* Start-a-project button: the gradient drifts, a shine sweeps across every few seconds and the
+     glow breathes; on a mouse, a light follows the cursor and the button leans toward it */
+  .nav-cta{
+    position:relative;isolation:isolate;overflow:hidden;
+    background:linear-gradient(90deg,var(--cyan),var(--amber),var(--cyan));background-size:200% 100%;
+    animation:ctaFlow 6s linear infinite,ctaGlow 3.2s ease-in-out infinite;
+    transition:transform var(--dur-press) var(--ease-out),filter var(--dur-ui) ease,translate .25s var(--ease-out);
+  }
+  .nav-cta::before{
+    content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;opacity:0;transition:opacity .25s ease;
+    background:radial-gradient(70px circle at var(--mx,50%) var(--my,50%),rgba(255,255,255,.6),transparent 70%);
+  }
+  .nav-cta::after{
+    content:'';position:absolute;top:0;bottom:0;left:-60%;width:45%;z-index:-1;pointer-events:none;
+    background:linear-gradient(105deg,transparent,rgba(255,255,255,.65),transparent);
+    transform:skewX(-20deg);animation:ctaShine 4.5s ease-in-out infinite;
+  }
+  .nav-cta:hover::before{ opacity:1; }
+  .nav-cta:hover{ animation-duration:2s,1.6s; }
+  @keyframes ctaFlow{ to{ background-position:-200% 0; } }
+  @keyframes ctaGlow{
+    0%,100%{ box-shadow:0 0 10px rgba(34,211,238,.35),0 0 0 rgba(255,178,36,0); }
+    50%{ box-shadow:0 0 18px rgba(34,211,238,.25),0 0 22px rgba(255,178,36,.45); }
+  }
+  @keyframes ctaShine{ 0%,55%{ left:-60%; } 85%,100%{ left:130%; } }
+  /* Brand seal: same glow, shine and cursor light as the Start a project button */
+  .logo-mark{
+    position:relative;display:block;width:40px;height:40px;flex:none;border-radius:50%;overflow:hidden;isolation:isolate;
+    animation:ctaGlow 3.2s ease-in-out infinite;transition:translate .25s var(--ease-out);
+  }
+  .logo-mark::before{
+    content:'';position:absolute;inset:0;z-index:1;pointer-events:none;opacity:0;transition:opacity .25s ease;
+    background:radial-gradient(22px circle at var(--mx,50%) var(--my,50%),rgba(255,255,255,.45),transparent 70%);
+  }
+  .logo-mark::after{
+    content:'';position:absolute;top:-10%;bottom:-10%;left:-80%;width:55%;z-index:1;pointer-events:none;
+    background:linear-gradient(105deg,transparent,rgba(255,255,255,.55),transparent);
+    transform:skewX(-20deg);animation:ctaShine 4.5s ease-in-out infinite;
+  }
+  .logo:hover .logo-mark::before{ opacity:1; }
+  .logo:hover .logo-mark{ animation-duration:1.6s; }
+  .logo:hover .logo-mark::after{ animation-duration:2s; }
   /* Hover lift only where a real pointer hovers; touch fires false hovers on tap */
   @media (hover:hover) and (pointer:fine){
     .nav-cta:hover{ filter:brightness(1.08); transform:translateY(-1px); }
@@ -493,14 +535,14 @@
 
 <header id="siteHeader">
   <a class="logo" href="index.html" aria-label="Da Website Builder, home">
-    <img src="brand/logo-seal-512.png" width="40" height="40" alt="">
+    <span class="logo-mark"><img src="brand/logo-seal-512.png" width="40" height="40" alt=""></span>
     <span class="logo-text">DA WEBSITE BUILDER</span>
   </a>
   <nav aria-label="Main">
     <a class="nav-link" href="services.html">Services</a>
     <a class="nav-link" href="pricing.html">Pricing</a>
     <a class="nav-link" href="contact.html">Contact</a>
-    <a class="nav-cta" href="contact.html">Start a project</a>
+    <a class="nav-cta" href="pricing.html#pricing">Start a project</a>
     <button class="menu-btn" id="menuBtn" type="button" aria-expanded="false" aria-controls="siteMenu"><span class="menu-ico" aria-hidden="true"><i></i><i></i></span><span class="menu-lbl mono">MENU</span></button>
   </nav>
 </header>
@@ -734,13 +776,101 @@
   site.position.set(0, 3.2, 0);
   scene.add(site);
 
-  /* concrete-like pad the site stands on (foundation) */
-  var pad = new THREE.Mesh(new THREE.BoxGeometry(FW + 4, .5, 9), new THREE.MeshStandardMaterial({ color: 0x0c131c, roughness: .32, metalness: .75, envMapIntensity: .9, transparent: true, opacity: 0 }));
-  pad.position.set(0, .25, 1.5);
+  /* ---------------- Hardware: monitor, keyboard and PC towers ---------------- */
+  /* rounded shapes so the hardware reads as real objects, not boxes */
+  function roundRect(w, h, r){
+    var sh = new THREE.Shape(), x = -w / 2, y = -h / 2;
+    sh.moveTo(x + r, y); sh.lineTo(x + w - r, y); sh.quadraticCurveTo(x + w, y, x + w, y + r);
+    sh.lineTo(x + w, y + h - r); sh.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    sh.lineTo(x + r, y + h); sh.quadraticCurveTo(x, y + h, x, y + h - r);
+    sh.lineTo(x, y + r); sh.quadraticCurveTo(x, y, x + r, y);
+    return sh;
+  }
+  /* a plate facing +z: w x h face with rounded corners, d deep, centred */
+  function plate(w, h, d, r, bevel){
+    var bv = bevel || 0;
+    var g = new THREE.ExtrudeGeometry(roundRect(w - 2 * bv, h - 2 * bv, Math.max(.01, r - bv)), { depth: Math.max(.01, d - 2 * bv), bevelEnabled: bv > 0, bevelSize: bv, bevelThickness: bv, bevelSegments: 2, curveSegments: 6 });
+    g.center(); return g;
+  }
+  /* a slab lying flat: w wide (x), l long (z), t thick (y), base at y = 0 */
+  function slab(w, l, t, r, bevel){
+    var g = plate(w, l, t, r, bevel); g.rotateX(-Math.PI / 2); g.translate(0, t / 2, 0); return g;
+  }
+  var PLASTIC = { color: 0x0d1117, roughness: .5, metalness: .25, envMapIntensity: .8 };
+  var ALU = { color: 0x3e4650, roughness: .42, metalness: .85, envMapIntensity: .9 };
+  function fadeMat(o){ var m = new THREE.MeshStandardMaterial(o); m.transparent = true; m.opacity = 0; return m; }
+  /* a warm rim from behind and a cool fill so the hardware has highlights and form */
+  var rimLight = new THREE.DirectionalLight(0xffc56a, .2); rimLight.position.set(14, 12, -16); scene.add(rimLight);
+  var fillLight = new THREE.DirectionalLight(0x7fd6ff, .3); fillLight.position.set(10, 6, 22); scene.add(fillLight);
+
+  /* the frame becomes a big monitor: thin bezel, a rear shell, an aluminium arm and foot */
+  var HW = FW + .7, HH = FH + .7;
+  var monitorMat = fadeMat(PLASTIC);
+  var standMat = fadeMat(ALU);
+  var monitorEdgeMat = new THREE.LineBasicMaterial({ color: 0x9aa7b4, transparent: true, opacity: 0 });
+  var monitor = new THREE.Group();
+  (function(){
+    var bezel = new THREE.Mesh(plate(HW, HH, .32, .3, .05), monitorMat);
+    bezel.position.set(0, 3.2 + FH / 2, -.24); monitor.add(bezel);
+    var shell = new THREE.Mesh(plate(HW * .62, HH * .58, .5, .9, .12), monitorMat);
+    shell.position.set(0, 3.2 + FH * .52, -.62); monitor.add(shell);
+    var chin = new THREE.Mesh(plate(HW, .32, .34, .12, .04), monitorMat);
+    chin.position.set(0, 3.2 - .2, -.22); monitor.add(chin);
+    var ring = new THREE.LineSegments(new THREE.EdgesGeometry(bezel.geometry, 40), monitorEdgeMat);
+    ring.position.copy(bezel.position); monitor.add(ring);
+    /* stand: a tilted arm from the shell down to a flat oval foot */
+    var arm = new THREE.Mesh(plate(1.5, 4.4, .2, .2, .04), standMat);
+    arm.position.set(0, 2.15, -1.45); arm.rotation.x = -.28; monitor.add(arm);
+    var foot = new THREE.Mesh(slab(5.4, 3.2, .12, 1.4, .04), standMat);
+    foot.position.set(0, 0, -1.2); monitor.add(foot);
+    /* power light on the chin */
+    var pwr = new THREE.Mesh(new THREE.CircleGeometry(.06, 16), new THREE.MeshBasicMaterial({ color: CYAN, transparent: true, opacity: 0 }));
+    pwr.position.set(HW / 2 - .6, 3.2 - .2, -.04); monitor.add(pwr);
+    monitor.userData.pwr = pwr;
+  })();
+  scene.add(monitor);
+
+  /* the pad underneath becomes a keyboard: aluminium case, staggered keycaps, RGB underglow */
+  var KB_W = 14.4, KB_D = 4.7;
+  var pad = new THREE.Mesh(slab(KB_W, KB_D, .32, .35, .06), fadeMat(ALU));
+  pad.position.set(0, 0, 3.6); pad.rotation.x = .05;
   scene.add(pad);
-  var padEdge = new THREE.LineSegments(new THREE.EdgesGeometry(pad.geometry), new THREE.LineBasicMaterial({ color: AMBER, transparent: true, opacity: 0 }));
-  padEdge.position.copy(pad.position);
+  var padEdge = new THREE.LineSegments(new THREE.EdgesGeometry(pad.geometry, 40), new THREE.LineBasicMaterial({ color: 0xc7d0da, transparent: true, opacity: 0 }));
+  padEdge.position.copy(pad.position); padEdge.rotation.copy(pad.rotation);
   scene.add(padEdge);
+  var keyboard = (function(){
+    /* a 60% layout in key units: every row adds up to 15 */
+    var ROWS = [
+      [1,1,1,1,1,1,1,1,1,1,1,1,1,2],
+      [1.5,1,1,1,1,1,1,1,1,1,1,1,1,1.5],
+      [1.75,1,1,1,1,1,1,1,1,1,1,1,2.25],
+      [2.25,1,1,1,1,1,1,1,1,1,1,2.75],
+      [1.25,1.25,1.25,6.25,1.25,1.25,1.25,1.25]
+    ];
+    var U = .88, PZ = .84, layout = [];
+    ROWS.forEach(function(row, r){ var c = 0; row.forEach(function(wu){ layout.push([r, c, wu]); c += wu; }); });
+    var n = layout.length, dummy = new THREE.Object3D(), plateGroup = new THREE.Group();
+    plateGroup.position.copy(pad.position); plateGroup.rotation.copy(pad.rotation);
+    var capGeo = slab(1, .7, .22, .1, .035);
+    var caps = new THREE.InstancedMesh(capGeo, fadeMat({ color: 0x151b23, roughness: .75, metalness: .05, envMapIntensity: .4 }), n);
+    var glyphs = new THREE.InstancedMesh(new THREE.PlaneGeometry(.2, .2), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0, depthWrite: false }), n);
+    var x0 = -15 * U / 2, z0 = -ROWS.length * PZ / 2 + PZ / 2, base = new THREE.Color(0x1e5b66);
+    layout.forEach(function(k, i){
+      var w = k[2] * U - .1, x = x0 + k[1] * U + k[2] * U / 2, z = z0 + k[0] * PZ;
+      dummy.position.set(x, .3, z); dummy.rotation.set(0, 0, 0); dummy.scale.set(w, 1, 1); dummy.updateMatrix();
+      caps.setMatrixAt(i, dummy.matrix);
+      var wide = k[2] > 2;
+      dummy.position.set(wide ? x : x - w / 2 + .2, .525, z - (wide ? 0 : .14)); dummy.rotation.set(-Math.PI / 2, 0, 0);
+      dummy.scale.set(wide ? w * 2.6 : 1, wide ? .2 : 1, 1); dummy.updateMatrix();
+      glyphs.setMatrixAt(i, dummy.matrix);
+      glyphs.setColorAt(i, base);
+    });
+    var glow = new THREE.Mesh(new THREE.PlaneGeometry(KB_W * 1.5, KB_D * 2.2), new THREE.MeshBasicMaterial({ color: CYAN, map: GLOW, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending }));
+    glow.rotation.x = -Math.PI / 2; glow.position.set(0, .02, pad.position.z);
+    plateGroup.add(caps, glyphs);
+    scene.add(glow, plateGroup);
+    return { caps: caps, glyphs: glyphs, glow: glow, n: n, base: base, heat: new Float32Array(n), lastKey: 0 };
+  })();
 
   var backPanel = new THREE.Mesh(new THREE.PlaneGeometry(FW, FH), new THREE.MeshBasicMaterial({ color: 0x060b12, transparent: true, opacity: 0, depthWrite: false }));
   backPanel.position.set(0, FH / 2, -.05);
@@ -877,35 +1007,86 @@
   liveGlow.position.set(0, 3.2 + FH / 2, -1.5);
   scene.add(liveGlow);
 
-  /* ---------------- Foundation: server, database, CDN towers ---------------- */
+  /* ---------------- Foundation: server, database, CDN as three PC towers ---------------- */
+  /* front mesh grille texture: a fine dot grid */
+  var MESH_TEX = (function(){
+    var c = document.createElement('canvas'); c.width = c.height = 64;
+    var g = c.getContext('2d'); g.fillStyle = '#0a0e13'; g.fillRect(0, 0, 64, 64); g.fillStyle = '#26303b';
+    for (var y = 4; y < 64; y += 8) for (var x = (y / 8 % 2) * 4 + 4; x < 64; x += 8){ g.beginPath(); g.arc(x, y, 2.2, 0, 7); g.fill(); }
+    var t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(5, 9); t.encoding = THREE.sRGBEncoding; return t;
+  })();
+  function fanMesh(radius, color, glowAmt){
+    var fan = new THREE.Group();
+    fan.add(new THREE.Mesh(new THREE.RingGeometry(radius * .86, radius, 40), new THREE.MeshBasicMaterial({ color: color, transparent: true, opacity: .95, side: THREE.DoubleSide })));
+    var hub = new THREE.Mesh(new THREE.CircleGeometry(radius * .22, 20), new THREE.MeshBasicMaterial({ color: 0x0b0f14, side: THREE.DoubleSide }));
+    hub.position.z = .004; fan.add(hub);
+    var blades = new THREE.Group();
+    for (var b = 0; b < 7; b++){
+      var bl = new THREE.Mesh(new THREE.PlaneGeometry(radius * .62, radius * .2), new THREE.MeshBasicMaterial({ color: color, transparent: true, opacity: .32, side: THREE.DoubleSide, depthWrite: false }));
+      bl.position.x = radius * .5; bl.rotation.x = .5;
+      var arm = new THREE.Group(); arm.rotation.z = b / 7 * Math.PI * 2; arm.add(bl); blades.add(arm);
+    }
+    fan.add(blades);
+    var halo = glowSprite(color, radius * 3.2, glowAmt); fan.add(halo);
+    return { g: fan, blades: blades };
+  }
   var towers = [];
-  [['SERVER', -6.5], ['DATABASE', 0], ['CDN', 6.5]].forEach(function(t, i){
-    var g = new THREE.Group(), h = 2.2;
-    var body = new THREE.Mesh(new THREE.BoxGeometry(3.2, h, 2.2), new THREE.MeshStandardMaterial({ color: 0x1a2533, roughness: .22, metalness: .9, envMapIntensity: 1.3 }));
-    body.position.y = h / 2; g.add(body);
-    var edge = new THREE.LineSegments(new THREE.EdgesGeometry(body.geometry), new THREE.LineBasicMaterial({ color: AMBER, transparent: true, opacity: .7 }));
-    edge.position.copy(body.position); g.add(edge);
+  [['SERVER', -7.5], ['DATABASE', 0], ['CDN', 7.5]].forEach(function(t, i){
+    var g = new THREE.Group(), h = 3.3, w = 1.6, d = 3;
+    var side = i === 2 ? -1 : 1, fans = [];
+    /* chassis: matte black body on four feet */
+    var body = new THREE.Mesh(plate(d, h, w, .12, .05), new THREE.MeshStandardMaterial(PLASTIC));
+    body.rotation.y = Math.PI / 2;
+    body.position.y = h / 2 + .12; g.add(body);
+    [[-1,-1],[1,-1],[1,1],[-1,1]].forEach(function(c){
+      var ft = new THREE.Mesh(new THREE.CylinderGeometry(.11, .13, .12, 12), new THREE.MeshStandardMaterial(ALU));
+      ft.position.set(c[0] * (w / 2 - .22), .06, c[1] * (d / 2 - .3)); g.add(ft);
+    });
+    var edge = new THREE.LineSegments(new THREE.EdgesGeometry(body.geometry, 40), new THREE.LineBasicMaterial({ color: 0x8c99a6, transparent: true, opacity: .18 }));
+    edge.position.copy(body.position); edge.rotation.copy(body.rotation); g.add(edge);
+    /* front: mesh grille with three intake fans glowing through it, a top I/O strip */
+    var fz = d / 2 + .062, top = h + .12;
+    var grille = new THREE.Mesh(new THREE.PlaneGeometry(w - .3, h - .85), new THREE.MeshStandardMaterial({ map: MESH_TEX, roughness: .7, metalness: .4, transparent: true, opacity: .92 }));
+    grille.position.set(0, .12 + (h - .85) / 2 + .2, fz + .01); g.add(grille);
+    [0, 1, 2].forEach(function(k){
+      var f = fanMesh(.48, k === 1 ? AMBER : CYAN, .28);
+      f.g.position.set(0, .12 + .55 + k * .82, fz - .02); g.add(f.g); fans.push(f.blades);
+    });
+    var strip = new THREE.Mesh(new THREE.PlaneGeometry(w - .3, .035), new THREE.MeshBasicMaterial({ color: CYAN, transparent: true, opacity: .85 }));
+    strip.position.set(0, top - .5, fz + .012); g.add(strip);
+    var power = new THREE.Mesh(new THREE.RingGeometry(.07, .1, 24), new THREE.MeshBasicMaterial({ color: AMBER }));
+    power.position.set(w / 2 - .32, top - .27, fz + .012); g.add(power);
     var leds = [];
     for (var k = 0; k < 4; k++){
-      var led = new THREE.Mesh(new THREE.BoxGeometry(.18, .18, .05), new THREE.MeshBasicMaterial({ color: CYAN }));
-      led.position.set(-1.1 + k * .32, h - .45, 1.13); g.add(led); leds.push(led);
+      var led = new THREE.Mesh(new THREE.CircleGeometry(.035, 12), new THREE.MeshBasicMaterial({ color: CYAN }));
+      led.position.set(-w / 2 + .3 + k * .14, top - .27, fz + .012); g.add(led); leds.push(led);
     }
-    var slots = new THREE.Mesh(new THREE.PlaneGeometry(2.4, .08), new THREE.MeshBasicMaterial({ color: AMBER, transparent: true, opacity: .5 }));
-    slots.position.set(0, .7, 1.12); g.add(slots);
-    var lbl = textSprite(t[0], '#ffb224', .38); lbl.position.set(0, h + .55, 0); g.add(lbl);
+    /* tempered glass side facing the middle: board, GPU with its own glow, and a rear exhaust fan */
+    var sx = side * (w / 2 + .07);
+    var board = new THREE.Mesh(new THREE.PlaneGeometry(d - .5, h - .6), new THREE.MeshStandardMaterial({ color: 0x0f1a22, roughness: .6, metalness: .3 }));
+    board.rotation.y = side * Math.PI / 2; board.position.set(side * (w / 2 + .055), h / 2 + .15, 0); g.add(board);
+    var gpu = new THREE.Mesh(new THREE.BoxGeometry(.02, .32, d - 1), new THREE.MeshStandardMaterial({ color: 0x232c36, roughness: .35, metalness: .8 }));
+    gpu.position.set(sx, h * .45, .1); g.add(gpu);
+    var gpuLine = new THREE.Mesh(new THREE.PlaneGeometry(d - 1.1, .03), new THREE.MeshBasicMaterial({ color: AMBER }));
+    gpuLine.rotation.y = side * Math.PI / 2; gpuLine.position.set(sx + side * .012, h * .45 - .12, .1); g.add(gpuLine);
+    var rear = fanMesh(.42, CYAN, .22);
+    rear.g.rotation.y = side * Math.PI / 2; rear.g.position.set(sx, h * .78, -d / 2 + .65); g.add(rear.g); fans.push(rear.blades);
+    var glass = new THREE.Mesh(new THREE.PlaneGeometry(d - .2, h - .2), new THREE.MeshStandardMaterial({ color: 0x88b8cc, roughness: .05, metalness: .9, envMapIntensity: 1.6, transparent: true, opacity: .14, side: THREE.DoubleSide, depthWrite: false }));
+    glass.rotation.y = side * Math.PI / 2; glass.position.set(side * (w / 2 + .085), h / 2 + .12, 0); g.add(glass);
+    var lbl = textSprite(t[0], '#ffb224', .38); lbl.position.set(0, h + .75, 0); g.add(lbl);
     var lamp = new THREE.PointLight(0xffb224, 0, 9, 2); lamp.position.set(0, h + 1, 1.5); g.add(lamp);
-    g.position.set(t[1], .5, 7.2);
+    g.position.set(t[1], 0, 7.4);
     g.scale.set(1, .001, 1);
     scene.add(g);
-    towers.push({ g: g, leds: leds, lamp: lamp, label: lbl, h: h });
+    towers.push({ g: g, leds: leds, lamp: lamp, label: lbl, h: h + .12, fans: fans, strip: strip });
   });
 
   /* ---------------- Wiring: cables from towers up into the frame ---------------- */
   var cables = towers.map(function(t, i){
     var x0 = t.g.position.x, x1 = -5 + i * 5;
     var curve = new THREE.CatmullRomCurve3([
-      new THREE.Vector3(x0, .5 + t.h + .02, 7.0),
-      new THREE.Vector3(x0, .5 + t.h + .35, 5.9),
+      new THREE.Vector3(x0, t.g.position.y + t.h + .02, 7.2),
+      new THREE.Vector3(x0, t.g.position.y + t.h + .35, 6.1),
       new THREE.Vector3(x1 + (x0 - x1) * .35, 3.05, 2.4),
       new THREE.Vector3(x1, 3.22, .35)
     ]);
@@ -1074,7 +1255,7 @@
   }
 
   /* ---------------- Build state per scroll position ---------------- */
-  var lastIdle = 0, lastCablePulse = 0;
+  var lastIdle = 0, lastCablePulse = 0, kc = new THREE.Color();
   function updateWorld(p, now, dt){
     var t1 = seg(p, .10, .28),   /* blueprint */
         t2 = seg(p, .28, .44),   /* foundation */
@@ -1093,12 +1274,33 @@
 
     /* foundation: pad pours in, towers rise one after another */
     pad.material.opacity = .95 * easeOut(t2);
-    padEdge.material.opacity = .55 * t2 * (1 - t5 * .6);
+    padEdge.material.opacity = .25 * t2;
+    monitorMat.opacity = standMat.opacity = .97 * easeOut(t2);
+    monitorEdgeMat.opacity = .22 * t2;
+    monitor.userData.pwr.material.opacity = t2 * (t6 > 0 ? 1 : .5);
+    keyboard.caps.material.opacity = .97 * easeOut(t2);
+    keyboard.glyphs.material.opacity = t2;
+    keyboard.glow.material.opacity = (.035 + .09 * t6) * t2;
+    /* keys tap away while the site is framed, wired and finished */
+    if (!calmFx && t3 > 0 && t6 < 1 && now - keyboard.lastKey > 70){
+      keyboard.lastKey = now;
+      keyboard.heat[(Math.random() * keyboard.n) | 0] = 1;
+    }
+    for (var q = 0; q < keyboard.n; q++){
+      var heat = keyboard.heat[q];
+      if (heat > 0) keyboard.heat[q] = Math.max(0, heat - dt * 3);
+      kc.copy(keyboard.base).lerp(CYAN, .25 * t6).lerp(q % 7 ? CYAN : AMBER, heat);
+      keyboard.glyphs.setColorAt(q, kc);
+    }
+    keyboard.glyphs.instanceColor.needsUpdate = true;
     towers.forEach(function(t, i){
       var local = clamp((t2 - i * .22) / .56, 0, 1);
       t.g.scale.y = Math.max(.001, easeOutBack(local));
       t.g.visible = local > 0;
-      t.lamp.intensity = 1.6 * local;
+      t.lamp.intensity = .45 * local;
+      t.strip.material.opacity = .4 + .5 * (calmFx ? 1 : .5 + .5 * Math.sin(now * .003 + i));
+      var spin = (calmFx ? 0 : 2 + 10 * t4) * dt;
+      t.fans.forEach(function(f){ f.rotation.z += spin; });
       t.leds.forEach(function(l, k){
         var on = t4 >= 1 || calmFx || Math.sin(now * .007 + i * 2 + k * 1.3) > 0;
         l.material.color.copy(on ? CYAN : BG);
@@ -1416,7 +1618,7 @@
   });
   /* links to the other pages fade to black first, then cut */
   document.addEventListener('click', function(e){
-    var a = e.target.closest && e.target.closest('a[href$=".html"]');
+    var a = e.target.closest && e.target.closest('a[href$=".html"], a[href*=".html#"]');
     if (!a || e.defaultPrevented || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button || a.target || reduceMotion) return;
     e.preventDefault();
     document.body.classList.add('leaving');
@@ -1434,6 +1636,29 @@
     lastTime = t;
     frame(getProgress(), t, 0.016, true);
     requestAnimationFrame(function(){ window.__ready = true; requestAnimationFrame(tick); });
+  });
+})();
+</script>
+<script>
+/* Start-a-project button and brand seal: cursor light and a small magnetic lean, on real mice only */
+(function(){
+  if (!matchMedia('(hover:hover) and (pointer:fine)').matches) return;
+  document.querySelectorAll('.logo-mark').forEach(function(m){
+    var a = m.closest('.logo');
+    a.addEventListener('pointermove', function(e){
+      var r = m.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+      m.style.setProperty('--mx', x + 'px'); m.style.setProperty('--my', y + 'px');
+      m.style.translate = Math.max(-4, Math.min(4, (x - r.width / 2) * .12)).toFixed(1) + 'px ' + Math.max(-4, Math.min(4, (y - r.height / 2) * .12)).toFixed(1) + 'px';
+    });
+    a.addEventListener('pointerleave', function(){ m.style.translate = ''; });
+  });
+  document.querySelectorAll('.nav-cta').forEach(function(b){
+    b.addEventListener('pointermove', function(e){
+      var r = b.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+      b.style.setProperty('--mx', x + 'px'); b.style.setProperty('--my', y + 'px');
+      b.style.translate = ((x - r.width / 2) * .18).toFixed(1) + 'px ' + ((y - r.height / 2) * .3).toFixed(1) + 'px';
+    });
+    b.addEventListener('pointerleave', function(){ b.style.translate = ''; });
   });
 })();
 </script>

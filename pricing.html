@@ -94,6 +94,48 @@
     color:#050608;
     transition:transform var(--dur-press) var(--ease-out),filter var(--dur-ui) ease;
   }
+  /* Start-a-project button: the gradient drifts, a shine sweeps across every few seconds and the
+     glow breathes; on a mouse, a light follows the cursor and the button leans toward it */
+  .nav-cta{
+    position:relative;isolation:isolate;overflow:hidden;
+    background:linear-gradient(90deg,var(--cyan),var(--amber),var(--cyan));background-size:200% 100%;
+    animation:ctaFlow 6s linear infinite,ctaGlow 3.2s ease-in-out infinite;
+    transition:transform var(--dur-press) var(--ease-out),filter var(--dur-ui) ease,translate .25s var(--ease-out);
+  }
+  .nav-cta::before{
+    content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;opacity:0;transition:opacity .25s ease;
+    background:radial-gradient(70px circle at var(--mx,50%) var(--my,50%),rgba(255,255,255,.6),transparent 70%);
+  }
+  .nav-cta::after{
+    content:'';position:absolute;top:0;bottom:0;left:-60%;width:45%;z-index:-1;pointer-events:none;
+    background:linear-gradient(105deg,transparent,rgba(255,255,255,.65),transparent);
+    transform:skewX(-20deg);animation:ctaShine 4.5s ease-in-out infinite;
+  }
+  .nav-cta:hover::before{ opacity:1; }
+  .nav-cta:hover{ animation-duration:2s,1.6s; }
+  @keyframes ctaFlow{ to{ background-position:-200% 0; } }
+  @keyframes ctaGlow{
+    0%,100%{ box-shadow:0 0 10px rgba(34,211,238,.35),0 0 0 rgba(255,178,36,0); }
+    50%{ box-shadow:0 0 18px rgba(34,211,238,.25),0 0 22px rgba(255,178,36,.45); }
+  }
+  @keyframes ctaShine{ 0%,55%{ left:-60%; } 85%,100%{ left:130%; } }
+  /* Brand seal: same glow, shine and cursor light as the Start a project button */
+  .logo-mark{
+    position:relative;display:block;width:40px;height:40px;flex:none;border-radius:50%;overflow:hidden;isolation:isolate;
+    animation:ctaGlow 3.2s ease-in-out infinite;transition:translate .25s var(--ease-out);
+  }
+  .logo-mark::before{
+    content:'';position:absolute;inset:0;z-index:1;pointer-events:none;opacity:0;transition:opacity .25s ease;
+    background:radial-gradient(22px circle at var(--mx,50%) var(--my,50%),rgba(255,255,255,.45),transparent 70%);
+  }
+  .logo-mark::after{
+    content:'';position:absolute;top:-10%;bottom:-10%;left:-80%;width:55%;z-index:1;pointer-events:none;
+    background:linear-gradient(105deg,transparent,rgba(255,255,255,.55),transparent);
+    transform:skewX(-20deg);animation:ctaShine 4.5s ease-in-out infinite;
+  }
+  .logo:hover .logo-mark::before{ opacity:1; }
+  .logo:hover .logo-mark{ animation-duration:1.6s; }
+  .logo:hover .logo-mark::after{ animation-duration:2s; }
   /* Hover lift only where a real pointer hovers; touch fires false hovers on tap */
   @media (hover:hover) and (pointer:fine){
     .nav-cta:hover{ filter:brightness(1.08); transform:translateY(-1px); }
@@ -505,14 +547,14 @@
 
 <header id="siteHeader">
   <a class="logo" href="index.html" aria-label="Da Website Builder, home">
-    <img src="brand/logo-seal-512.png" width="40" height="40" alt="">
+    <span class="logo-mark"><img src="brand/logo-seal-512.png" width="40" height="40" alt=""></span>
     <span class="logo-text">DA WEBSITE BUILDER</span>
   </a>
   <nav aria-label="Main">
     <a class="nav-link" href="services.html">Services</a>
     <a class="nav-link" href="pricing.html" aria-current="page">Pricing</a>
     <a class="nav-link" href="contact.html">Contact</a>
-    <a class="nav-cta" href="contact.html">Start a project</a>
+    <a class="nav-cta" href="#pricing">Start a project</a>
     <button class="menu-btn" id="menuBtn" type="button" aria-expanded="false" aria-controls="siteMenu"><span class="menu-ico" aria-hidden="true"><i></i><i></i></span><span class="menu-lbl mono">MENU</span></button>
   </nav>
 </header>
@@ -1605,7 +1647,7 @@
   });
   /* links to the other pages fade to black first, then cut */
   document.addEventListener('click', function(e){
-    var a = e.target.closest && e.target.closest('a[href$=".html"]');
+    var a = e.target.closest && e.target.closest('a[href$=".html"], a[href*=".html#"]');
     if (!a || e.defaultPrevented || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button || a.target || reduceMotion) return;
     e.preventDefault();
     document.body.classList.add('leaving');
@@ -1623,6 +1665,29 @@
     lastTime = t;
     frame(getProgress(), t, 0.016, true);
     requestAnimationFrame(function(){ window.__ready = true; requestAnimationFrame(tick); });
+  });
+})();
+</script>
+<script>
+/* Start-a-project button and brand seal: cursor light and a small magnetic lean, on real mice only */
+(function(){
+  if (!matchMedia('(hover:hover) and (pointer:fine)').matches) return;
+  document.querySelectorAll('.logo-mark').forEach(function(m){
+    var a = m.closest('.logo');
+    a.addEventListener('pointermove', function(e){
+      var r = m.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+      m.style.setProperty('--mx', x + 'px'); m.style.setProperty('--my', y + 'px');
+      m.style.translate = Math.max(-4, Math.min(4, (x - r.width / 2) * .12)).toFixed(1) + 'px ' + Math.max(-4, Math.min(4, (y - r.height / 2) * .12)).toFixed(1) + 'px';
+    });
+    a.addEventListener('pointerleave', function(){ m.style.translate = ''; });
+  });
+  document.querySelectorAll('.nav-cta').forEach(function(b){
+    b.addEventListener('pointermove', function(e){
+      var r = b.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+      b.style.setProperty('--mx', x + 'px'); b.style.setProperty('--my', y + 'px');
+      b.style.translate = ((x - r.width / 2) * .18).toFixed(1) + 'px ' + ((y - r.height / 2) * .3).toFixed(1) + 'px';
+    });
+    b.addEventListener('pointerleave', function(){ b.style.translate = ''; });
   });
 })();
 </script>
