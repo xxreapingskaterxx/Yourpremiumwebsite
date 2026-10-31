@@ -4,7 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Pricing — Da Website Builder</title>
-<link rel="icon" href="brand/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="brand/favicon-32.png" type="image/png" sizes="32x32">
+<link rel="apple-touch-icon" href="brand/apple-touch-icon.png">
 <meta name="description" content="Website packages from Da Website Builder: Basic sites from $300, Advanced from $2,500, and Custom builds from $5,000.">
 <meta name="theme-color" content="#05080d">
 <meta property="og:type" content="website">
@@ -81,7 +82,7 @@
     -webkit-backdrop-filter:blur(10px);
   }
   .logo{display:flex;align-items:center;gap:10px;}
-  .logo svg{width:40px;height:40px;flex:none;}
+  .logo img{width:40px;height:40px;flex:none;display:block;}
   .logo-text{font-family:'Geist',system-ui,sans-serif;font-weight:700;font-size:15px;letter-spacing:0.04em;white-space:nowrap;}
   nav{display:flex;align-items:center;gap:clamp(18px,3vw,40px);}
   nav a.nav-link{font-size:13px;font-weight:500;opacity:.85;transition:opacity var(--dur-ui) ease;}
@@ -180,6 +181,7 @@
   .custom-form{ display:grid;grid-template-columns:repeat(3,1fr);gap:20px 22px; }
   .custom-form .field{ display:flex;flex-direction:column;gap:8px;min-width:0; }
   .custom-form .field.wide{ grid-column:1 / -1; }
+  .custom-form .field.span2{ grid-column:span 2; }
   .custom-form label{ font-size:13px;font-weight:600; }
   .custom-form .opt-tag{ font-weight:400;color:var(--ink-dim);margin-left:4px; }
   .custom-form input, .custom-form select, .custom-form textarea{
@@ -204,7 +206,7 @@
   }
   .form-send:active{ transform:scale(.97); }
   @media (hover:hover) and (pointer:fine){ .form-send:hover{ background:#ffc457; } }
-  @media (max-width:760px){ .custom-form{ grid-template-columns:1fr; } }
+  @media (max-width:760px){ .custom-form{ grid-template-columns:1fr; } .custom-form .field.span2{ grid-column:auto; } }
 
   /* ---------- Build stage ---------- */
   .film-scroll{
@@ -493,20 +495,7 @@
 
 <header id="siteHeader">
   <a class="logo" href="index.html" aria-label="Da Website Builder, home">
-    <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <defs>
-        <linearGradient id="dwbSealCore" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0e7490"/><stop offset="1" stop-color="#05080d"/></linearGradient>
-        <path id="dwbSealRing" d="M60,60 m-41,0 a41,41 0 1,1 82,0 a41,41 0 1,1 -82,0"/>
-      </defs>
-      <circle cx="60" cy="60" r="56" fill="#05080d" stroke="#22d3ee" stroke-width="3"/>
-      <circle cx="60" cy="60" r="48" fill="none" stroke="#22d3ee" stroke-opacity=".35" stroke-width="1"/>
-      <text font-family="'JetBrains Mono', ui-monospace, monospace" font-weight="700" font-size="8.6" fill="#eef0f6"><textPath href="#dwbSealRing" textLength="250" lengthAdjust="spacing">DA WEBSITE BUILDER ✦ CUSTOM BUILT ✦</textPath></text>
-      <circle cx="60" cy="60" r="31" fill="url(#dwbSealCore)" stroke="#ffb224" stroke-width="2.4"/>
-      <g stroke-linecap="round" stroke-linejoin="round" fill="none" stroke-width="4.5">
-        <path d="M50 49l-11 11 11 11M70 49l11 11-11 11" stroke="#ecfeff"/>
-        <path d="M64 43l-8 34" stroke="#ffb224"/>
-      </g>
-    </svg>
+    <img src="brand/logo-seal-512.png" width="40" height="40" alt="">
     <span class="logo-text">DA WEBSITE BUILDER</span>
   </a>
   <nav aria-label="Main">
@@ -525,7 +514,7 @@
       <li><a href="pricing.html" style="--d:160ms" aria-current="page"><span class="num mono">03</span>Pricing<span class="scene mono">SCENE · THE TOWERS</span></a></li>
       <li><a href="contact.html" style="--d:210ms"><span class="num mono">04</span>Contact<span class="scene mono">SCENE · THE SIGNAL</span></a></li>
     </ol>
-    <div class="menu-foot mono"><a href="mailto:desmondbetts@ymail.com">desmondbetts@ymail.com</a><span>EACH PAGE, ITS OWN FILM</span></div>
+    <div class="menu-foot mono"><a href="mailto:dbetts@dawebsitebuilder.com">dbetts@dawebsitebuilder.com</a><span>EACH PAGE, ITS OWN FILM</span></div>
   </nav>
 </div>
 
@@ -635,6 +624,12 @@
           <p class="field-err" id="cfEmailErr"></p>
         </div>
         <div class="field">
+          <label for="cfPhone">Phone <span class="opt-tag">optional</span></label>
+          <input id="cfPhone" name="phone" type="tel" autocomplete="tel" inputmode="tel">
+          <p class="field-hint">If you'd rather we call or text you back.</p>
+          <p class="field-err" id="cfPhoneErr"></p>
+        </div>
+        <div class="field span2">
           <label for="cfBiz">Business or project name <span class="opt-tag">optional</span></label>
           <input id="cfBiz" name="business" type="text" autocomplete="organization">
         </div>
@@ -657,7 +652,7 @@
             <option>Not sure yet</option>
           </select>
         </div>
-        <div class="field">
+        <div class="field span2">
           <label for="cfTime">Timeline</label>
           <select id="cfTime" name="timeline">
             <option>Flexible</option>
@@ -672,20 +667,22 @@
           <p class="field-hint">Pages, features, sites you like, deadline. Rough notes are fine.</p>
           <p class="field-err" id="cfDetailsErr"></p>
         </div>
+        <input type="text" name="_honey" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
         <div class="field wide form-foot">
           <button class="cta form-send" type="submit">Send my request</button>
-          <p class="field-hint" id="cfStatus" role="status">Opens your email app with everything filled in, addressed to desmondbetts@ymail.com.</p>
+          <p class="field-hint" id="cfStatus" role="status">Goes straight to our inbox. We reply within one business day.</p>
         </div>
       </form>
     </div>
   </section>
 <script>
-/* custom build request: validates, then hands a filled-in email to the visitor's mail app */
+/* custom build request: validates, then sends it to the inbox through FormSubmit; falls back to the visitor's mail app */
 (function(){
   var form = document.getElementById('customForm');
   var checks = {
     cfName: function(v){ return v ? '' : 'Add your name so we know who to reply to.'; },
     cfEmail: function(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) ? '' : 'Add an email like name@example.com.'; },
+    cfPhone: function(v){ return !v || v.replace(/\D/g, '').length >= 10 ? '' : 'Add a full number with area code, like 214 555 0123.'; },
     cfDetails: function(v){ return v.length >= 10 ? '' : 'Add a line or two about what you want built.'; }
   };
   function check(id){
@@ -704,20 +701,36 @@
     e.preventDefault();
     var bad = Object.keys(checks).filter(function(id){ return !check(id); });
     if (bad.length){ document.getElementById(bad[0]).focus(); return; }
-    var f = form.elements;
-    var body = [
-      'Name: ' + f.name.value.trim(),
-      'Email: ' + f.email.value.trim(),
-      'Business / project: ' + (f.business.value.trim() || '-'),
-      'Need: ' + f.type.value,
-      'Budget: ' + f.budget.value,
-      'Timeline: ' + f.timeline.value,
-      '',
-      f.details.value.trim()
-    ].join('\n');
-    location.href = 'mailto:desmondbetts@ymail.com?subject=' + encodeURIComponent('Custom build request: ' + f.name.value.trim())
-      + '&body=' + encodeURIComponent(body);
-    document.getElementById('cfStatus').textContent = "Your email app should open with the request ready to send. If it didn't, email desmondbetts@ymail.com directly.";
+    var f = form.elements, status = document.getElementById('cfStatus'), btn = form.querySelector('.form-send');
+    if (f._honey.value) return;
+    var data = {
+      name: f.name.value.trim(),
+      email: f.email.value.trim(),
+      phone: f.phone.value.trim() || '-',
+      business: f.business.value.trim() || '-',
+      need: f.type.value,
+      budget: f.budget.value,
+      timeline: f.timeline.value,
+      details: f.details.value.trim(),
+      _subject: 'Custom build request: ' + f.name.value.trim(),
+      _template: 'table'
+    };
+    function fallback(){
+      var body = ['Name: ' + data.name, 'Email: ' + data.email, 'Phone: ' + data.phone, 'Business / project: ' + data.business,
+        'Need: ' + data.need, 'Budget: ' + data.budget, 'Timeline: ' + data.timeline, '', data.details].join('\n');
+      location.href = 'mailto:dbetts@dawebsitebuilder.com?subject=' + encodeURIComponent(data._subject) + '&body=' + encodeURIComponent(body);
+      status.textContent = "We couldn't send it from here, so your email app should open with the request filled in. If it didn't, email dbetts@dawebsitebuilder.com directly.";
+    }
+    btn.disabled = true; btn.textContent = 'Sending…'; status.textContent = 'Sending your request…';
+    fetch('https://formsubmit.co/ajax/dbetts@dawebsitebuilder.com', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify(data)
+    }).then(function(r){ return r.json(); }).then(function(res){
+      if (String(res.success) !== 'true') throw new Error(res.message || 'not sent');
+      form.reset();
+      status.textContent = "Sent. Thanks, " + data.name + ". We'll reply to " + data.email + " within one business day.";
+    }).catch(fallback).then(function(){ btn.disabled = false; btn.textContent = 'Send my request'; });
   });
 })();
 </script>
@@ -726,8 +739,8 @@
     <div class="contact-wrap">
       <div class="reveal"><div class="eyebrow mono">// START A BUILD</div><h2>Let's build your website.</h2></div>
       <div class="contact-links reveal" style="--i:1">
-        <a class="big-link" href="mailto:desmondbetts@ymail.com">
-          <span>desmondbetts@ymail.com</span>
+        <a class="big-link" href="mailto:dbetts@dawebsitebuilder.com">
+          <span>dbetts@dawebsitebuilder.com</span>
           <span>→</span>
         </a>
         <div class="contact-meta">Tell us about your project and we'll get back to you within one business day.</div>
@@ -764,7 +777,7 @@
 
   <footer>
     <div>&copy; <span id="year"></span> Da Website Builder. All rights reserved.</div>
-    <a href="mailto:desmondbetts@ymail.com">desmondbetts@ymail.com</a>
+    <a href="mailto:dbetts@dawebsitebuilder.com">dbetts@dawebsitebuilder.com</a>
   </footer>
 </main>
 
