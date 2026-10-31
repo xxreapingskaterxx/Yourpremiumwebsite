@@ -683,12 +683,16 @@
   var FX = DWBFX.create(renderer, scene, camera, { small: SMALL, background: BG });
 
   /* soft radial sprite used for every glow, pulse and mote */
+  /* a soft falloff that fades all the way to nothing: the old linear gradient ended in a visible rim on phones */
   function glowTexture(){
-    var c = document.createElement('canvas'); c.width = c.height = 64;
-    var g = c.getContext('2d'), gr = g.createRadialGradient(32, 32, 0, 32, 32, 32);
-    gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(.25, 'rgba(255,255,255,.55)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
-    g.fillStyle = gr; g.fillRect(0, 0, 64, 64);
-    return new THREE.CanvasTexture(c);
+    var N = 128, d = new Uint8Array(N * N * 4), e = Math.exp(-4.5);
+    for (var y = 0; y < N; y++) for (var x = 0; x < N; x++){
+      var u = (x + .5) / N * 2 - 1, v = (y + .5) / N * 2 - 1, r2 = u * u + v * v, i = (y * N + x) * 4;
+      var a = r2 >= 1 ? 0 : (Math.exp(-r2 * 4.5) - e) / (1 - e) * (1 - r2);
+      d[i] = d[i + 1] = d[i + 2] = 255; d[i + 3] = Math.round(a * 255);
+    }
+    var t = new THREE.DataTexture(d, N, N); t.magFilter = t.minFilter = THREE.LinearFilter; t.needsUpdate = true;
+    return t;
   }
   var GLOW = glowTexture();
   function glowSprite(color, size, opacity){
@@ -1024,6 +1028,8 @@
   scene.add(marker);
 
   var liveGlow = glowSprite(AMBER, 34, 0);
+  /* this wash is taller than the monitor stands, so without this the floor cuts a hard line through it */
+  liveGlow.material.depthTest = false;
   liveGlow.position.set(0, 3.2 + FH / 2, -1.5);
   scene.add(liveGlow);
 

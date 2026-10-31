@@ -1093,12 +1093,16 @@
   var FX = DWBFX.create(renderer, scene, camera, { small: SMALL, background: BG });
 
   /* soft radial sprite used for every glow, pulse and mote */
+  /* a soft falloff that fades all the way to nothing: the old linear gradient ended in a visible rim on phones */
   function glowTexture(){
-    var c = document.createElement('canvas'); c.width = c.height = 64;
-    var g = c.getContext('2d'), gr = g.createRadialGradient(32, 32, 0, 32, 32, 32);
-    gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(.25, 'rgba(255,255,255,.55)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
-    g.fillStyle = gr; g.fillRect(0, 0, 64, 64);
-    return new THREE.CanvasTexture(c);
+    var N = 128, d = new Uint8Array(N * N * 4), e = Math.exp(-4.5);
+    for (var y = 0; y < N; y++) for (var x = 0; x < N; x++){
+      var u = (x + .5) / N * 2 - 1, v = (y + .5) / N * 2 - 1, r2 = u * u + v * v, i = (y * N + x) * 4;
+      var a = r2 >= 1 ? 0 : (Math.exp(-r2 * 4.5) - e) / (1 - e) * (1 - r2);
+      d[i] = d[i + 1] = d[i + 2] = 255; d[i + 3] = Math.round(a * 255);
+    }
+    var t = new THREE.DataTexture(d, N, N); t.magFilter = t.minFilter = THREE.LinearFilter; t.needsUpdate = true;
+    return t;
   }
   var GLOW = glowTexture();
   function glowSprite(color, size, opacity){
@@ -1260,6 +1264,8 @@
   var pulsePool = [];
   function getSprite(color){
     var s = pulsePool.pop() || glowSprite(color, 1.1, 1);
+    /* pulses ride the floor, so the floor must not slice them into half-domes */
+    s.material.depthTest = false;
     s.material.color.copy(color); s.visible = true; scene.add(s);
     return s;
   }
@@ -1324,8 +1330,9 @@
   var hit = new THREE.Vector3(), hitValid = false;
   var cursorLight = new THREE.PointLight(0x22d3ee, 0, 22, 1.6);
   scene.add(cursorLight);
-  var cursorGlow = glowSprite(CYAN, 7, 0);
-  scene.add(cursorGlow);
+  /* the cursor's pool of light is painted by the floor shader itself, so it has no edge to slice */
+  var poolB = FX.floorMaterial.uniforms.uGlowB.value;
+  FX.floorMaterial.uniforms.uGlowColB.value.copy(CYAN).convertSRGBToLinear();
   var bits = [], MAX_BITS = SMALL ? 60 : 140;
   var GLYPHS = ['0','1','0','1','{','}','</>','/','*',';','#'];
   var heroFx = 1;
@@ -1556,10 +1563,10 @@
     if (hitValid){
       traceUniforms.uP.value.copy(hit);
       cursorLight.position.set(hit.x, 3, hit.z);
-      cursorGlow.position.set(hit.x, .3, hit.z);
+      poolB.x = hit.x; poolB.y = hit.z;
     }
     cursorLight.intensity = 3 * traceUniforms.uPtr.value;
-    cursorGlow.material.opacity = .35 * traceUniforms.uPtr.value;
+    poolB.z = 3.2; poolB.w = .35 * traceUniforms.uPtr.value;
 
     updateWorld(smoothP, now, dt);
     updatePulses(dt);
