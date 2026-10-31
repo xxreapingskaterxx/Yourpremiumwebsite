@@ -1487,6 +1487,16 @@
     camera.updateProjectionMatrix();
     fx.width = Math.round(innerWidth * FDPR); fx.height = Math.round(innerHeight * FDPR);
   }
+  /* keep the frame rate up by trading sharpness: if the device can't keep up, the film steps its resolution
+     down (never below one pixel per CSS pixel) so the finger trail stays smooth; the look is otherwise unchanged */
+  var MAX_PR = Math.min(window.devicePixelRatio || 1, 1.75), MIN_PR = Math.min(MAX_PR, 1), pr = MAX_PR;
+  var frameAvg = 1 / 60, lastQ = performance.now() + 1500;
+  function adaptQuality(dt, now){
+    frameAvg += (dt - frameAvg) * .06;
+    if (now - lastQ < 1000 || frameAvg < 1 / 45 || pr <= MIN_PR) return;
+    lastQ = now; pr = Math.max(MIN_PR, pr - .25); frameAvg = 1 / 50;
+    renderer.setPixelRatio(pr); renderer.setSize(sizedW, sizedH, false); FX.resize();
+  }
   /* debounced: iOS fires resize constantly while its toolbars move */
   window.addEventListener('resize', function(){ clearTimeout(resizeTimer); resizeTimer = setTimeout(resize, 150); });
 
@@ -1624,7 +1634,7 @@
     smoothP += (p - smoothP) * (reduceMotion ? 1 : Math.min(1, dt * 9));
     if (Math.abs(p - smoothP) < .0003) smoothP = p;
     /* stop rendering entirely once the stage has scrolled away */
-    if (stageVisible()) frame(p, now, dt, false);
+    if (stageVisible()){ frame(p, now, dt, false); adaptQuality(dt, now); }
     /* the cursor effect keeps going after the film has scrolled away */
     if (!stageVisible()) hitValid = false;
     drawFx(dt);
