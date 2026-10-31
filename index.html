@@ -109,7 +109,7 @@
   .nav-cta::after{
     content:'';position:absolute;top:0;bottom:0;left:-60%;width:45%;z-index:-1;pointer-events:none;
     background:linear-gradient(105deg,transparent,rgba(255,255,255,.65),transparent);
-    transform:skewX(-20deg);animation:ctaShine 4.5s ease-in-out infinite;
+    transform:skewX(-20deg);animation:ctaShine 4.5s ease-in-out infinite;will-change:transform;
   }
   .nav-cta:hover::before{ opacity:1; }
   .nav-cta:hover{ animation-duration:2s,1.6s; }
@@ -118,7 +118,8 @@
     0%,100%{ box-shadow:0 0 10px rgba(34,211,238,.35),0 0 0 rgba(255,178,36,0); }
     50%{ box-shadow:0 0 18px rgba(34,211,238,.25),0 0 22px rgba(255,178,36,.45); }
   }
-  @keyframes ctaShine{ 0%,55%{ left:-60%; } 85%,100%{ left:130%; } }
+  @keyframes ctaShine{ 0%,55%{ transform:translateX(0) skewX(-20deg); } 85%,100%{ transform:translateX(422%) skewX(-20deg); } }
+  @keyframes sealShine{ 0%,55%{ transform:translateX(0) skewX(-20deg); } 85%,100%{ transform:translateX(382%) skewX(-20deg); } }
   /* Brand seal: same glow, shine and cursor light as the Start a project button */
   .logo-mark{
     position:relative;display:block;width:40px;height:40px;flex:none;border-radius:50%;overflow:hidden;isolation:isolate;
@@ -131,11 +132,16 @@
   .logo-mark::after{
     content:'';position:absolute;top:-10%;bottom:-10%;left:-80%;width:55%;z-index:1;pointer-events:none;
     background:linear-gradient(105deg,transparent,rgba(255,255,255,.55),transparent);
-    transform:skewX(-20deg);animation:ctaShine 4.5s ease-in-out infinite;
+    transform:skewX(-20deg);animation:sealShine 4.5s ease-in-out infinite;will-change:transform;
   }
   .logo:hover .logo-mark::before{ opacity:1; }
   .logo:hover .logo-mark{ animation-duration:1.6s; }
   .logo:hover .logo-mark::after{ animation-duration:2s; }
+  /* touch screens: a steady glow instead of repainting the shadow and gradient every frame */
+  @media (hover:none), (pointer:coarse){
+    .nav-cta{ animation:none;box-shadow:0 0 14px rgba(34,211,238,.3),0 0 16px rgba(255,178,36,.25); }
+    .logo-mark{ animation:none;box-shadow:0 0 12px rgba(34,211,238,.35),0 0 14px rgba(255,178,36,.25); }
+  }
   /* Hover lift only where a real pointer hovers; touch fires false hovers on tap */
   @media (hover:hover) and (pointer:fine){
     .nav-cta:hover{ filter:brightness(1.08); transform:translateY(-1px); }
@@ -800,8 +806,11 @@
   var ALU = { color: 0x3e4650, roughness: .42, metalness: .85, envMapIntensity: .9 };
   function fadeMat(o){ var m = new THREE.MeshStandardMaterial(o); m.transparent = true; m.opacity = 0; return m; }
   /* a warm rim from behind and a cool fill so the hardware has highlights and form */
-  var rimLight = new THREE.DirectionalLight(0xffc56a, .2); rimLight.position.set(14, 12, -16); scene.add(rimLight);
-  var fillLight = new THREE.DirectionalLight(0x7fd6ff, .3); fillLight.position.set(10, 6, 22); scene.add(fillLight);
+  /* phones skip these: every extra light makes each lit pixel more expensive */
+  if (!SMALL){
+    var rimLight = new THREE.DirectionalLight(0xffc56a, .2); rimLight.position.set(14, 12, -16); scene.add(rimLight);
+    var fillLight = new THREE.DirectionalLight(0x7fd6ff, .3); fillLight.position.set(10, 6, 22); scene.add(fillLight);
+  }
 
   /* the frame becomes a big monitor: thin bezel, a rear shell, an aluminium arm and foot */
   var HW = FW + .7, HH = FH + .7;
@@ -1005,6 +1014,8 @@
 
   var liveGlow = glowSprite(AMBER, 34, 0);
   liveGlow.position.set(0, 3.2 + FH / 2, -1.5);
+  /* phones: a screen-filling additive sprite costs fill rate and its edges get clipped into a hard amber box */
+  liveGlow.visible = !SMALL;
   scene.add(liveGlow);
 
   /* ---------------- Foundation: server, database, CDN as three PC towers ---------------- */
@@ -1021,13 +1032,14 @@
     var hub = new THREE.Mesh(new THREE.CircleGeometry(radius * .22, 20), new THREE.MeshBasicMaterial({ color: 0x0b0f14, side: THREE.DoubleSide }));
     hub.position.z = .004; fan.add(hub);
     var blades = new THREE.Group();
-    for (var b = 0; b < 7; b++){
+    var NB = SMALL ? 4 : 7;
+    for (var b = 0; b < NB; b++){
       var bl = new THREE.Mesh(new THREE.PlaneGeometry(radius * .62, radius * .2), new THREE.MeshBasicMaterial({ color: color, transparent: true, opacity: .32, side: THREE.DoubleSide, depthWrite: false }));
       bl.position.x = radius * .5; bl.rotation.x = .5;
-      var arm = new THREE.Group(); arm.rotation.z = b / 7 * Math.PI * 2; arm.add(bl); blades.add(arm);
+      var arm = new THREE.Group(); arm.rotation.z = b / NB * Math.PI * 2; arm.add(bl); blades.add(arm);
     }
     fan.add(blades);
-    var halo = glowSprite(color, radius * 3.2, glowAmt); fan.add(halo);
+    if (!SMALL) fan.add(glowSprite(color, radius * 3.2, glowAmt));
     return { g: fan, blades: blades };
   }
   var towers = [];
@@ -1074,11 +1086,10 @@
     var glass = new THREE.Mesh(new THREE.PlaneGeometry(d - .2, h - .2), new THREE.MeshStandardMaterial({ color: 0x88b8cc, roughness: .05, metalness: .9, envMapIntensity: 1.6, transparent: true, opacity: .14, side: THREE.DoubleSide, depthWrite: false }));
     glass.rotation.y = side * Math.PI / 2; glass.position.set(side * (w / 2 + .085), h / 2 + .12, 0); g.add(glass);
     var lbl = textSprite(t[0], '#ffb224', .38); lbl.position.set(0, h + .75, 0); g.add(lbl);
-    var lamp = new THREE.PointLight(0xffb224, 0, 9, 2); lamp.position.set(0, h + 1, 1.5); g.add(lamp);
     g.position.set(t[1], 0, 7.4);
     g.scale.set(1, .001, 1);
     scene.add(g);
-    towers.push({ g: g, leds: leds, lamp: lamp, label: lbl, h: h + .12, fans: fans, strip: strip });
+    towers.push({ g: g, leds: leds, label: lbl, h: h + .12, fans: fans, strip: strip });
   });
 
   /* ---------------- Wiring: cables from towers up into the frame ---------------- */
@@ -1286,18 +1297,20 @@
       keyboard.lastKey = now;
       keyboard.heat[(Math.random() * keyboard.n) | 0] = 1;
     }
+    var kbDirty = t6 > 0 && t6 < 1;
     for (var q = 0; q < keyboard.n; q++){
       var heat = keyboard.heat[q];
+      if (heat <= 0 && !kbDirty && keyboard.settled) continue;
       if (heat > 0) keyboard.heat[q] = Math.max(0, heat - dt * 3);
       kc.copy(keyboard.base).lerp(CYAN, .25 * t6).lerp(q % 7 ? CYAN : AMBER, heat);
       keyboard.glyphs.setColorAt(q, kc);
     }
     keyboard.glyphs.instanceColor.needsUpdate = true;
+    keyboard.settled = !kbDirty;
     towers.forEach(function(t, i){
       var local = clamp((t2 - i * .22) / .56, 0, 1);
       t.g.scale.y = Math.max(.001, easeOutBack(local));
       t.g.visible = local > 0;
-      t.lamp.intensity = .45 * local;
       t.strip.material.opacity = .4 + .5 * (calmFx ? 1 : .5 + .5 * Math.sin(now * .003 + i));
       var spin = (calmFx ? 0 : 2 + 10 * t4) * dt;
       t.fans.forEach(function(f){ f.rotation.z += spin; });
