@@ -494,6 +494,16 @@
   }
   .contact-links a.big-link:hover{ border-color:var(--amber);color:var(--amber); }
   .contact-meta{ font-size:13px;color:var(--ink-dim); }
+  .phone-links{ display:flex;flex-direction:column;gap:10px; }
+  .phone-row{ display:flex;align-items:center;gap:10px;flex-wrap:wrap; }
+  .phone-num{ font-size:15px;letter-spacing:.04em;color:var(--ink);min-width:150px; }
+  .phone-btn{
+    display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 20px;
+    border:1px solid rgba(255,255,255,.18);border-radius:999px;font-size:14px;font-weight:600;color:var(--ink);
+    transition:border-color var(--dur-ui) ease,color var(--dur-ui) ease,transform var(--dur-press) var(--ease-out);
+  }
+  .phone-btn:hover{ border-color:var(--cyan);color:var(--cyan); }
+  .phone-btn:active{ transform:scale(.97); }
 
   @media (max-width:860px){
     .contact-wrap{grid-template-columns:1fr;}
@@ -656,6 +666,10 @@
           <span>dbetts@dawebsitebuilder.com</span>
           <span>→</span>
         </a>
+        <div class="phone-links" aria-label="Call or text us">
+          <div class="phone-row"><span class="phone-num mono">(469) 820-0347</span><a class="phone-btn" href="tel:+14698200347">Call</a><a class="phone-btn" href="sms:+14698200347">Text</a></div>
+          <div class="phone-row"><span class="phone-num mono">(214) 397-3700</span><a class="phone-btn" href="tel:+12143973700">Call</a><a class="phone-btn" href="sms:+12143973700">Text</a></div>
+        </div>
         <div class="contact-meta">Tell us about your project and we'll get back to you within one business day.</div>
       </div>
     </div>

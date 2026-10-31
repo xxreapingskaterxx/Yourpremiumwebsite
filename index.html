@@ -287,6 +287,7 @@
     background:repeating-linear-gradient(0deg, #fff 0 1px, transparent 1px 3px);
   }
   #fxCanvas{ pointer-events:none; z-index:2; }
+  #trailCanvas{ position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:50; }
   #bottomFade{
     position:absolute;inset:0;
     background:var(--black);
@@ -564,6 +565,7 @@
   </nav>
 </div>
 
+<canvas id="trailCanvas" aria-hidden="true"></canvas>
 <div class="film-scroll" id="filmScroll">
   <div class="film-stage" id="stage" role="img" aria-label="A camera flies through a 3D circuit city as a website is built from blueprint to live launch while you scroll">
     <canvas id="filmCanvas" aria-hidden="true"></canvas>
@@ -793,14 +795,27 @@
     return sh;
   }
   /* a plate facing +z: w x h face with rounded corners, d deep, centred */
-  function plate(w, h, d, r, bevel){
-    var bv = bevel || 0;
-    var g = new THREE.ExtrudeGeometry(roundRect(w - 2 * bv, h - 2 * bv, Math.max(.01, r - bv)), { depth: Math.max(.01, d - 2 * bv), bevelEnabled: bv > 0, bevelSize: bv, bevelThickness: bv, bevelSegments: 2, curveSegments: 6 });
+  function plate(w, h, d, r, bevel, segs){
+    var bv = bevel || 0, sg = segs || 6;
+    var g = new THREE.ExtrudeGeometry(roundRect(w - 2 * bv, h - 2 * bv, Math.max(.01, r - bv)), { depth: Math.max(.01, d - 2 * bv), bevelEnabled: bv > 0, bevelSize: bv, bevelThickness: bv, bevelSegments: Math.min(2, sg), curveSegments: sg });
     g.center(); return g;
   }
   /* a slab lying flat: w wide (x), l long (z), t thick (y), base at y = 0 */
-  function slab(w, l, t, r, bevel){
-    var g = plate(w, l, t, r, bevel); g.rotateX(-Math.PI / 2); g.translate(0, t / 2, 0); return g;
+  function slab(w, l, t, r, bevel, segs){
+    var g = plate(w, l, t, r, bevel, segs); g.rotateX(-Math.PI / 2); g.translate(0, t / 2, 0); return g;
+  }
+  /* join several geometries into one so they cost a single draw call */
+  function mergeGeos(list){
+    var out = new THREE.BufferGeometry();
+    list = list.map(function(g){ return g.index ? g.toNonIndexed() : g; });
+    ['position', 'normal', 'uv'].forEach(function(a){
+      var n = 0, o = 0;
+      list.forEach(function(g){ n += g.attributes[a].array.length; });
+      var arr = new Float32Array(n);
+      list.forEach(function(g){ arr.set(g.attributes[a].array, o); o += g.attributes[a].array.length; });
+      out.setAttribute(a, new THREE.BufferAttribute(arr, list[0].attributes[a].itemSize));
+    });
+    return out;
   }
   var PLASTIC = { color: 0x0d1117, roughness: .5, metalness: .25, envMapIntensity: .8 };
   var ALU = { color: 0x3e4650, roughness: .42, metalness: .85, envMapIntensity: .9 };
@@ -860,7 +875,7 @@
     ROWS.forEach(function(row, r){ var c = 0; row.forEach(function(wu){ layout.push([r, c, wu]); c += wu; }); });
     var n = layout.length, dummy = new THREE.Object3D(), plateGroup = new THREE.Group();
     plateGroup.position.copy(pad.position); plateGroup.rotation.copy(pad.rotation);
-    var capGeo = slab(1, .7, .22, .1, .035);
+    var capGeo = slab(1, .7, .22, .1, .035, 2);
     var caps = new THREE.InstancedMesh(capGeo, fadeMat({ color: 0x151b23, roughness: .75, metalness: .05, envMapIntensity: .4 }), n);
     var glyphs = new THREE.InstancedMesh(new THREE.PlaneGeometry(.2, .2), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0, depthWrite: false }), n);
     var x0 = -15 * U / 2, z0 = -ROWS.length * PZ / 2 + PZ / 2, base = new THREE.Color(0x1e5b66);
@@ -987,7 +1002,7 @@
     var rot = new THREE.Euler((r() - .5) * 2, (r() - .5) * 2.4, (r() - .5) * 1.2);
     g.visible = false;
     site.add(g);
-    return { g: g, edges: edges, fill: fill, bars: bars, target: target, from: from, rot: rot, k: b.k };
+    return { g: g, edges: edges, fill: fill, bars: bars, target: target, from: from, rot: rot, k: b.k, w: w, h: h, hov: 0 };
   });
 
   /* the empty lot in the hero: a pulsing marker where the site will be built */
@@ -1031,14 +1046,18 @@
     fan.add(new THREE.Mesh(new THREE.RingGeometry(radius * .86, radius, 40), new THREE.MeshBasicMaterial({ color: color, transparent: true, opacity: .95, side: THREE.DoubleSide })));
     var hub = new THREE.Mesh(new THREE.CircleGeometry(radius * .22, 20), new THREE.MeshBasicMaterial({ color: 0x0b0f14, side: THREE.DoubleSide }));
     hub.position.z = .004; fan.add(hub);
-    var blades = new THREE.Group();
-    var NB = SMALL ? 4 : 7;
-    for (var b = 0; b < NB; b++){
-      var bl = new THREE.Mesh(new THREE.PlaneGeometry(radius * .62, radius * .2), new THREE.MeshBasicMaterial({ color: color, transparent: true, opacity: .32, side: THREE.DoubleSide, depthWrite: false }));
-      bl.position.x = radius * .5; bl.rotation.x = .5;
-      var arm = new THREE.Group(); arm.rotation.z = b / NB * Math.PI * 2; arm.add(bl); blades.add(arm);
+    /* all seven blades share one mesh, so a fan is three draw calls instead of nine */
+    var parts = [];
+    for (var b = 0; b < 7; b++){
+      var bg = new THREE.PlaneGeometry(radius * .62, radius * .2);
+      bg.rotateX(.5); bg.translate(radius * .5, 0, 0); bg.rotateZ(b / 7 * Math.PI * 2);
+      parts.push(bg);
     }
+    var blades = new THREE.Mesh(mergeGeos(parts), new THREE.MeshBasicMaterial({ color: color, transparent: true, opacity: .32, side: THREE.DoubleSide, depthWrite: false }));
+    blades.position.z = .006;
     fan.add(blades);
+    /* drawn after the grille so the fans never drop out behind it */
+    fan.traverse(function(o){ o.renderOrder = 2; });
     if (!SMALL) fan.add(glowSprite(color, radius * 3.2, glowAmt));
     return { g: fan, blades: blades };
   }
@@ -1050,29 +1069,31 @@
     var body = new THREE.Mesh(plate(d, h, w, .12, .05), new THREE.MeshStandardMaterial(PLASTIC));
     body.rotation.y = Math.PI / 2;
     body.position.y = h / 2 + .12; g.add(body);
-    [[-1,-1],[1,-1],[1,1],[-1,1]].forEach(function(c){
-      var ft = new THREE.Mesh(new THREE.CylinderGeometry(.11, .13, .12, 12), new THREE.MeshStandardMaterial(ALU));
-      ft.position.set(c[0] * (w / 2 - .22), .06, c[1] * (d / 2 - .3)); g.add(ft);
-    });
+    g.add(new THREE.Mesh(mergeGeos([[-1,-1],[1,-1],[1,1],[-1,1]].map(function(c){
+      return new THREE.CylinderGeometry(.11, .13, .12, 12).translate(c[0] * (w / 2 - .22), .06, c[1] * (d / 2 - .3));
+    })), new THREE.MeshStandardMaterial(ALU)));
     var edge = new THREE.LineSegments(new THREE.EdgesGeometry(body.geometry, 40), new THREE.LineBasicMaterial({ color: 0x8c99a6, transparent: true, opacity: .18 }));
     edge.position.copy(body.position); edge.rotation.copy(body.rotation); g.add(edge);
     /* front: mesh grille with three intake fans glowing through it, a top I/O strip */
     var fz = d / 2 + .062, top = h + .12;
-    var grille = new THREE.Mesh(new THREE.PlaneGeometry(w - .3, h - .85), new THREE.MeshStandardMaterial({ map: MESH_TEX, roughness: .7, metalness: .4, transparent: true, opacity: .92 }));
-    grille.position.set(0, .12 + (h - .85) / 2 + .2, fz + .01); g.add(grille);
+    var grille = new THREE.Mesh(new THREE.PlaneGeometry(w - .3, h - .85), new THREE.MeshStandardMaterial({ map: MESH_TEX, roughness: .7, metalness: .4 }));
+    var gy = .12 + (h - .85) / 2 + .2;
+    grille.position.set(0, gy, fz + .01); g.add(grille);
+    /* three fans centred on the grille, evenly spaced, sitting just in front of it */
     [0, 1, 2].forEach(function(k){
-      var f = fanMesh(.48, k === 1 ? AMBER : CYAN, .28);
-      f.g.position.set(0, .12 + .55 + k * .82, fz - .02); g.add(f.g); fans.push(f.blades);
+      var f = fanMesh(.39, k === 1 ? AMBER : CYAN, .28);
+      f.g.position.set(0, gy + (1 - k) * .81, fz + .03); g.add(f.g); fans.push(f.blades);
     });
     var strip = new THREE.Mesh(new THREE.PlaneGeometry(w - .3, .035), new THREE.MeshBasicMaterial({ color: CYAN, transparent: true, opacity: .85 }));
     strip.position.set(0, top - .5, fz + .012); g.add(strip);
     var power = new THREE.Mesh(new THREE.RingGeometry(.07, .1, 24), new THREE.MeshBasicMaterial({ color: AMBER }));
     power.position.set(w / 2 - .32, top - .27, fz + .012); g.add(power);
-    var leds = [];
+    var leds = new THREE.InstancedMesh(new THREE.CircleGeometry(.035, 12), new THREE.MeshBasicMaterial(), 4), ld = new THREE.Object3D();
     for (var k = 0; k < 4; k++){
-      var led = new THREE.Mesh(new THREE.CircleGeometry(.035, 12), new THREE.MeshBasicMaterial({ color: CYAN }));
-      led.position.set(-w / 2 + .3 + k * .14, top - .27, fz + .012); g.add(led); leds.push(led);
+      ld.position.set(-w / 2 + .3 + k * .14, top - .27, fz + .012); ld.updateMatrix();
+      leds.setMatrixAt(k, ld.matrix); leds.setColorAt(k, CYAN);
     }
+    g.add(leds);
     /* tempered glass side facing the middle: board, GPU with its own glow, and a rear exhaust fan */
     var sx = side * (w / 2 + .07);
     var board = new THREE.Mesh(new THREE.PlaneGeometry(d - .5, h - .6), new THREE.MeshStandardMaterial({ color: 0x0f1a22, roughness: .6, metalness: .3 }));
@@ -1208,7 +1229,8 @@
         g: GLYPHS[(Math.random() * GLYPHS.length) | 0], amber: Math.random() < .4, size: 10 + Math.random() * 5 });
     }
   }
-  function onMove(cx, cy){
+  function onMove(cx, cy, mouse){
+    ptr.mouse = !!mouse; ptr.moveT = performance.now();
     var r = stage.getBoundingClientRect();
     var x = cx - r.left, y = cy - r.top;
     if (!ptr.has){ ptr.has = true; ptr.lastX = x; ptr.lastY = y; ptr.sx = x; ptr.sy = y; }
@@ -1220,13 +1242,14 @@
     var now = performance.now();
     if (hitValid && now - ptr.lastPulse > 110){ ptr.lastPulse = now; pulseNear(hit); }
   }
-  stage.addEventListener('pointermove', function(e){ onMove(e.clientX, e.clientY); });
+  stage.addEventListener('pointermove', function(e){ onMove(e.clientX, e.clientY, e.pointerType === 'mouse'); });
   stage.addEventListener('pointerdown', function(e){
-    onMove(e.clientX, e.clientY);
+    onMove(e.clientX, e.clientY, e.pointerType === 'mouse');
     if (!calmFx && heroFx > .02){ spawnBits(ptr.x, ptr.y, 10); if (hitValid) pulseNear(hit); }
+    if (overScreen) sendRipple();
   });
   /* touch scrolling cancels pointer events, so follow the finger directly while it scrolls */
-  stage.addEventListener('touchmove', function(e){ var t = e.touches[0]; if (t) onMove(t.clientX, t.clientY); }, { passive: true });
+  stage.addEventListener('touchmove', function(e){ var t = e.touches[0]; if (t) onMove(t.clientX, t.clientY, false); }, { passive: true });
   stage.addEventListener('pointerleave', function(e){ if (e.pointerType === 'mouse') ptr.has = false; });
   var lastScrollY = window.scrollY;
   window.addEventListener('scroll', function(){
@@ -1234,6 +1257,41 @@
     if (calmFx || !ptr.has || heroFx <= .02 || !dy) return;
     spawnBits(ptr.x, ptr.y, Math.min(3, 1 + Math.abs(dy) / 40 | 0), -clamp(dy, -60, 60) * 2.2);
   }, { passive: true });
+
+  /* the monitor screen reacts to the pointer: a light follows it, the section under it lifts, and it sends ripples */
+  var screenPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0), screenHit = new THREE.Vector3();
+  var overScreen = false, screenOn = 0, screenReady = 0, lastRipple = 0;
+  /* a flat glow lying on the screen; a camera-facing sprite would tilt into the bezel and get cut off */
+  var screenGlow = new THREE.Mesh(new THREE.PlaneGeometry(5, 5), new THREE.MeshBasicMaterial({ map: GLOW, color: CYAN, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending }));
+  screenGlow.visible = false; site.add(screenGlow);
+  var ripple = new THREE.Mesh(new THREE.RingGeometry(.92, 1, 48), new THREE.MeshBasicMaterial({ color: CYAN, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending }));
+  ripple.userData.t = 1; ripple.visible = false; site.add(ripple);
+  function sendRipple(){
+    lastRipple = performance.now();
+    ripple.position.set(screenHit.x, screenHit.y, .42);
+    ripple.userData.t = 0; ripple.visible = true;
+  }
+  function updateScreen(dt, now){
+    overScreen = false;
+    if (ptr.has && screenReady > 0 && raycaster.ray.intersectPlane(screenPlane, screenHit)){
+      screenHit.sub(site.position);
+      /* a finger has no hover, so the effect lingers for a moment after the touch moves */
+      overScreen = Math.abs(screenHit.x) < FW / 2 && screenHit.y > 0 && screenHit.y < FH && (ptr.mouse || now - ptr.moveT < 1600);
+    }
+    screenOn += ((overScreen ? 1 : 0) - screenOn) * Math.min(1, dt * 8);
+    if (overScreen){
+      screenGlow.position.set(screenHit.x, screenHit.y, .45);
+      if (!calmFx && now - lastRipple > 900 && now - ptr.moveT < 120) sendRipple();
+    }
+    screenGlow.visible = screenOn > .01;
+    screenGlow.material.opacity = .5 * screenOn * screenReady;
+    if (ripple.visible){
+      var rt = ripple.userData.t = Math.min(1, ripple.userData.t + dt * 1.3);
+      ripple.scale.setScalar(.2 + easeOut(rt) * 3.2);
+      ripple.material.opacity = .7 * (1 - rt) * screenReady;
+      ripple.visible = rt < 1;
+    }
+  }
 
   function drawFx(dt){
     fctx.setTransform(FDPR, 0, 0, FDPR, 0, 0);
@@ -1265,6 +1323,68 @@
     fctx.globalAlpha = 1;
   }
 
+  /* ---------------- Past the hero: a light ribbon that follows the mouse or finger down the whole page ---------------- */
+  var trailCv = document.getElementById('trailCanvas'), tctx = trailCv.getContext('2d');
+  var trail = [], TRAIL_LIFE = .7, trailPtr = { x: 0, y: 0, has: false }, trailDirty = false, trailTimer = 0;
+  function sizeTrail(){ trailCv.width = Math.round(innerWidth * FDPR); trailCv.height = Math.round(innerHeight * FDPR); trailDirty = true; }
+  sizeTrail();
+  window.addEventListener('resize', function(){ clearTimeout(trailTimer); trailTimer = setTimeout(sizeTrail, 150); });
+  function trailAdd(x, y){
+    var last = trail[trail.length - 1];
+    if (last && Math.abs(x - last.x) + Math.abs(y - last.y) < 4) return;
+    trail.push({ x: x, y: y, age: 0 });
+    if (trail.length > 40) trail.shift();
+  }
+  function trailMove(x, y){
+    trailPtr.x = x; trailPtr.y = y; trailPtr.has = true;
+    if (!calmFx && heroFx < .98) trailAdd(x, y);
+  }
+  window.addEventListener('pointermove', function(e){ if (e.pointerType === 'mouse') trailMove(e.clientX, e.clientY); }, { passive: true });
+  window.addEventListener('touchstart', function(e){ var t = e.touches[0]; if (t){ trail.length = 0; trailMove(t.clientX, t.clientY); } }, { passive: true });
+  window.addEventListener('touchmove', function(e){ var t = e.touches[0]; if (t) trailMove(t.clientX, t.clientY); }, { passive: true });
+  document.documentElement.addEventListener('mouseleave', function(){ trailPtr.has = false; });
+  var trailScrollY = window.scrollY;
+  window.addEventListener('scroll', function(){
+    var dy = window.scrollY - trailScrollY; trailScrollY = window.scrollY;
+    /* the ribbon rides along with the page, so scrolling pulls a streak out behind the pointer */
+    for (var i = 0; i < trail.length; i++) trail[i].y -= dy;
+    if (trailPtr.has && !calmFx && heroFx < .98) trailAdd(trailPtr.x, trailPtr.y);
+  }, { passive: true });
+
+  function drawTrail(dt){
+    while (trail.length && trail[0].age + dt > TRAIL_LIFE) trail.shift();
+    for (var i = 0; i < trail.length; i++) trail[i].age += dt;
+    if (!trail.length && !trailDirty) return;
+    tctx.setTransform(FDPR, 0, 0, FDPR, 0, 0);
+    tctx.clearRect(0, 0, innerWidth, innerHeight);
+    trailDirty = trail.length > 0;
+    /* fades in as the hero's code trail fades out, so one hands over to the other */
+    var on = 1 - heroFx, n = trail.length;
+    if (n < 3 || on <= .02) return;
+    tctx.globalCompositeOperation = 'lighter';
+    tctx.lineCap = 'round';
+    for (var pass = 0; pass < 2; pass++){
+      for (var j = 1; j < n - 1; j++){
+        var a = trail[j - 1], b = trail[j], c = trail[j + 1];
+        var k = j / (n - 1), life = 1 - b.age / TRAIL_LIFE, alpha = life * k * on;
+        /* amber at the tail, cyan at the head */
+        var r = Math.round(255 - 221 * k), g = Math.round(178 + 33 * k), bl = Math.round(36 + 202 * k);
+        tctx.strokeStyle = 'rgba(' + r + ',' + g + ',' + bl + ',' + (pass ? .95 * alpha : .22 * alpha).toFixed(3) + ')';
+        tctx.lineWidth = (pass ? 3.4 : 18) * (.3 + .7 * k) * life;
+        tctx.beginPath();
+        tctx.moveTo((a.x + b.x) / 2, (a.y + b.y) / 2);
+        tctx.quadraticCurveTo(b.x, b.y, (b.x + c.x) / 2, (b.y + c.y) / 2);
+        tctx.stroke();
+      }
+    }
+    var head = trail[n - 1], hl = (1 - head.age / TRAIL_LIFE) * on;
+    var hg = tctx.createRadialGradient(head.x, head.y, 0, head.x, head.y, 22);
+    hg.addColorStop(0, 'rgba(34,211,238,' + (.45 * hl).toFixed(3) + ')'); hg.addColorStop(1, 'rgba(34,211,238,0)');
+    tctx.fillStyle = hg;
+    tctx.fillRect(head.x - 22, head.y - 22, 44, 44);
+    tctx.globalCompositeOperation = 'source-over';
+  }
+
   /* ---------------- Build state per scroll position ---------------- */
   var lastIdle = 0, lastCablePulse = 0, kc = new THREE.Color();
   function updateWorld(p, now, dt){
@@ -1292,6 +1412,9 @@
     keyboard.caps.material.opacity = .97 * easeOut(t2);
     keyboard.glyphs.material.opacity = t2;
     keyboard.glow.material.opacity = (.035 + .09 * t6) * t2;
+    /* fully faded hardware still costs draw calls, so skip it until the foundation starts */
+    monitor.visible = pad.visible = padEdge.visible = keyboard.glow.visible = keyboard.caps.parent.visible = t2 > 0;
+    screenReady = t3;
     /* keys tap away while the site is framed, wired and finished */
     if (!calmFx && t3 > 0 && t6 < 1 && now - keyboard.lastKey > 70){
       keyboard.lastKey = now;
@@ -1314,10 +1437,11 @@
       t.strip.material.opacity = .4 + .5 * (calmFx ? 1 : .5 + .5 * Math.sin(now * .003 + i));
       var spin = (calmFx ? 0 : 2 + 10 * t4) * dt;
       t.fans.forEach(function(f){ f.rotation.z += spin; });
-      t.leds.forEach(function(l, k){
+      for (var k = 0; k < 4; k++){
         var on = t4 >= 1 || calmFx || Math.sin(now * .007 + i * 2 + k * 1.3) > 0;
-        l.material.color.copy(on ? CYAN : BG);
-      });
+        t.leds.setColorAt(k, on ? CYAN : BG);
+      }
+      t.leds.instanceColor.needsUpdate = true;
     });
 
     /* framing: sections fly in and snap into place */
@@ -1330,7 +1454,12 @@
       var e = easeOutBack(local), e2 = easeOut(local);
       b.g.position.lerpVectors(b.from, b.target, e);
       b.g.rotation.set(b.rot.x * (1 - e2), b.rot.y * (1 - e2), b.rot.z * (1 - e2));
-      b.edges.material.opacity = (.35 + .65 * e2) * (1 - t5 * .65);
+      /* the section under the pointer lifts off the screen and its outline lights up */
+      var under = screenOn > .01 && Math.abs(screenHit.x - b.target.x) < b.w / 2 && Math.abs(screenHit.y - b.target.y) < b.h / 2;
+      b.hov += ((under ? screenOn : 0) - b.hov) * Math.min(1, dt * 10);
+      b.g.position.z += .8 * b.hov * e2;
+      b.g.scale.setScalar(1 + .025 * b.hov * e2);
+      b.edges.material.opacity = Math.max((.35 + .65 * e2) * (1 - t5 * .65), b.hov * e2);
       /* finishes: real fills and content */
       b.fill.material.opacity = b.k === 'hero' ? .95 * t5 : .07 * t5;
       b.bars.forEach(function(bar){
@@ -1522,6 +1651,7 @@
     }
     cursorLight.intensity = 3 * traceUniforms.uPtr.value;
     cursorGlow.material.opacity = .35 * traceUniforms.uPtr.value;
+    updateScreen(dt, now);
 
     updateWorld(smoothP, now, dt);
     updatePulses(dt);
@@ -1543,6 +1673,7 @@
     if (Math.abs(p - smoothP) < .0003) smoothP = p;
     /* stop rendering entirely once the stage has scrolled away */
     if (stageVisible()) frame(p, now, dt, false);
+    drawTrail(dt);
     header.classList.toggle('in-content', p >= .999);
     requestAnimationFrame(tick);
   }
