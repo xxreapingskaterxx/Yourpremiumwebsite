@@ -697,6 +697,12 @@
     s.scale.set(size, size, 1);
     return s;
   }
+  /* a glow lying flat on the board: a standing sprite this close to the floor gets sliced in half by it */
+  function groundGlow(color, size, opacity){
+    var m = new THREE.Mesh(new THREE.PlaneGeometry(size, size), new THREE.MeshBasicMaterial({ map: GLOW, color: color, transparent: true, opacity: opacity, blending: THREE.AdditiveBlending, depthWrite: false }));
+    m.rotation.x = -Math.PI / 2;
+    return m;
+  }
   function textSprite(text, color, h){
     var c = document.createElement('canvas'), g = c.getContext('2d');
     var fs = 64;
@@ -1019,7 +1025,7 @@
     });
     var cg = new THREE.BufferGeometry(); cg.setAttribute('position', new THREE.Float32BufferAttribute(corners, 3));
     var cl = new THREE.LineSegments(cg, new THREE.LineBasicMaterial({ color: CYAN, transparent: true, opacity: .8 }));
-    marker.add(ring, ring2, cl, glowSprite(AMBER, 14, .18));
+    marker.add(ring, ring2, cl, groundGlow(AMBER, 14, .18));
     marker.rotation.x = 0;
     ring.rotation.x = ring2.rotation.x = -Math.PI / 2;
     marker.position.set(0, .05, 1);
@@ -1151,6 +1157,8 @@
   var pulsePool = [];
   function getSprite(color){
     var s = pulsePool.pop() || glowSprite(color, 1.1, 1);
+    /* pulses ride the floor, so the floor must not slice them into half-domes */
+    s.material.depthTest = false;
     s.material.color.copy(color); s.visible = true; scene.add(s);
     return s;
   }
@@ -1218,7 +1226,7 @@
   var hit = new THREE.Vector3(), hitValid = false;
   var cursorLight = new THREE.PointLight(0x22d3ee, 0, 22, 1.6);
   scene.add(cursorLight);
-  var cursorGlow = glowSprite(CYAN, 7, 0);
+  var cursorGlow = groundGlow(CYAN, 7, 0);
   scene.add(cursorGlow);
   var bits = [], MAX_BITS = SMALL ? 60 : 140;
   var GLYPHS = ['0','1','0','1','{','}','</>','/','*',';','#'];
@@ -1254,6 +1262,13 @@
   });
   /* touch scrolling cancels pointer events, so follow the finger directly while it scrolls */
   window.addEventListener('touchmove', function(e){ var t = e.touches[0]; if (t) onMove(t.clientX, t.clientY, false); }, { passive: true });
+  /* a new touch starts where the finger lands, not where the last one lifted */
+  window.addEventListener('touchstart', function(e){
+    var t = e.touches[0]; if (!t) return;
+    ptr.has = false;
+    onMove(t.clientX, t.clientY, false);
+    if (!calmFx) spawnBits(ptr.x, ptr.y, 4);
+  }, { passive: true });
   document.documentElement.addEventListener('mouseleave', function(){ ptr.has = false; });
   var lastScrollY = window.scrollY;
   window.addEventListener('scroll', function(){
@@ -1297,7 +1312,9 @@
     }
   }
 
+  var lastFont = '';
   function drawFx(dt){
+    lastFont = '';
     fctx.setTransform(FDPR, 0, 0, FDPR, 0, 0);
     fctx.clearRect(0, 0, fx.width, fx.height);
     /* the crosshair and x/z readout belong to the hero only; the code symbols keep going everywhere */
@@ -1311,7 +1328,7 @@
       fctx.moveTo(ptr.sx, ptr.sy - 14); fctx.lineTo(ptr.sx, ptr.sy - 5); fctx.moveTo(ptr.sx, ptr.sy + 5); fctx.lineTo(ptr.sx, ptr.sy + 14);
       fctx.stroke();
       if (hitValid){
-        fctx.fillStyle = 'rgba(255,178,36,.85)'; fctx.font = '10px "JetBrains Mono", monospace';
+        fctx.fillStyle = 'rgba(255,178,36,.85)'; fctx.font = '10px "JetBrains Mono", monospace'; lastFont = fctx.font;
         fctx.fillText('x ' + hit.x.toFixed(1) + '  z ' + hit.z.toFixed(1), ptr.sx + 12, ptr.sy + 22);
       }
     }
@@ -1322,7 +1339,8 @@
       b.x += b.vx * dt; b.y += b.vy * dt; b.vy *= .985;
       fctx.globalAlpha = b.life * b.life;
       fctx.fillStyle = b.amber ? '#ffb224' : '#22d3ee';
-      fctx.font = Math.round(b.size) + 'px "JetBrains Mono", monospace';
+      var font = Math.round(b.size) + 'px "JetBrains Mono", monospace';
+      if (font !== lastFont){ fctx.font = font; lastFont = font; }
       fctx.fillText(b.g, b.x, b.y);
     }
     fctx.globalAlpha = 1;
@@ -1590,7 +1608,7 @@
     if (hitValid){
       traceUniforms.uP.value.copy(hit);
       cursorLight.position.set(hit.x, 3, hit.z);
-      cursorGlow.position.set(hit.x, .3, hit.z);
+      cursorGlow.position.set(hit.x, .04, hit.z);
     }
     cursorLight.intensity = 3 * traceUniforms.uPtr.value;
     cursorGlow.material.opacity = .35 * traceUniforms.uPtr.value;
