@@ -1298,10 +1298,11 @@
   function drawFx(dt){
     fctx.setTransform(FDPR, 0, 0, FDPR, 0, 0);
     fctx.clearRect(0, 0, fx.width, fx.height);
-    if (ptr.has){
+    /* the crosshair and x/z readout belong to the hero only; the code symbols keep going everywhere */
+    if (ptr.has && heroFx > .02){
       var k = calmFx ? 1 : Math.min(1, dt * 16);
       ptr.sx += (ptr.x - ptr.sx) * k; ptr.sy += (ptr.y - ptr.sy) * k;
-      fctx.globalAlpha = 1;
+      fctx.globalAlpha = heroFx;
       fctx.strokeStyle = 'rgba(34,211,238,.75)'; fctx.lineWidth = 1;
       fctx.beginPath();
       fctx.moveTo(ptr.sx - 14, ptr.sy); fctx.lineTo(ptr.sx - 5, ptr.sy); fctx.moveTo(ptr.sx + 5, ptr.sy); fctx.lineTo(ptr.sx + 14, ptr.sy);
