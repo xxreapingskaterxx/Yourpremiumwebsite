@@ -669,7 +669,7 @@
 
   /* ---------------- Renderer, scene, camera ---------------- */
   var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: !SMALL, powerPreference: 'high-performance' });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.75));
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, SMALL ? 1.5 : 1.75));
   renderer.outputEncoding = THREE.sRGBEncoding;
   renderer.setClearColor(BG, 1);
 
@@ -683,6 +683,17 @@
   key.position.set(-20, 30, 18);
   scene.add(key);
   var FX = DWBFX.create(renderer, scene, camera, { small: SMALL, background: BG });
+  /* iPhones can drop the WebGL context under memory pressure, which freezes the film and the finger light where they are.
+     Ask for it back, rebuild the targets when it returns, and reload once if it never does */
+  var glLostTimer = 0;
+  canvas.addEventListener('webglcontextlost', function(e){
+    e.preventDefault(); window.__glLost = (window.__glLost || 0) + 1;
+    glLostTimer = setTimeout(function(){
+      try { if (sessionStorage.getItem('dwbGlReload')) return; sessionStorage.setItem('dwbGlReload', '1'); } catch (err) { return; }
+      location.reload();
+    }, 3000);
+  });
+  canvas.addEventListener('webglcontextrestored', function(){ clearTimeout(glLostTimer); sizedW = 0; resize(); });
 
   /* soft radial sprite used for every glow, pulse and mote */
   /* a soft falloff that fades all the way to nothing: the old linear gradient ended in a visible rim on phones */
@@ -1228,12 +1239,10 @@
   var bits = [], MAX_BITS = SMALL ? 60 : 140;
   var GLYPHS = ['0','1','0','1','{','}','</>','/','*',';','#'];
   var heroFx = 1;
-  /* 1 while the film fills the screen, fading to 0 as it scrolls away: the cursor effect lives for the whole film */
-  var filmFx = 1;
 
   function spawnBits(x, y, n, vy){
-    /* the code-symbol trail runs for the whole film, not the sections after it */
-    if (filmFx <= .5) return;
+    /* the code symbols belong to the hero only; past it the finger trail is the light on the board */
+    if (heroFx <= .5) return;
     for (var i = 0; i < n && bits.length < MAX_BITS; i++){
       bits.push({ x: x + (Math.random() - .5) * 14, y: y + (Math.random() - .5) * 14,
         vx: (Math.random() - .5) * 30, vy: (vy || -18) + (Math.random() - .5) * 20, life: 1,
@@ -1323,11 +1332,11 @@
     lastFont = '';
     fctx.setTransform(FDPR, 0, 0, FDPR, 0, 0);
     fctx.clearRect(0, 0, fx.width, fx.height);
-    /* the crosshair and x/z readout run for the whole film, not the sections after it */
-    if (ptr.has && filmFx > .02){
+    /* the crosshair and x/z readout belong to the hero only */
+    if (ptr.has && heroFx > .02){
       var k = calmFx ? 1 : Math.min(1, dt * 16);
       ptr.sx += (ptr.x - ptr.sx) * k; ptr.sy += (ptr.y - ptr.sy) * k;
-      fctx.globalAlpha = filmFx;
+      fctx.globalAlpha = heroFx;
       fctx.strokeStyle = 'rgba(34,211,238,.75)'; fctx.lineWidth = 1;
       fctx.beginPath();
       fctx.moveTo(ptr.sx - 14, ptr.sy); fctx.lineTo(ptr.sx - 5, ptr.sy); fctx.moveTo(ptr.sx + 5, ptr.sy); fctx.lineTo(ptr.sx + 14, ptr.sy);
@@ -1503,7 +1512,7 @@
   }
   /* keep the frame rate up by trading sharpness: if the device can't keep up, the film steps its resolution
      down (never below one pixel per CSS pixel) so the finger trail stays smooth; the look is otherwise unchanged */
-  var MAX_PR = Math.min(window.devicePixelRatio || 1, 1.75), MIN_PR = Math.min(MAX_PR, 1), pr = MAX_PR;
+  var MAX_PR = Math.min(window.devicePixelRatio || 1, SMALL ? 1.5 : 1.75), MIN_PR = Math.min(MAX_PR, 1), pr = MAX_PR;
   var frameAvg = 1 / 60, lastQ = performance.now() + 1500;
   function adaptQuality(dt, now){
     frameAvg += (dt - frameAvg) * .06;
@@ -1644,8 +1653,12 @@
   /* one bad frame must never stop the loop, or the film and the finger trail freeze where they are */
   function tick(now){
     requestAnimationFrame(tick);
-    try { step(now); } catch (err) { console.error(err); }
+    try { step(now); } catch (err) { console.error(err); window.__lastErr = String(err && err.message || err); }
+    if (dbg){ dbgN++; if (now - dbgT > 1000){ dbg.textContent = 'fps ' + dbgN + '  res ' + pr.toFixed(2) + '  gl lost ' + (window.__glLost || 0) + (window.__lastErr ? '  err ' + window.__lastErr : ''); dbgN = 0; dbgT = now; } }
   }
+  /* ?debug puts a small readout in the corner, so a freeze on a real phone can be told apart from a dropped context */
+  var dbg = /[?&]debug/.test(location.search) ? document.body.appendChild(document.createElement('div')) : null, dbgN = 0, dbgT = 0;
+  if (dbg) dbg.style.cssText = 'position:fixed;left:8px;bottom:8px;z-index:99;font:11px monospace;color:#22d3ee;background:rgba(0,0,0,.7);padding:4px 6px;border-radius:4px;pointer-events:none';
   function step(now){
     var dt = Math.min(.05, (now - lastTime) / 1000);
     lastTime = now;
@@ -1653,7 +1666,6 @@
     smoothP += (p - smoothP) * (reduceMotion ? 1 : Math.min(1, dt * 9));
     if (Math.abs(p - smoothP) < .0003) smoothP = p;
     /* stop rendering entirely once the stage has scrolled away */
-    filmFx = clamp(filmScroll.getBoundingClientRect().bottom / window.innerHeight * 2 - 1, 0, 1);
     if (stageVisible()){ frame(p, now, dt, false); adaptQuality(dt, now); }
     /* the cursor effect keeps going after the film has scrolled away */
     if (!stageVisible()) hitValid = false;

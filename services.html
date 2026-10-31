@@ -786,6 +786,17 @@
   key.position.set(-20, 30, 18);
   scene.add(key);
   var FX = DWBFX.create(renderer, scene, camera, { small: SMALL, background: BG });
+  /* iPhones can drop the WebGL context under memory pressure, which freezes the film and the finger light where they are.
+     Ask for it back, rebuild the targets when it returns, and reload once if it never does */
+  var glLostTimer = 0;
+  canvas.addEventListener('webglcontextlost', function(e){
+    e.preventDefault(); window.__glLost = (window.__glLost || 0) + 1;
+    glLostTimer = setTimeout(function(){
+      try { if (sessionStorage.getItem('dwbGlReload')) return; sessionStorage.setItem('dwbGlReload', '1'); } catch (err) { return; }
+      location.reload();
+    }, 3000);
+  });
+  canvas.addEventListener('webglcontextrestored', function(){ clearTimeout(glLostTimer); sizedW = 0; resize(); });
 
   /* soft radial sprite used for every glow, pulse and mote */
   /* a soft falloff that fades all the way to nothing: the old linear gradient ended in a visible rim on phones */
@@ -1164,6 +1175,8 @@
   var heroFx = 1;
 
   function spawnBits(x, y, n, vy){
+    /* the code symbols belong to the hero only */
+    if (heroFx <= .5) return;
     for (var i = 0; i < n && bits.length < MAX_BITS; i++){
       bits.push({ x: x + (Math.random() - .5) * 14, y: y + (Math.random() - .5) * 14,
         vx: (Math.random() - .5) * 30, vy: (vy || -18) + (Math.random() - .5) * 20, life: 1,

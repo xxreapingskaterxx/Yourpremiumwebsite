@@ -42,13 +42,13 @@
 
     scene.environment = buildEnv(renderer);
 
-    /* phones get the same antialiasing and mirror floor as desktop: on their tile-based GPUs MSAA is nearly free,
-       and without the reflections the board under the build looks flat. */
+    /* phones keep the mirror floor and antialiasing: without the reflections the board under the build looks flat */
     var msaa = gl2 && (renderer.extensions.has('EXT_color_buffer_float') || renderer.extensions.has('EXT_color_buffer_half_float'));
     function rt(samples){
       return new THREE.WebGLRenderTarget(1, 1, { type: TYPE, samples: msaa ? samples : 0, depthBuffer: true });
     }
-    var main = rt(4);
+    /* phones get 2x MSAA: 4x half-float buffers at phone resolution can push iOS Safari into dropping the context */
+    var main = rt(opts.small ? 2 : 4);
     var mirror = rt(0);
     var lv = [rt(0), rt(0), rt(0), rt(0), rt(0), rt(0)]; /* three bloom levels, ping-pong pairs */
     lv.forEach(function(r){ r.depthBuffer = false; });
