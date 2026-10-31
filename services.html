@@ -109,7 +109,7 @@
   .nav-cta::after{
     content:'';position:absolute;top:0;bottom:0;left:-60%;width:45%;z-index:-1;pointer-events:none;
     background:linear-gradient(105deg,transparent,rgba(255,255,255,.65),transparent);
-    transform:skewX(-20deg);animation:ctaShine 4.5s ease-in-out infinite;
+    transform:skewX(-20deg);animation:ctaShine 4.5s ease-in-out infinite;will-change:transform;
   }
   .nav-cta:hover::before{ opacity:1; }
   .nav-cta:hover{ animation-duration:2s,1.6s; }
@@ -118,7 +118,8 @@
     0%,100%{ box-shadow:0 0 10px rgba(34,211,238,.35),0 0 0 rgba(255,178,36,0); }
     50%{ box-shadow:0 0 18px rgba(34,211,238,.25),0 0 22px rgba(255,178,36,.45); }
   }
-  @keyframes ctaShine{ 0%,55%{ left:-60%; } 85%,100%{ left:130%; } }
+  @keyframes ctaShine{ 0%,55%{ transform:translateX(0) skewX(-20deg); } 85%,100%{ transform:translateX(422%) skewX(-20deg); } }
+  @keyframes sealShine{ 0%,55%{ transform:translateX(0) skewX(-20deg); } 85%,100%{ transform:translateX(382%) skewX(-20deg); } }
   /* Brand seal: same glow, shine and cursor light as the Start a project button */
   .logo-mark{
     position:relative;display:block;width:40px;height:40px;flex:none;border-radius:50%;overflow:hidden;isolation:isolate;
@@ -131,11 +132,16 @@
   .logo-mark::after{
     content:'';position:absolute;top:-10%;bottom:-10%;left:-80%;width:55%;z-index:1;pointer-events:none;
     background:linear-gradient(105deg,transparent,rgba(255,255,255,.55),transparent);
-    transform:skewX(-20deg);animation:ctaShine 4.5s ease-in-out infinite;
+    transform:skewX(-20deg);animation:sealShine 4.5s ease-in-out infinite;will-change:transform;
   }
   .logo:hover .logo-mark::before{ opacity:1; }
   .logo:hover .logo-mark{ animation-duration:1.6s; }
   .logo:hover .logo-mark::after{ animation-duration:2s; }
+  /* touch screens: a steady glow instead of repainting the shadow and gradient every frame */
+  @media (hover:none), (pointer:coarse){
+    .nav-cta{ animation:none;box-shadow:0 0 14px rgba(34,211,238,.3),0 0 16px rgba(255,178,36,.25); }
+    .logo-mark{ animation:none;box-shadow:0 0 12px rgba(34,211,238,.35),0 0 14px rgba(255,178,36,.25); }
+  }
   /* Hover lift only where a real pointer hovers; touch fires false hovers on tap */
   @media (hover:hover) and (pointer:fine){
     .nav-cta:hover{ filter:brightness(1.08); transform:translateY(-1px); }

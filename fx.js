@@ -56,10 +56,12 @@
     function pass(mat, target){ quad.material = mat; renderer.setRenderTarget(target); renderer.render(quadScene, quadCam); }
 
     var bright = passMat([
-      'uniform sampler2D tDiffuse; uniform float uTh; varying vec2 vUv;',
-      'void main(){ vec3 c = texture2D(tDiffuse, vUv).rgb; float l = max(c.r, max(c.g, c.b));',
-      '  gl_FragColor = vec4(c * smoothstep(uTh, uTh + .35, l), 1.); }'
-    ].join('\n'), { tDiffuse: { value: null }, uTh: { value: opts.threshold || .55 } });
+      'uniform sampler2D tDiffuse; uniform float uTh; uniform vec2 uTexel; varying vec2 vUv;',
+      /* average a 2x2 block of source pixels so one-pixel sparkles cannot pop the glow on and off */
+      'vec3 tap(vec2 o){ vec3 c = texture2D(tDiffuse, vUv + o * uTexel).rgb; float l = max(c.r, max(c.g, c.b)); return c * smoothstep(uTh, uTh + .35, l) / (1. + l * .25); }',
+      'void main(){ vec3 c = tap(vec2(-.5, -.5)) + tap(vec2(.5, -.5)) + tap(vec2(-.5, .5)) + tap(vec2(.5, .5));',
+      '  gl_FragColor = vec4(c * .25 * 1.2, 1.); }'
+    ].join('\n'), { tDiffuse: { value: null }, uTh: { value: opts.threshold || .55 }, uTexel: { value: new THREE.Vector2(1, 1) } });
 
     var blur = passMat([
       'uniform sampler2D tDiffuse; uniform vec2 uDir; varying vec2 vUv;',
@@ -126,6 +128,7 @@
       renderer.getDrawingBufferSize(size);
       var w = Math.max(1, size.x), h = Math.max(1, size.y);
       main.setSize(w, h);
+      bright.uniforms.uTexel.value.set(1 / w, 1 / h);
       if (mirror){ mirror.setSize(Math.ceil(w / 2), Math.ceil(h / 2)); floorMat.uniforms.uTexel.value.set(2 / w, 2 / h); }
       for (var i = 0; i < 3; i++){
         var d = Math.pow(2, i + 1);
