@@ -286,8 +286,8 @@
     opacity:.05;
     background:repeating-linear-gradient(0deg, #fff 0 1px, transparent 1px 3px);
   }
-  #fxCanvas{ pointer-events:none; z-index:2; }
-  #trailCanvas{ position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:50; }
+  /* fixed to the viewport so the hero's cursor effect carries on down the whole page */
+  #fxCanvas{ position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:50; }
   #bottomFade{
     position:absolute;inset:0;
     background:var(--black);
@@ -565,12 +565,11 @@
   </nav>
 </div>
 
-<canvas id="trailCanvas" aria-hidden="true"></canvas>
+<canvas id="fxCanvas" aria-hidden="true"></canvas>
 <div class="film-scroll" id="filmScroll">
   <div class="film-stage" id="stage" role="img" aria-label="A camera flies through a 3D circuit city as a website is built from blueprint to live launch while you scroll">
     <canvas id="filmCanvas" aria-hidden="true"></canvas>
     <div id="grainVignette"></div>
-    <canvas id="fxCanvas" aria-hidden="true"></canvas>
     <div class="term" id="term" aria-hidden="true">
       <div class="term-head"><i></i><i></i><i></i><span>dwb — build</span></div>
       <div class="term-body" id="termBody"></div>
@@ -668,7 +667,8 @@
 
   /* ---------------- Renderer, scene, camera ---------------- */
   var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: !SMALL, powerPreference: 'high-performance' });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, SMALL ? 1.5 : 1.75));
+  /* phones: the monitor, keyboard and towers make this film heavier than the other pages, so it renders a little softer to keep the same speed */
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, SMALL ? 1.25 : 1.75));
   renderer.outputEncoding = THREE.sRGBEncoding;
   renderer.setClearColor(BG, 1);
 
@@ -1106,6 +1106,8 @@
     rear.g.rotation.y = side * Math.PI / 2; rear.g.position.set(sx, h * .78, -d / 2 + .65); g.add(rear.g); fans.push(rear.blades);
     var glass = new THREE.Mesh(new THREE.PlaneGeometry(d - .2, h - .2), new THREE.MeshStandardMaterial({ color: 0x88b8cc, roughness: .05, metalness: .9, envMapIntensity: 1.6, transparent: true, opacity: .14, side: THREE.DoubleSide, depthWrite: false }));
     glass.rotation.y = side * Math.PI / 2; glass.position.set(side * (w / 2 + .085), h / 2 + .12, 0); g.add(glass);
+    /* phones barely see the side window, so they skip what's behind it */
+    if (SMALL) board.visible = gpu.visible = gpuLine.visible = glass.visible = rear.g.visible = edge.visible = false;
     var lbl = textSprite(t[0], '#ffb224', .38); lbl.position.set(0, h + .75, 0); g.add(lbl);
     g.position.set(t[1], 0, 7.4);
     g.scale.set(1, .001, 1);
@@ -1232,29 +1234,29 @@
   function onMove(cx, cy, mouse){
     ptr.mouse = !!mouse; ptr.moveT = performance.now();
     var r = stage.getBoundingClientRect();
-    var x = cx - r.left, y = cy - r.top;
+    var x = cx, y = cy;
     if (!ptr.has){ ptr.has = true; ptr.lastX = x; ptr.lastY = y; ptr.sx = x; ptr.sy = y; }
     ptr.x = x; ptr.y = y;
-    ptr.nx = (x / r.width) * 2 - 1; ptr.ny = -(y / r.height) * 2 + 1;
-    if (calmFx || heroFx <= .02) return;
+    ptr.nx = ((x - r.left) / r.width) * 2 - 1; ptr.ny = -((y - r.top) / r.height) * 2 + 1;
+    if (calmFx) return;
     var dist = Math.hypot(x - ptr.lastX, y - ptr.lastY);
     if (dist > 12){ spawnBits(x, y, Math.min(3, Math.floor(dist / 12))); ptr.lastX = x; ptr.lastY = y; }
     var now = performance.now();
     if (hitValid && now - ptr.lastPulse > 110){ ptr.lastPulse = now; pulseNear(hit); }
   }
-  stage.addEventListener('pointermove', function(e){ onMove(e.clientX, e.clientY, e.pointerType === 'mouse'); });
-  stage.addEventListener('pointerdown', function(e){
+  window.addEventListener('pointermove', function(e){ onMove(e.clientX, e.clientY, e.pointerType === 'mouse'); }, { passive: true });
+  window.addEventListener('pointerdown', function(e){
     onMove(e.clientX, e.clientY, e.pointerType === 'mouse');
-    if (!calmFx && heroFx > .02){ spawnBits(ptr.x, ptr.y, 10); if (hitValid) pulseNear(hit); }
+    if (!calmFx){ spawnBits(ptr.x, ptr.y, 10); if (hitValid) pulseNear(hit); }
     if (overScreen) sendRipple();
   });
   /* touch scrolling cancels pointer events, so follow the finger directly while it scrolls */
-  stage.addEventListener('touchmove', function(e){ var t = e.touches[0]; if (t) onMove(t.clientX, t.clientY, false); }, { passive: true });
-  stage.addEventListener('pointerleave', function(e){ if (e.pointerType === 'mouse') ptr.has = false; });
+  window.addEventListener('touchmove', function(e){ var t = e.touches[0]; if (t) onMove(t.clientX, t.clientY, false); }, { passive: true });
+  document.documentElement.addEventListener('mouseleave', function(){ ptr.has = false; });
   var lastScrollY = window.scrollY;
   window.addEventListener('scroll', function(){
     var dy = window.scrollY - lastScrollY; lastScrollY = window.scrollY;
-    if (calmFx || !ptr.has || heroFx <= .02 || !dy) return;
+    if (calmFx || !ptr.has || !dy) return;
     spawnBits(ptr.x, ptr.y, Math.min(3, 1 + Math.abs(dy) / 40 | 0), -clamp(dy, -60, 60) * 2.2);
   }, { passive: true });
 
@@ -1296,10 +1298,10 @@
   function drawFx(dt){
     fctx.setTransform(FDPR, 0, 0, FDPR, 0, 0);
     fctx.clearRect(0, 0, fx.width, fx.height);
-    if (ptr.has && heroFx > .02){
+    if (ptr.has){
       var k = calmFx ? 1 : Math.min(1, dt * 16);
       ptr.sx += (ptr.x - ptr.sx) * k; ptr.sy += (ptr.y - ptr.sy) * k;
-      fctx.globalAlpha = heroFx;
+      fctx.globalAlpha = 1;
       fctx.strokeStyle = 'rgba(34,211,238,.75)'; fctx.lineWidth = 1;
       fctx.beginPath();
       fctx.moveTo(ptr.sx - 14, ptr.sy); fctx.lineTo(ptr.sx - 5, ptr.sy); fctx.moveTo(ptr.sx + 5, ptr.sy); fctx.lineTo(ptr.sx + 14, ptr.sy);
@@ -1321,68 +1323,6 @@
       fctx.fillText(b.g, b.x, b.y);
     }
     fctx.globalAlpha = 1;
-  }
-
-  /* ---------------- Past the hero: a light ribbon that follows the mouse or finger down the whole page ---------------- */
-  var trailCv = document.getElementById('trailCanvas'), tctx = trailCv.getContext('2d');
-  var trail = [], TRAIL_LIFE = .7, trailPtr = { x: 0, y: 0, has: false }, trailDirty = false, trailTimer = 0;
-  function sizeTrail(){ trailCv.width = Math.round(innerWidth * FDPR); trailCv.height = Math.round(innerHeight * FDPR); trailDirty = true; }
-  sizeTrail();
-  window.addEventListener('resize', function(){ clearTimeout(trailTimer); trailTimer = setTimeout(sizeTrail, 150); });
-  function trailAdd(x, y){
-    var last = trail[trail.length - 1];
-    if (last && Math.abs(x - last.x) + Math.abs(y - last.y) < 4) return;
-    trail.push({ x: x, y: y, age: 0 });
-    if (trail.length > 40) trail.shift();
-  }
-  function trailMove(x, y){
-    trailPtr.x = x; trailPtr.y = y; trailPtr.has = true;
-    if (!calmFx && heroFx < .98) trailAdd(x, y);
-  }
-  window.addEventListener('pointermove', function(e){ if (e.pointerType === 'mouse') trailMove(e.clientX, e.clientY); }, { passive: true });
-  window.addEventListener('touchstart', function(e){ var t = e.touches[0]; if (t){ trail.length = 0; trailMove(t.clientX, t.clientY); } }, { passive: true });
-  window.addEventListener('touchmove', function(e){ var t = e.touches[0]; if (t) trailMove(t.clientX, t.clientY); }, { passive: true });
-  document.documentElement.addEventListener('mouseleave', function(){ trailPtr.has = false; });
-  var trailScrollY = window.scrollY;
-  window.addEventListener('scroll', function(){
-    var dy = window.scrollY - trailScrollY; trailScrollY = window.scrollY;
-    /* the ribbon rides along with the page, so scrolling pulls a streak out behind the pointer */
-    for (var i = 0; i < trail.length; i++) trail[i].y -= dy;
-    if (trailPtr.has && !calmFx && heroFx < .98) trailAdd(trailPtr.x, trailPtr.y);
-  }, { passive: true });
-
-  function drawTrail(dt){
-    while (trail.length && trail[0].age + dt > TRAIL_LIFE) trail.shift();
-    for (var i = 0; i < trail.length; i++) trail[i].age += dt;
-    if (!trail.length && !trailDirty) return;
-    tctx.setTransform(FDPR, 0, 0, FDPR, 0, 0);
-    tctx.clearRect(0, 0, innerWidth, innerHeight);
-    trailDirty = trail.length > 0;
-    /* fades in as the hero's code trail fades out, so one hands over to the other */
-    var on = 1 - heroFx, n = trail.length;
-    if (n < 3 || on <= .02) return;
-    tctx.globalCompositeOperation = 'lighter';
-    tctx.lineCap = 'round';
-    for (var pass = 0; pass < 2; pass++){
-      for (var j = 1; j < n - 1; j++){
-        var a = trail[j - 1], b = trail[j], c = trail[j + 1];
-        var k = j / (n - 1), life = 1 - b.age / TRAIL_LIFE, alpha = life * k * on;
-        /* amber at the tail, cyan at the head */
-        var r = Math.round(255 - 221 * k), g = Math.round(178 + 33 * k), bl = Math.round(36 + 202 * k);
-        tctx.strokeStyle = 'rgba(' + r + ',' + g + ',' + bl + ',' + (pass ? .95 * alpha : .22 * alpha).toFixed(3) + ')';
-        tctx.lineWidth = (pass ? 3.4 : 18) * (.3 + .7 * k) * life;
-        tctx.beginPath();
-        tctx.moveTo((a.x + b.x) / 2, (a.y + b.y) / 2);
-        tctx.quadraticCurveTo(b.x, b.y, (b.x + c.x) / 2, (b.y + c.y) / 2);
-        tctx.stroke();
-      }
-    }
-    var head = trail[n - 1], hl = (1 - head.age / TRAIL_LIFE) * on;
-    var hg = tctx.createRadialGradient(head.x, head.y, 0, head.x, head.y, 22);
-    hg.addColorStop(0, 'rgba(34,211,238,' + (.45 * hl).toFixed(3) + ')'); hg.addColorStop(1, 'rgba(34,211,238,0)');
-    tctx.fillStyle = hg;
-    tctx.fillRect(head.x - 22, head.y - 22, 44, 44);
-    tctx.globalCompositeOperation = 'source-over';
   }
 
   /* ---------------- Build state per scroll position ---------------- */
@@ -1532,7 +1472,7 @@
     camera.aspect = w / h;
     camera.fov = w < h ? 52 : 42;
     camera.updateProjectionMatrix();
-    fx.width = Math.round(w * FDPR); fx.height = Math.round(h * FDPR);
+    fx.width = Math.round(innerWidth * FDPR); fx.height = Math.round(innerHeight * FDPR);
   }
   /* debounced: iOS fires resize constantly while its toolbars move */
   window.addEventListener('resize', function(){ clearTimeout(resizeTimer); resizeTimer = setTimeout(resize, 150); });
@@ -1642,7 +1582,7 @@
       raycaster.setFromCamera(ndc, camera);
       hitValid = !!raycaster.ray.intersectPlane(groundPlane, hit);
     }
-    var fxOn = hitValid ? Math.max(heroFx, .35) : 0;
+    var fxOn = hitValid ? 1 : 0;
     traceUniforms.uPtr.value += (fxOn - traceUniforms.uPtr.value) * Math.min(1, dt * 8);
     if (hitValid){
       traceUniforms.uP.value.copy(hit);
@@ -1656,7 +1596,6 @@
     updateWorld(smoothP, now, dt);
     updatePulses(dt);
     FX.render(ground, camLook);
-    drawFx(dt);
     updateBeats(p);
     updateReadout(p);
     updateTerm(smoothP);
@@ -1673,7 +1612,9 @@
     if (Math.abs(p - smoothP) < .0003) smoothP = p;
     /* stop rendering entirely once the stage has scrolled away */
     if (stageVisible()) frame(p, now, dt, false);
-    drawTrail(dt);
+    /* the cursor effect keeps going after the film has scrolled away */
+    if (!stageVisible()) hitValid = false;
+    drawFx(dt);
     header.classList.toggle('in-content', p >= .999);
     requestAnimationFrame(tick);
   }
