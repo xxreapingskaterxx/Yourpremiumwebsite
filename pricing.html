@@ -207,6 +207,16 @@
   .form-send:active{ transform:scale(.97); }
   @media (hover:hover) and (pointer:fine){ .form-send:hover{ background:#ffc457; } }
   @media (max-width:760px){ .custom-form{ grid-template-columns:1fr; } .custom-form .field.span2{ grid-column:auto; } }
+  /* one tab per package above its own request form */
+  .pkg-tabs{ display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:26px; }
+  .pkg-tabs button{ display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding:16px 18px;border-radius:14px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.02);color:var(--ink);font:inherit;text-align:left;cursor:pointer;transition:border-color var(--dur-ui) ease,background var(--dur-ui) ease; }
+  .pkg-tabs button .mono{ font-size:12px;letter-spacing:.12em;color:var(--ink-dim); }
+  .pkg-tabs button b{ font-family:'Geist',system-ui,sans-serif;font-size:20px;font-weight:600; }
+  .pkg-tabs button[aria-selected="true"]{ border-color:var(--amber);background:rgba(255,178,36,.06); }
+  .pkg-tabs button[aria-selected="true"] .mono{ color:var(--amber); }
+  @media (hover:hover) and (pointer:fine){ .pkg-tabs button[aria-selected="false"]:hover{ border-color:var(--cyan); } }
+  .pkg-note{ color:var(--ink-dim);font-size:15px;max-width:62ch;margin-bottom:22px; }
+  @media (max-width:560px){ .pkg-tabs{ gap:8px; } .pkg-tabs button{ padding:12px; } .pkg-tabs button b{ font-size:15px; } }
 
   /* ---------- Build stage ---------- */
   .film-scroll{
@@ -578,7 +588,7 @@
           <li>Mobile-friendly</li>
           <li>About 1 week turnaround</li>
         </ul>
-        <a class="price-btn" href="contact.html">Get started</a>
+        <a class="price-btn" href="#custom" data-open-pkg="basic">Tell us what to build</a>
       </div>
       <div class="price-card featured spot reveal" style="--i:1">
         <div class="price-tier mono">ADVANCED</div>
@@ -589,7 +599,7 @@
           <li>Animations &amp; scroll effects</li>
           <li>2–3 weeks turnaround</li>
         </ul>
-        <a class="price-btn" href="contact.html">Get started</a>
+        <a class="price-btn" href="#custom" data-open-pkg="advanced">Tell us what to build</a>
       </div>
       <div class="price-card spot reveal" style="--i:2">
         <div class="price-tier mono">CUSTOM</div>
@@ -600,7 +610,7 @@
           <li>Stores, web apps &amp; dashboards</li>
           <li>Quoted to your project</li>
         </ul>
-        <a class="price-btn" href="#custom">Request a custom build</a>
+        <a class="price-btn" href="#custom" data-open-pkg="custom">Tell us what to build</a>
       </div>
     </div>
   </section>
@@ -608,129 +618,289 @@
   <section id="custom">
     <div class="custom-wrap">
       <div class="section-head reveal">
-        <div class="eyebrow mono">// CUSTOM BUILD</div>
+        <div class="eyebrow mono">// START YOUR BUILD</div>
         <h2>Tell us what to build.</h2>
-        <p>Custom builds start at $5,000. Describe what you want and it goes straight to our inbox. We'll reply with a plan and a quote within one business day.</p>
+        <p>Pick your package. Each one has its own short form, and every request goes straight to our inbox. We reply within one business day.</p>
       </div>
-      <form class="custom-form reveal" id="customForm" novalidate>
-        <div class="field">
-          <label for="cfName">Your name</label>
-          <input id="cfName" name="name" type="text" autocomplete="name" required>
-          <p class="field-err" id="cfNameErr"></p>
-        </div>
-        <div class="field">
-          <label for="cfEmail">Email</label>
-          <input id="cfEmail" name="email" type="email" autocomplete="email" required>
-          <p class="field-err" id="cfEmailErr"></p>
-        </div>
-        <div class="field">
-          <label for="cfPhone">Phone <span class="opt-tag">optional</span></label>
-          <input id="cfPhone" name="phone" type="tel" autocomplete="tel" inputmode="tel">
-          <p class="field-hint">If you'd rather we call or text you back.</p>
-          <p class="field-err" id="cfPhoneErr"></p>
-        </div>
-        <div class="field span2">
-          <label for="cfBiz">Business or project name <span class="opt-tag">optional</span></label>
-          <input id="cfBiz" name="business" type="text" autocomplete="organization">
-        </div>
-        <div class="field">
-          <label for="cfType">What do you need?</label>
-          <select id="cfType" name="type">
-            <option>A custom website</option>
-            <option>An online store</option>
-            <option>A web app or dashboard</option>
-            <option>A 3D / scroll-film site</option>
-            <option>Something else</option>
-          </select>
-        </div>
-        <div class="field">
-          <label for="cfBudget">Budget</label>
-          <select id="cfBudget" name="budget">
-            <option>$5,000 – $10,000</option>
-            <option>$10,000 – $20,000</option>
-            <option>$20,000+</option>
-            <option>Not sure yet</option>
-          </select>
-        </div>
-        <div class="field span2">
-          <label for="cfTime">Timeline</label>
-          <select id="cfTime" name="timeline">
-            <option>Flexible</option>
-            <option>As soon as possible</option>
-            <option>1–2 months</option>
-            <option>3+ months</option>
-          </select>
-        </div>
-        <div class="field wide">
-          <label for="cfDetails">Describe your build</label>
-          <textarea id="cfDetails" name="details" rows="6" required></textarea>
-          <p class="field-hint">Pages, features, sites you like, deadline. Rough notes are fine.</p>
-          <p class="field-err" id="cfDetailsErr"></p>
-        </div>
-        <input type="text" name="_honey" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
-        <div class="field wide form-foot">
-          <button class="cta form-send" type="submit">Send my request</button>
-          <p class="field-hint" id="cfStatus" role="status">Goes straight to our inbox. We reply within one business day.</p>
-        </div>
-      </form>
+      <div class="pkg-tabs reveal" role="tablist" aria-label="Package">
+        <button type="button" role="tab" id="tab-basic" aria-controls="panel-basic" aria-selected="false" tabindex="-1" data-pkg="basic"><span class="mono">BASIC</span><b>$300–500</b></button>
+        <button type="button" role="tab" id="tab-advanced" aria-controls="panel-advanced" aria-selected="true" tabindex="0" data-pkg="advanced"><span class="mono">ADVANCED</span><b>$2,500</b></button>
+        <button type="button" role="tab" id="tab-custom" aria-controls="panel-custom" aria-selected="false" tabindex="-1" data-pkg="custom"><span class="mono">CUSTOM</span><b>From $5,000</b></button>
+      </div>
+
+      <div class="pkg-panel" id="panel-basic" role="tabpanel" aria-labelledby="tab-basic" hidden>
+        <p class="pkg-note">A clean 1–3 page site, online in about a week. Tell us what it needs to say.</p>
+        <form class="custom-form pkg-form" id="basicForm" data-pkg="Basic" data-price="$300–500" data-prefix="bf" novalidate>
+          <div class="field">
+            <label for="bfName">Your name</label>
+            <input id="bfName" name="name" type="text" autocomplete="name" required>
+            <p class="field-err" id="bfNameErr"></p>
+          </div>
+          <div class="field">
+            <label for="bfEmail">Email</label>
+            <input id="bfEmail" name="email" type="email" autocomplete="email" required>
+            <p class="field-err" id="bfEmailErr"></p>
+          </div>
+          <div class="field">
+            <label for="bfPhone">Phone <span class="opt-tag">optional</span></label>
+            <input id="bfPhone" name="phone" type="tel" autocomplete="tel" inputmode="tel">
+            <p class="field-hint">If you'd rather we call or text you back.</p>
+            <p class="field-err" id="bfPhoneErr"></p>
+          </div>
+          <div class="field span2">
+            <label for="bfBiz">Business name <span class="opt-tag">optional</span></label>
+            <input id="bfBiz" name="business" type="text" autocomplete="organization">
+          </div>
+          <div class="field">
+            <label for="bfPages">How many pages?</label>
+            <select id="bfPages" name="pages">
+              <option>1 page</option>
+              <option>2 pages</option>
+              <option>3 pages</option>
+              <option>Not sure yet</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="bfAssets">Logo and photos ready?</label>
+            <select id="bfAssets" name="assets">
+              <option>Yes, ready to go</option>
+              <option>Some of them</option>
+              <option>Not yet</option>
+            </select>
+          </div>
+          <div class="field span2">
+            <label for="bfTime">Timeline</label>
+            <select id="bfTime" name="timeline">
+              <option>About 1 week</option>
+              <option>Flexible</option>
+              <option>As soon as possible</option>
+            </select>
+          </div>
+          <div class="field wide">
+            <label for="bfDetails">What should the site say and do?</label>
+            <textarea id="bfDetails" name="details" rows="6" required></textarea>
+            <p class="field-hint">What you offer, who it's for, sites you like. Rough notes are fine.</p>
+            <p class="field-err" id="bfDetailsErr"></p>
+          </div>
+          <input type="text" name="_honey" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
+          <div class="field wide form-foot">
+            <button class="cta form-send" type="submit">Send my Basic request</button>
+            <p class="field-hint" id="bfStatus" role="status">Goes straight to our inbox. We reply within one business day.</p>
+          </div>
+        </form>
+      </div>
+
+      <div class="pkg-panel" id="panel-advanced" role="tabpanel" aria-labelledby="tab-advanced">
+        <p class="pkg-note">A premium site customized to your brand, with animation and scroll effects. Two to three weeks.</p>
+        <form class="custom-form pkg-form" id="advancedForm" data-pkg="Advanced" data-price="$2,500" data-prefix="af" novalidate>
+          <div class="field">
+            <label for="afName">Your name</label>
+            <input id="afName" name="name" type="text" autocomplete="name" required>
+            <p class="field-err" id="afNameErr"></p>
+          </div>
+          <div class="field">
+            <label for="afEmail">Email</label>
+            <input id="afEmail" name="email" type="email" autocomplete="email" required>
+            <p class="field-err" id="afEmailErr"></p>
+          </div>
+          <div class="field">
+            <label for="afPhone">Phone <span class="opt-tag">optional</span></label>
+            <input id="afPhone" name="phone" type="tel" autocomplete="tel" inputmode="tel">
+            <p class="field-hint">If you'd rather we call or text you back.</p>
+            <p class="field-err" id="afPhoneErr"></p>
+          </div>
+          <div class="field span2">
+            <label for="afBiz">Business or brand name <span class="opt-tag">optional</span></label>
+            <input id="afBiz" name="business" type="text" autocomplete="organization">
+          </div>
+          <div class="field">
+            <label for="afPages">How many pages?</label>
+            <select id="afPages" name="pages">
+              <option>4–6 pages</option>
+              <option>7–10 pages</option>
+              <option>More than 10</option>
+              <option>Not sure yet</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="afMotion">How much motion?</label>
+            <select id="afMotion" name="motion">
+              <option>Subtle and polished</option>
+              <option>Bold scroll effects</option>
+              <option>Not sure yet</option>
+            </select>
+          </div>
+          <div class="field span2">
+            <label for="afTime">Timeline</label>
+            <select id="afTime" name="timeline">
+              <option>2–3 weeks</option>
+              <option>Flexible</option>
+              <option>As soon as possible</option>
+            </select>
+          </div>
+          <div class="field wide">
+            <label for="afDetails">Describe your brand and site</label>
+            <textarea id="afDetails" name="details" rows="6" required></textarea>
+            <p class="field-hint">Pages you need, brand colors or guide, sites you like, deadline. Rough notes are fine.</p>
+            <p class="field-err" id="afDetailsErr"></p>
+          </div>
+          <input type="text" name="_honey" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
+          <div class="field wide form-foot">
+            <button class="cta form-send" type="submit">Send my Advanced request</button>
+            <p class="field-hint" id="afStatus" role="status">Goes straight to our inbox. We reply within one business day.</p>
+          </div>
+        </form>
+      </div>
+
+      <div class="pkg-panel" id="panel-custom" role="tabpanel" aria-labelledby="tab-custom" hidden>
+        <p class="pkg-note">Built from scratch: 3D scroll films, online stores, web apps. Describe it and we'll reply with a plan and a quote.</p>
+        <form class="custom-form pkg-form" id="customForm" data-pkg="Custom" data-price="from $5,000" data-prefix="cf" novalidate>
+          <div class="field">
+            <label for="cfName">Your name</label>
+            <input id="cfName" name="name" type="text" autocomplete="name" required>
+            <p class="field-err" id="cfNameErr"></p>
+          </div>
+          <div class="field">
+            <label for="cfEmail">Email</label>
+            <input id="cfEmail" name="email" type="email" autocomplete="email" required>
+            <p class="field-err" id="cfEmailErr"></p>
+          </div>
+          <div class="field">
+            <label for="cfPhone">Phone <span class="opt-tag">optional</span></label>
+            <input id="cfPhone" name="phone" type="tel" autocomplete="tel" inputmode="tel">
+            <p class="field-hint">If you'd rather we call or text you back.</p>
+            <p class="field-err" id="cfPhoneErr"></p>
+          </div>
+          <div class="field span2">
+            <label for="cfBiz">Business or project name <span class="opt-tag">optional</span></label>
+            <input id="cfBiz" name="business" type="text" autocomplete="organization">
+          </div>
+          <div class="field">
+            <label for="cfType">What do you need?</label>
+            <select id="cfType" name="need">
+              <option>A custom website</option>
+              <option>An online store</option>
+              <option>A web app or dashboard</option>
+              <option>A 3D / scroll-film site</option>
+              <option>Something else</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="cfBudget">Budget</label>
+            <select id="cfBudget" name="budget">
+              <option>$5,000 – $10,000</option>
+              <option>$10,000 – $20,000</option>
+              <option>$20,000+</option>
+              <option>Not sure yet</option>
+            </select>
+          </div>
+          <div class="field span2">
+            <label for="cfTime">Timeline</label>
+            <select id="cfTime" name="timeline">
+              <option>Flexible</option>
+              <option>As soon as possible</option>
+              <option>1–2 months</option>
+              <option>3+ months</option>
+            </select>
+          </div>
+          <div class="field wide">
+            <label for="cfDetails">Describe your build</label>
+            <textarea id="cfDetails" name="details" rows="6" required></textarea>
+            <p class="field-hint">Pages, features, sites you like, deadline. Rough notes are fine.</p>
+            <p class="field-err" id="cfDetailsErr"></p>
+          </div>
+          <input type="text" name="_honey" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
+          <div class="field wide form-foot">
+            <button class="cta form-send" type="submit">Send my Custom request</button>
+            <p class="field-hint" id="cfStatus" role="status">Goes straight to our inbox. We reply within one business day.</p>
+          </div>
+        </form>
+      </div>
     </div>
   </section>
 <script>
-/* custom build request: validates, then sends it to the inbox through FormSubmit; falls back to the visitor's mail app */
+/* package tabs: one request form per package; the price cards open the matching tab */
 (function(){
-  var form = document.getElementById('customForm');
-  var checks = {
-    cfName: function(v){ return v ? '' : 'Add your name so we know who to reply to.'; },
-    cfEmail: function(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) ? '' : 'Add an email like name@example.com.'; },
-    cfPhone: function(v){ return !v || v.replace(/\D/g, '').length >= 10 ? '' : 'Add a full number with area code, like 214 555 0123.'; },
-    cfDetails: function(v){ return v.length >= 10 ? '' : 'Add a line or two about what you want built.'; }
-  };
-  function check(id){
-    var el = document.getElementById(id), msg = checks[id](el.value.trim()), err = document.getElementById(id + 'Err');
-    err.textContent = msg;
-    el.setAttribute('aria-invalid', msg ? 'true' : 'false');
-    if (msg) el.setAttribute('aria-describedby', id + 'Err'); else el.removeAttribute('aria-describedby');
-    return !msg;
+  var tabs = Array.from(document.querySelectorAll('.pkg-tabs [role="tab"]'));
+  function select(pkg, focus){
+    tabs.forEach(function(t){
+      var on = t.dataset.pkg === pkg;
+      t.setAttribute('aria-selected', on ? 'true' : 'false');
+      t.tabIndex = on ? 0 : -1;
+      document.getElementById(t.getAttribute('aria-controls')).hidden = !on;
+      if (on && focus) t.focus();
+    });
   }
-  Object.keys(checks).forEach(function(id){
-    var el = document.getElementById(id);
-    el.addEventListener('blur', function(){ if (el.value.trim()) check(id); });
-    el.addEventListener('input', function(){ if (el.getAttribute('aria-invalid') === 'true') check(id); });
+  tabs.forEach(function(t, i){
+    t.addEventListener('click', function(){ select(t.dataset.pkg); });
+    t.addEventListener('keydown', function(e){
+      var d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+      if (!d) return;
+      e.preventDefault();
+      select(tabs[(i + d + tabs.length) % tabs.length].dataset.pkg, true);
+    });
   });
-  form.addEventListener('submit', function(e){
-    e.preventDefault();
-    var bad = Object.keys(checks).filter(function(id){ return !check(id); });
-    if (bad.length){ document.getElementById(bad[0]).focus(); return; }
-    var f = form.elements, status = document.getElementById('cfStatus'), btn = form.querySelector('.form-send');
-    if (f._honey.value) return;
-    var data = {
-      name: f.name.value.trim(),
-      email: f.email.value.trim(),
-      phone: f.phone.value.trim() || '-',
-      business: f.business.value.trim() || '-',
-      need: f.type.value,
-      budget: f.budget.value,
-      timeline: f.timeline.value,
-      details: f.details.value.trim(),
-      _subject: 'Custom build request: ' + f.name.value.trim(),
-      _template: 'table'
-    };
-    function fallback(){
-      var body = ['Name: ' + data.name, 'Email: ' + data.email, 'Phone: ' + data.phone, 'Business / project: ' + data.business,
-        'Need: ' + data.need, 'Budget: ' + data.budget, 'Timeline: ' + data.timeline, '', data.details].join('\n');
-      location.href = 'mailto:dbetts@dawebsitebuilder.com?subject=' + encodeURIComponent(data._subject) + '&body=' + encodeURIComponent(body);
-      status.textContent = "We couldn't send it from here, so your email app should open with the request filled in. If it didn't, email dbetts@dawebsitebuilder.com directly.";
+  document.querySelectorAll('[data-open-pkg]').forEach(function(a){
+    a.addEventListener('click', function(){ select(a.dataset.openPkg); });
+  });
+  var m = /^#build-(basic|advanced|custom)$/.exec(location.hash);
+  if (m) select(m[1]);
+})();
+
+/* each request: validates, then sends it to the inbox through FormSubmit; falls back to the visitor's mail app */
+(function(){
+  var INBOX = 'dbetts@dawebsitebuilder.com';
+  document.querySelectorAll('.pkg-form').forEach(function(form){
+    var p = form.dataset.prefix, pkg = form.dataset.pkg;
+    var checks = {};
+    checks[p + 'Name'] = function(v){ return v ? '' : 'Add your name so we know who to reply to.'; };
+    checks[p + 'Email'] = function(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) ? '' : 'Add an email like name@example.com.'; };
+    checks[p + 'Phone'] = function(v){ return !v || v.replace(/\D/g, '').length >= 10 ? '' : 'Add a full number with area code, like 214 555 0123.'; };
+    checks[p + 'Details'] = function(v){ return v.length >= 10 ? '' : 'Add a line or two about what you want built.'; };
+    function check(id){
+      var el = document.getElementById(id), msg = checks[id](el.value.trim()), err = document.getElementById(id + 'Err');
+      err.textContent = msg;
+      el.setAttribute('aria-invalid', msg ? 'true' : 'false');
+      if (msg) el.setAttribute('aria-describedby', id + 'Err'); else el.removeAttribute('aria-describedby');
+      return !msg;
     }
-    btn.disabled = true; btn.textContent = 'Sending…'; status.textContent = 'Sending your request…';
-    fetch('https://formsubmit.co/ajax/dbetts@dawebsitebuilder.com', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-      body: JSON.stringify(data)
-    }).then(function(r){ return r.json(); }).then(function(res){
-      if (String(res.success) !== 'true') throw new Error(res.message || 'not sent');
-      form.reset();
-      status.textContent = "Sent. Thanks, " + data.name + ". We'll reply to " + data.email + " within one business day.";
-    }).catch(fallback).then(function(){ btn.disabled = false; btn.textContent = 'Send my request'; });
+    Object.keys(checks).forEach(function(id){
+      var el = document.getElementById(id);
+      el.addEventListener('blur', function(){ if (el.value.trim()) check(id); });
+      el.addEventListener('input', function(){ if (el.getAttribute('aria-invalid') === 'true') check(id); });
+    });
+    var btn = form.querySelector('.form-send'), label = btn.textContent, status = document.getElementById(p + 'Status');
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      var bad = Object.keys(checks).filter(function(id){ return !check(id); });
+      if (bad.length){ document.getElementById(bad[0]).focus(); return; }
+      if (form.elements._honey.value) return;
+      /* every named field goes into the email, labelled the way the visitor saw it */
+      var data = { package: pkg + ' (' + form.dataset.price + ')' }, lines = ['Package: ' + data.package];
+      Array.from(form.elements).forEach(function(el){
+        if (!el.name || el.name.charAt(0) === '_' || el.name === 'details') return;
+        var v = el.value.trim() || '-', l = form.querySelector('label[for="' + el.id + '"]');
+        var text = l ? l.firstChild.textContent.trim() : el.name;
+        data[el.name] = v; lines.push(text + ': ' + v);
+      });
+      data.details = form.elements.details.value.trim();
+      data._subject = pkg + ' site request: ' + data.name;
+      data._template = 'table';
+      function fallback(){
+        location.href = 'mailto:' + INBOX + '?subject=' + encodeURIComponent(data._subject) + '&body=' + encodeURIComponent(lines.concat(['', data.details]).join('\n'));
+        status.textContent = "We couldn't send it from here, so your email app should open with the request filled in. If it didn't, email " + INBOX + ' directly.';
+      }
+      btn.disabled = true; btn.textContent = 'Sending…'; status.textContent = 'Sending your request…';
+      fetch('https://formsubmit.co/ajax/' + INBOX, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify(data)
+      }).then(function(r){ return r.json(); }).then(function(res){
+        if (String(res.success) !== 'true') throw new Error(res.message || 'not sent');
+        form.reset();
+        status.textContent = 'Sent. Thanks, ' + data.name + ". We'll reply to " + data.email + ' within one business day.';
+      }).catch(fallback).then(function(){ btn.disabled = false; btn.textContent = label; });
+    });
   });
 })();
 </script>
