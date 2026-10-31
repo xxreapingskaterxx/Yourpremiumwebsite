@@ -119,6 +119,23 @@
     50%{ box-shadow:0 0 18px rgba(34,211,238,.25),0 0 22px rgba(255,178,36,.45); }
   }
   @keyframes ctaShine{ 0%,55%{ left:-60%; } 85%,100%{ left:130%; } }
+  /* Brand seal: same glow, shine and cursor light as the Start a project button */
+  .logo-mark{
+    position:relative;display:block;width:40px;height:40px;flex:none;border-radius:50%;overflow:hidden;isolation:isolate;
+    animation:ctaGlow 3.2s ease-in-out infinite;transition:translate .25s var(--ease-out);
+  }
+  .logo-mark::before{
+    content:'';position:absolute;inset:0;z-index:1;pointer-events:none;opacity:0;transition:opacity .25s ease;
+    background:radial-gradient(22px circle at var(--mx,50%) var(--my,50%),rgba(255,255,255,.45),transparent 70%);
+  }
+  .logo-mark::after{
+    content:'';position:absolute;top:-10%;bottom:-10%;left:-80%;width:55%;z-index:1;pointer-events:none;
+    background:linear-gradient(105deg,transparent,rgba(255,255,255,.55),transparent);
+    transform:skewX(-20deg);animation:ctaShine 4.5s ease-in-out infinite;
+  }
+  .logo:hover .logo-mark::before{ opacity:1; }
+  .logo:hover .logo-mark{ animation-duration:1.6s; }
+  .logo:hover .logo-mark::after{ animation-duration:2s; }
   /* Hover lift only where a real pointer hovers; touch fires false hovers on tap */
   @media (hover:hover) and (pointer:fine){
     .nav-cta:hover{ filter:brightness(1.08); transform:translateY(-1px); }
@@ -530,7 +547,7 @@
 
 <header id="siteHeader">
   <a class="logo" href="index.html" aria-label="Da Website Builder, home">
-    <img src="brand/logo-seal-512.png" width="40" height="40" alt="">
+    <span class="logo-mark"><img src="brand/logo-seal-512.png" width="40" height="40" alt=""></span>
     <span class="logo-text">DA WEBSITE BUILDER</span>
   </a>
   <nav aria-label="Main">
@@ -1652,9 +1669,18 @@
 })();
 </script>
 <script>
-/* Start-a-project button: cursor light and a small magnetic lean, on real mice only */
+/* Start-a-project button and brand seal: cursor light and a small magnetic lean, on real mice only */
 (function(){
   if (!matchMedia('(hover:hover) and (pointer:fine)').matches) return;
+  document.querySelectorAll('.logo-mark').forEach(function(m){
+    var a = m.closest('.logo');
+    a.addEventListener('pointermove', function(e){
+      var r = m.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+      m.style.setProperty('--mx', x + 'px'); m.style.setProperty('--my', y + 'px');
+      m.style.translate = Math.max(-4, Math.min(4, (x - r.width / 2) * .12)).toFixed(1) + 'px ' + Math.max(-4, Math.min(4, (y - r.height / 2) * .12)).toFixed(1) + 'px';
+    });
+    a.addEventListener('pointerleave', function(){ m.style.translate = ''; });
+  });
   document.querySelectorAll('.nav-cta').forEach(function(b){
     b.addEventListener('pointermove', function(e){
       var r = b.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
