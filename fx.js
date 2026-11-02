@@ -188,19 +188,38 @@
       renderer.setClearColor(clear, alpha);
     }
 
-    /* keep the frame rate up on slower phones: when frames run long, give up the least visible quality first —
-       sharpness down to one pixel per CSS pixel, then antialiasing, then the floor reflection, then a little more sharpness */
+    /* keep the frame rate up on slower devices, without throwing quality away for nothing.
+       Only sustained slowness counts: the first seconds after load (shader compiles, texture uploads)
+       and one-off stalls (tab switches, the film scrolling back into view) are ignored.
+       Levels: 0 full quality, 1 one pixel per CSS pixel, 2 no antialiasing, 3 no floor reflection.
+       Desktops stop at level 1 so the scene stays sharp and reflective; phones may go to level 3.
+       When frames run comfortably fast again, quality steps back up. */
     var maxPr = Math.min(window.devicePixelRatio || 1, opts.small ? 1.5 : 1.75), pr = maxPr;
-    var frameAvg = 1 / 60, lastQ = performance.now() + 1500, cssSize = new THREE.Vector2();
+    var fullSamples = main.samples, reflect = floorMat.uniforms.uStrength.value;
+    var level = 0, floorLevel = opts.small ? 3 : 1, recoveries = 0;
+    var frameAvg = 1 / 60, lastNow = 0, lastQ = performance.now() + 4000, cssSize = new THREE.Vector2();
     function setPr(v){ pr = v; renderer.getSize(cssSize); renderer.setPixelRatio(v); renderer.setSize(cssSize.x, cssSize.y, false); resize(); }
+    function apply(l){
+      level = l;
+      var wantPr = l >= 1 ? Math.min(1, maxPr) : maxPr;
+      var wantSamples = l >= 2 ? 0 : fullSamples, wantMirror = l < 3;
+      if (main.samples !== wantSamples){ main.samples = wantSamples; main.dispose(); }
+      if (mirrorOn !== wantMirror){
+        mirrorOn = wantMirror; floorMat.uniforms.uStrength.value = wantMirror ? reflect : 0;
+        if (!wantMirror) mirror.dispose();
+      }
+      if (pr !== wantPr) setPr(wantPr); else resize();
+    }
     function adapt(dt, now){
-      frameAvg += (dt - frameAvg) * .06;
-      if (now - lastQ < 1000 || frameAvg < 1 / 45) return;
-      lastQ = now; frameAvg = 1 / 50;
-      if (pr > 1) setPr(Math.max(1, pr - .25));
-      else if (main.samples > 0){ main.samples = 0; main.dispose(); }
-      else if (mirrorOn){ mirrorOn = false; floorMat.uniforms.uStrength.value = 0; mirror.dispose(); }
-      else if (pr > .75) setPr(.75);
+      var raw = lastNow ? (now - lastNow) / 1000 : 0; lastNow = now;
+      if (raw <= 0 || raw > 1) return;                /* a pause (tab switch, film scrolled back into view) */
+      frameAvg += (Math.min(raw, .1) - frameAvg) * .03; /* a one-off stall barely moves the average */
+      if (now < lastQ) return;
+      if (frameAvg > 1 / 40 && level < floorLevel){
+        apply(level + 1); lastQ = now + 3000; frameAvg = 1 / 50;
+      } else if (frameAvg < 1 / 57 && level > 0 && recoveries < 2){
+        apply(level - 1); recoveries++; lastQ = now + 5000; frameAvg = 1 / 55;
+      }
     }
     function quality(){ return 'res ' + pr.toFixed(2) + ' aa ' + main.samples + (mirrorOn ? ' mirror' : ''); }
 
