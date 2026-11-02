@@ -910,8 +910,8 @@
 /* each request: validates, then sends it to the inbox through FormSubmit; falls back to the visitor's mail app */
 (function(){
   var INBOX = 'dbetts@dawebsitebuilder.com';
-  /* requests are delivered to the personal Gmail until the dawebsitebuilder.com inbox can receive mail */
-  var DELIVER_TO = 'xxreapingskaterxx@gmail.com';
+  /* requests are delivered straight to the business inbox */
+  var DELIVER_TO = INBOX;
   document.querySelectorAll('.pkg-form').forEach(function(form){
     var p = form.dataset.prefix, pkg = form.dataset.pkg;
     var checks = {};
