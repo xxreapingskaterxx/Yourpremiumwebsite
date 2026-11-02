@@ -1377,7 +1377,12 @@
     if (!calmFx && heroFx > .02){ spawnBits(ptr.x, ptr.y, 10); if (hitValid) pulseNear(hit); }
   });
   /* touch scrolling cancels pointer events, so follow the finger directly while it scrolls */
-  stage.addEventListener('touchmove', function(e){ var t = e.touches[0]; if (t) onMove(t.clientX, t.clientY); }, { passive: true });
+  stage.addEventListener('touchmove', function(e){ var t = e.touches[0]; if (t){ ptr.lifted = false; onMove(t.clientX, t.clientY); } }, { passive: true });
+  /* past the hero, the finger light goes out when the finger lifts and comes back with the next touch */
+  function onLift(e){ if (!e.touches || !e.touches.length) ptr.lifted = true; }
+  window.addEventListener('touchstart', function(){ ptr.lifted = false; }, { passive: true, capture: true });
+  window.addEventListener('touchend', onLift, { passive: true, capture: true });
+  window.addEventListener('touchcancel', onLift, { passive: true, capture: true });
   stage.addEventListener('pointerleave', function(e){ if (e.pointerType === 'mouse') ptr.has = false; });
   var lastScrollY = window.scrollY;
   window.addEventListener('scroll', function(){
@@ -1579,6 +1584,8 @@
       hitValid = !!raycaster.ray.intersectPlane(groundPlane, hit);
     }
     var fxOn = hitValid ? Math.max(heroFx, .35) : 0;
+    /* a lifted finger fades its light out past the hero (heroFx is 1 on the hero, 0 past it) */
+    if (ptr.lifted) fxOn *= heroFx;
     traceUniforms.uPtr.value += (fxOn - traceUniforms.uPtr.value) * Math.min(1, dt * 8);
     if (hitValid){
       traceUniforms.uP.value.copy(hit);
