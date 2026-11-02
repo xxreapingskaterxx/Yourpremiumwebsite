@@ -1162,7 +1162,7 @@
 
   /* ---------------- Pointer: light, pulses, code-glyph trail ---------------- */
   var fx = document.getElementById('fxCanvas'), fctx = fx.getContext('2d'), FDPR = Math.min(window.devicePixelRatio || 1, 1.5);
-  var ptr = { x: 0, y: 0, nx: 0, ny: 0, sx: 0, sy: 0, has: false, lastX: 0, lastY: 0, lastPulse: 0 };
+  var ptr = { x: 0, y: 0, nx: 0, ny: 0, sx: 0, sy: 0, has: false, vis: 1, lastX: 0, lastY: 0, lastPulse: 0 };
   var raycaster = new THREE.Raycaster(), ndc = new THREE.Vector2(), groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
   var hit = new THREE.Vector3(), hitValid = false;
   var cursorLight = new THREE.PointLight(0x22d3ee, 0, 22, 1.6);
@@ -1202,7 +1202,7 @@
   });
   /* touch scrolling cancels pointer events, so follow the finger directly while it scrolls */
   stage.addEventListener('touchmove', function(e){ var t = e.touches[0]; if (t){ ptr.lifted = false; onMove(t.clientX, t.clientY); } }, { passive: true });
-  /* past the hero, the finger light goes out when the finger lifts and comes back with the next touch */
+  /* on touch screens the finger light and crosshair go out when the finger lifts and come back with the next touch */
   function onLift(e){ if (!e.touches || !e.touches.length) ptr.lifted = true; }
   window.addEventListener('touchstart', function(){ ptr.lifted = false; }, { passive: true, capture: true });
   window.addEventListener('touchend', onLift, { passive: true, capture: true });
@@ -1221,7 +1221,7 @@
     if (ptr.has && heroFx > .02){
       var k = calmFx ? 1 : Math.min(1, dt * 40);
       ptr.sx += (ptr.x - ptr.sx) * k; ptr.sy += (ptr.y - ptr.sy) * k;
-      fctx.globalAlpha = heroFx;
+      fctx.globalAlpha = heroFx * ptr.vis;
       fctx.strokeStyle = 'rgba(34,211,238,.75)'; fctx.lineWidth = 1;
       fctx.beginPath();
       fctx.moveTo(ptr.sx - 14, ptr.sy); fctx.lineTo(ptr.sx - 5, ptr.sy); fctx.moveTo(ptr.sx + 5, ptr.sy); fctx.lineTo(ptr.sx + 14, ptr.sy);
@@ -1439,8 +1439,9 @@
       hitValid = !!raycaster.ray.intersectPlane(groundPlane, hit);
     }
     var fxOn = hitValid ? Math.max(heroFx, .35) : 0;
-    /* a lifted finger fades its light out past the hero (heroFx is 1 on the hero, 0 past it) */
-    if (ptr.lifted) fxOn *= heroFx;
+    /* a lifted finger fades its light and crosshair out, on the hero and past it */
+    if (ptr.lifted) fxOn = 0;
+    ptr.vis += ((ptr.lifted ? 0 : 1) - ptr.vis) * Math.min(1, dt * 8);
     traceUniforms.uPtr.value += (fxOn - traceUniforms.uPtr.value) * Math.min(1, dt * 8);
     if (hitValid){
       traceUniforms.uP.value.copy(hit);
