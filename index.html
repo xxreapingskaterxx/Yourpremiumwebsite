@@ -661,7 +661,8 @@
 
   var stage = document.getElementById('stage');
   var canvas = document.getElementById('filmCanvas');
-  var SMALL = Math.min(screen.width, screen.height) < 768 || matchMedia('(pointer: coarse)').matches;
+  /* phones and tablets only: a laptop at 125-150% Windows scaling reports a screen as short as 720px, so screen size alone misreads it as a phone */
+  var SMALL = matchMedia('(pointer: coarse)').matches && !matchMedia('(hover: hover) and (pointer: fine)').matches || Math.min(screen.width, screen.height) < 500;
   var MOBILE = window.innerWidth < 760;
   if (MOBILE) document.documentElement.style.setProperty('--term-top', '160px');
 
