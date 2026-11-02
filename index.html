@@ -1230,6 +1230,16 @@
   var ptr = { x: 0, y: 0, nx: 0, ny: 0, sx: 0, sy: 0, vx: 0, vy: 0, t0: 0, has: false, vis: 1, lastX: 0, lastY: 0, lastPulse: 0 };
   var raycaster = new THREE.Raycaster(), ndc = new THREE.Vector2(), groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
   var hit = new THREE.Vector3(), hitValid = false;
+  /* a finger up in the sky above the horizon would miss the board and lose its light; keep the light on the board
+     instead, out along the finger's direction no farther than a little past where the camera is looking */
+  function boardHit(){
+    var o = raycaster.ray.origin, d = raycaster.ray.direction;
+    var hx = d.x, hz = d.z, hl = Math.hypot(hx, hz) || 1;
+    var maxD = Math.max(12, 1.6 * Math.hypot(camLook.x - o.x, camLook.z - o.z));
+    var ok = raycaster.ray.intersectPlane(groundPlane, hit);
+    if (!ok || Math.hypot(hit.x - o.x, hit.z - o.z) > maxD) hit.set(o.x + hx / hl * maxD, 0, o.z + hz / hl * maxD);
+    return o.y > 0;
+  }
   var cursorLight = new THREE.PointLight(0x22d3ee, 0, 22, 1.6);
   scene.add(cursorLight);
   /* the pools under the hero marker and under the cursor are painted by the floor shader itself,
@@ -1649,7 +1659,7 @@
       ptr.sny += (ptr.ny - clampLead(ptr.vy * ldn) * 2 / sizedH - ptr.sny) * kp;
       ndc.set(ptr.snx, ptr.sny);
       raycaster.setFromCamera(ndc, camera);
-      hitValid = !!raycaster.ray.intersectPlane(groundPlane, hit);
+      hitValid = boardHit();
     }
     var fxOn = hitValid ? 1 : 0;
     /* a lifted finger fades its light and crosshair out, on the hero and past it */
