@@ -192,11 +192,11 @@
        Only sustained slowness counts: the first seconds after load (shader compiles, texture uploads)
        and one-off stalls (tab switches, the film scrolling back into view) are ignored.
        Levels: 0 full quality, 1 one pixel per CSS pixel, 2 no antialiasing, 3 no floor reflection.
-       Desktops stop at level 1 so the scene stays sharp and reflective; phones may go to level 3.
+       Desktops never step down: full sharpness, antialiasing and reflections always. Phones may go to level 3.
        When frames run comfortably fast again, quality steps back up. */
     var maxPr = Math.min(window.devicePixelRatio || 1, opts.small ? 1.5 : 1.75), pr = maxPr;
     var fullSamples = main.samples, reflect = floorMat.uniforms.uStrength.value;
-    var level = 0, floorLevel = opts.small ? 3 : 1, recoveries = 0;
+    var level = 0, floorLevel = opts.small ? 3 : 0, recoveries = 0;
     var frameAvg = 1 / 60, lastNow = 0, lastQ = performance.now() + 4000, cssSize = new THREE.Vector2();
     function setPr(v){ pr = v; renderer.getSize(cssSize); renderer.setPixelRatio(v); renderer.setSize(cssSize.x, cssSize.y, false); resize(); }
     function apply(l){
