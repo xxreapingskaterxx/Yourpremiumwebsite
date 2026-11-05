@@ -286,16 +286,9 @@
     position:absolute;inset:0;
     pointer-events:none;
     background:
-      linear-gradient(90deg, rgba(5,8,13,.6) 0%, rgba(5,8,13,.25) 38%, rgba(5,8,13,0) 55%),
+      radial-gradient(ellipse 52% 62% at 0% 74%, rgba(5,8,13,.9) 0%, rgba(5,8,13,.62) 48%, rgba(5,8,13,0) 100%),
       radial-gradient(ellipse at 60% 50%, rgba(0,0,0,0) 40%, rgba(0,0,0,.6) 100%);
     z-index:2;
-  }
-  /* faint scanlines: the terminal half of the look */
-  #grainVignette::after{
-    content:'';
-    position:absolute;inset:0;
-    opacity:.05;
-    background:repeating-linear-gradient(0deg, #fff 0 1px, transparent 1px 3px);
   }
   #fxCanvas{ pointer-events:none; z-index:2; }
   #bottomFade{
@@ -1088,8 +1081,8 @@
   scene.fog = new THREE.FogExp2(BG, FOG);
   var camera = new THREE.PerspectiveCamera(42, 1, 0.1, 400);
 
-  scene.add(new THREE.HemisphereLight(0x5a7a9a, 0x05080d, 0.35));
-  var key = new THREE.DirectionalLight(0x9fd8ff, 0.55);
+  scene.add(new THREE.HemisphereLight(0xb8c8d8, 0x10141a, 0.4));
+  var key = new THREE.DirectionalLight(0xfff1e0, 1.15);
   key.position.set(-20, 30, 18);
   scene.add(key);
   var FX = DWBFX.create(renderer, scene, camera, { small: SMALL, background: BG });
@@ -1127,7 +1120,7 @@
     var c = document.createElement('canvas'), g = c.getContext('2d');
     var fs = 64;
     g.font = '500 ' + fs + 'px "JetBrains Mono", monospace';
-    c.width = Math.ceil(g.measureText(text).width + 24); c.height = fs + 24;
+    c.width = Math.ceil(Math.max(g.measureText(text).width, text.length * fs * .62) + 24); c.height = fs + 24;
     g.font = '500 ' + fs + 'px "JetBrains Mono", monospace';
     g.fillStyle = color; g.textBaseline = 'middle'; g.fillText(text, 12, c.height / 2 + 2);
     var t = new THREE.CanvasTexture(c); t.encoding = THREE.sRGBEncoding;
@@ -1142,13 +1135,6 @@
   scene.add(ground);
 
   var R = rng(11), G = 2, EXT = 64;
-  (function dots(){
-    var pts = [];
-    for (var x = -EXT; x <= EXT; x += G) for (var z = -EXT; z <= EXT; z += G) pts.push(x, 0.01, z);
-    var geo = new THREE.BufferGeometry();
-    geo.setAttribute('position', new THREE.Float32BufferAttribute(pts, 3));
-    scene.add(new THREE.Points(geo, new THREE.PointsMaterial({ color: 0x2a3a4c, size: .09, sizeAttenuation: true })));
-  })();
 
   var traces = [];
   var traceUniforms = {
@@ -1195,14 +1181,15 @@
         '  float g = uPtr * smoothstep(9.0, 0.0, distance(vW.xz, uP.xz));',
         '  vec3 hot = mix(uCyan, uAmber, vA);',
         '  float k = clamp(g + uLit, 0.0, 1.0);',
-        '  vec3 col = mix(vec3(0.22, 0.31, 0.41), hot, k);',
+        '  vec3 col = hot;',
         '  float fog = exp(-uFog * uFog * vD * vD * 1.4);',
-        '  gl_FragColor = vec4(pow(col * (0.55 + 0.9 * k), vec3(2.2)) * (1.0 + 1.6 * k), fog);',
+        '  gl_FragColor = vec4(pow(col * (0.55 + 0.9 * k), vec3(2.2)) * (1.0 + 1.6 * k) * k, fog);',
         '}'
       ].join('\n')
     });
     scene.add(new THREE.LineSegments(geo, mat));
   })();
+  FX.board(traces, EXT, function(x, z){ return [-22, 0, 22].some(function(sx){ return Math.abs(x - sx) < 8 && Math.abs(z) < 8; }); });
 
   /* ---------------- Three towers, one per package ---------------- */
   /* each package is a tower of floors: the more floors, the more is included */
@@ -1211,7 +1198,31 @@
     { x: 0,   floors: 7,  col: AMBER, name: 'ADVANCED', price: '$2,500',   feats: ['PREMIUM TEMPLATE', 'YOUR BRANDING', 'ANIMATIONS', '2–3 WEEKS'] },
     { x: 22,  floors: 11, col: CYAN,  name: 'CUSTOM',   price: 'FROM $5,000', feats: ['BUILT FROM SCRATCH', '3D + SCROLL FILMS', 'STORES + WEB APPS', 'QUOTED TO YOU'] }
   ];
-  var FLOOR_H = .7, FLOOR_GAP = .9;
+  var FLOOR_H = .84, FLOOR_GAP = .9;
+  /* one storey of curtain wall: tinted glass, steel mullions, and an office light on here and there */
+  function storey(seed){
+    var r = rng(seed), W = 512, H = 80;
+    function paint(lit){
+      var c = document.createElement('canvas'); c.width = W; c.height = H;
+      var g = c.getContext('2d');
+      g.fillStyle = lit ? '#000' : '#0d141b'; g.fillRect(0, 0, W, H);
+      if (lit){
+        var r2 = rng(seed);
+        for (var i = 0; i < 16; i++){
+          if (r2() < .26){ var v = 38 + r2() * r2() * 120; g.fillStyle = 'rgb(' + (v | 0) + ',' + (v * .84 | 0) + ',' + (v * .6 | 0) + ')'; g.fillRect(i * 32 + 3, 8, 26, 58); }
+        }
+      } else {
+        var gr = g.createLinearGradient(0, 0, 0, H); gr.addColorStop(0, '#2b3f4e'); gr.addColorStop(1, '#141f28');
+        g.fillStyle = gr; g.fillRect(0, 6, W, 62);
+        g.fillStyle = '#596067'; for (var m = 0; m <= 16; m++) g.fillRect(m * 32 - 1, 0, 2, H);
+      }
+      g.fillStyle = lit ? '#000' : '#3a4046'; g.fillRect(0, 0, W, 6); g.fillRect(0, 68, W, 12);
+      var t = new THREE.CanvasTexture(c); t.encoding = THREE.sRGBEncoding; t.anisotropy = 4;
+      return t;
+    }
+    return { map: paint(false), light: paint(true) };
+  }
+  var STOREYS = [3, 8, 14, 21, 27, 33, 41].map(storey);
   var towers = TIERS.map(function(t, ti){
     var g = new THREE.Group(), floors = [];
     /* lot corners */
@@ -1224,13 +1235,16 @@
     var lot = new THREE.LineSegments(lg, new THREE.LineBasicMaterial({ color: CYAN, transparent: true, opacity: .55 }));
     lot.position.y = .04; g.add(lot);
     var geo = new THREE.BoxGeometry(5.6, FLOOR_H, 5.6), eg = new THREE.EdgesGeometry(geo);
+    /* the slab tops and undersides sample the plain spandrel at the texture's edge, not the windows */
+    (function(){ var uv = geo.attributes.uv; for (var ui = 8; ui < 16; ui++) uv.setXY(ui, .5, .97); })();
     for (var k = 0; k < t.floors; k++){
       var col = ti === 2 && k % 2 ? AMBER : t.col;
       var f = new THREE.Group();
-      var body = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color: 0x0c1520, emissive: col, emissiveIntensity: .08, metalness: .5, roughness: .45, transparent: true, opacity: 0 }));
+      var st = STOREYS[(k * 3 + ti * 2) % STOREYS.length];
+      var body = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ map: st.map, emissive: 0xffffff, emissiveMap: st.light, emissiveIntensity: 1, metalness: .9, roughness: .16, envMapIntensity: 1, transparent: true, opacity: 0 }));
       var edge = new THREE.LineSegments(eg, new THREE.LineBasicMaterial({ color: col, transparent: true, opacity: 0 }));
       /* a lit window strip on the front face */
-      var strip = new THREE.Mesh(new THREE.PlaneGeometry(4.4, .12), new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0 }));
+      var strip = new THREE.Mesh(new THREE.PlaneGeometry(5.6, .03), new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0 }));
       strip.position.z = 2.81;
       f.add(body, edge, strip);
       f.userData.y = FLOOR_H / 2 + k * FLOOR_GAP;
@@ -1242,7 +1256,7 @@
     var ghostGeo = new THREE.BoxGeometry(5.6, topY - .2, 5.6); ghostGeo.translate(0, (topY - .2) / 2, 0);
     var ghost = new THREE.LineSegments(new THREE.EdgesGeometry(ghostGeo), new THREE.LineBasicMaterial({ color: CYAN, transparent: true, opacity: .35 }));
     g.add(ghost);
-    var beacon = glowSprite(AMBER, 7, 0); beacon.position.y = topY + .4; g.add(beacon);
+    var beacon = glowSprite(AMBER, 3, 0); beacon.position.y = topY + .4; g.add(beacon);
     var price = textSprite(t.price, '#eef0f6', .9); price.position.y = topY + 1.3; g.add(price);
     var name = textSprite(t.name, ti === 1 ? '#ffb224' : '#22d3ee', .5); name.position.y = topY + 2.35; g.add(name);
     /* what's included, written up the side of the tower */
@@ -1262,21 +1276,21 @@
   var motePos = new Float32Array(MOTES * 3), moteCol = new Float32Array(MOTES * 3), moteSpd = new Float32Array(MOTES);
   for (var m = 0; m < MOTES; m++){
     motePos[m*3] = (Math.random() * 2 - 1) * 45; motePos[m*3+1] = Math.random() * 30; motePos[m*3+2] = (Math.random() * 2 - 1) * 45;
-    var c = Math.random() < .35 ? AMBER : CYAN;
+    var c = DWBFX.DUST;
     moteCol[m*3] = c.r; moteCol[m*3+1] = c.g; moteCol[m*3+2] = c.b;
     moteSpd[m] = .3 + Math.random() * .9;
   }
   var moteGeo = new THREE.BufferGeometry();
   moteGeo.setAttribute('position', new THREE.BufferAttribute(motePos, 3));
   moteGeo.setAttribute('color', new THREE.BufferAttribute(moteCol, 3));
-  var motes = new THREE.Points(moteGeo, new THREE.PointsMaterial({ size: .32, map: GLOW, vertexColors: true, transparent: true, opacity: .7, depthWrite: false, blending: THREE.AdditiveBlending }));
+  var motes = new THREE.Points(moteGeo, new THREE.PointsMaterial({ size: .1, map: GLOW, vertexColors: true, transparent: true, opacity: .32, depthWrite: false, blending: THREE.AdditiveBlending }));
   scene.add(motes);
 
   /* ---------------- Signal pulses ---------------- */
   var pulses = [], MAX_PULSES = SMALL ? 24 : 48;
   var pulsePool = [];
   function getSprite(color){
-    var s = pulsePool.pop() || glowSprite(color, 1.1, 1);
+    var s = pulsePool.pop() || glowSprite(color, .62, .9);
     /* pulses ride the floor, so the floor must not slice them into half-domes */
     s.material.depthTest = false;
     s.material.color.copy(color); s.visible = true; scene.add(s);
@@ -1448,12 +1462,13 @@
         f.g.visible = l > 0;
         if (!f.g.visible) return;
         f.g.position.y = f.g.userData.y + (1 - e) * 5;
-        f.body.material.opacity = .95 * e;
-        f.edge.material.opacity = .9 * e;
-        f.strip.material.opacity = (.35 + .5 * tEnd) * e * (calmFx ? 1 : .8 + .2 * Math.sin(now * .004 + k + ti * 2));
+        f.body.material.opacity = e;
+        f.edge.material.opacity = .06 * e;
+        f.strip.material.opacity = (.04 + .1 * tEnd) * e * (calmFx ? 1 : .8 + .2 * Math.sin(now * .004 + k + ti * 2));
       });
       var done = seg(tt, .85, 1);
       tw.ghost.material.opacity = .35 * (1 - done);
+      FX.setShadow(ti, tw.g.position.x, 0, 2.8, 2.8, tw.floors.length * FLOOR_GAP * done, done > 0 ? 1 : 0);
       tw.beacon.material.opacity = (.3 + .25 * tEnd) * done;
       tw.name.material.opacity = tw.price.material.opacity = done;
       tw.feats.forEach(function(sp, j){ sp.material.opacity = seg(tt, (j + .5) / 4.5, (j + 1.2) / 4.5) * (1 - tEnd * .6); });

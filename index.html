@@ -275,16 +275,9 @@
     position:absolute;inset:0;
     pointer-events:none;
     background:
-      linear-gradient(90deg, rgba(5,8,13,.6) 0%, rgba(5,8,13,.25) 38%, rgba(5,8,13,0) 55%),
+      radial-gradient(ellipse 52% 62% at 0% 74%, rgba(5,8,13,.9) 0%, rgba(5,8,13,.62) 48%, rgba(5,8,13,0) 100%),
       radial-gradient(ellipse at 60% 50%, rgba(0,0,0,0) 40%, rgba(0,0,0,.6) 100%);
     z-index:2;
-  }
-  /* faint scanlines: the terminal half of the look */
-  #grainVignette::after{
-    content:'';
-    position:absolute;inset:0;
-    opacity:.05;
-    background:repeating-linear-gradient(0deg, #fff 0 1px, transparent 1px 3px);
   }
   /* fixed to the viewport so the hero's cursor effect carries on down the whole page */
   #fxCanvas{ position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:50; }
@@ -679,8 +672,8 @@
   scene.fog = new THREE.FogExp2(BG, FOG);
   var camera = new THREE.PerspectiveCamera(42, 1, 0.1, 400);
 
-  scene.add(new THREE.HemisphereLight(0x5a7a9a, 0x05080d, 0.35));
-  var key = new THREE.DirectionalLight(0x9fd8ff, 0.55);
+  scene.add(new THREE.HemisphereLight(0xb8c8d8, 0x10141a, 0.4));
+  var key = new THREE.DirectionalLight(0xfff1e0, 1.15);
   key.position.set(-20, 30, 18);
   scene.add(key);
   var FX = DWBFX.create(renderer, scene, camera, { small: SMALL, background: BG });
@@ -718,7 +711,7 @@
     var c = document.createElement('canvas'), g = c.getContext('2d');
     var fs = 64;
     g.font = '500 ' + fs + 'px "JetBrains Mono", monospace';
-    c.width = Math.ceil(g.measureText(text).width + 24); c.height = fs + 24;
+    c.width = Math.ceil(Math.max(g.measureText(text).width, text.length * fs * .62) + 24); c.height = fs + 24;
     g.font = '500 ' + fs + 'px "JetBrains Mono", monospace';
     g.fillStyle = color; g.textBaseline = 'middle'; g.fillText(text, 12, c.height / 2 + 2);
     var t = new THREE.CanvasTexture(c); t.encoding = THREE.sRGBEncoding;
@@ -733,13 +726,6 @@
   scene.add(ground);
 
   var R = rng(11), G = 2, EXT = 64;
-  (function dots(){
-    var pts = [];
-    for (var x = -EXT; x <= EXT; x += G) for (var z = -EXT; z <= EXT; z += G) pts.push(x, 0.01, z);
-    var geo = new THREE.BufferGeometry();
-    geo.setAttribute('position', new THREE.Float32BufferAttribute(pts, 3));
-    scene.add(new THREE.Points(geo, new THREE.PointsMaterial({ color: 0x2a3a4c, size: .09, sizeAttenuation: true })));
-  })();
 
   var traces = [];
   var traceUniforms = {
@@ -786,14 +772,15 @@
         '  float g = uPtr * smoothstep(9.0, 0.0, distance(vW.xz, uP.xz));',
         '  vec3 hot = mix(uCyan, uAmber, vA);',
         '  float k = clamp(g + uLit, 0.0, 1.0);',
-        '  vec3 col = mix(vec3(0.22, 0.31, 0.41), hot, k);',
+        '  vec3 col = hot;',
         '  float fog = exp(-uFog * uFog * vD * vD * 1.4);',
-        '  gl_FragColor = vec4(pow(col * (0.55 + 0.9 * k), vec3(2.2)) * (1.0 + 1.6 * k), fog);',
+        '  gl_FragColor = vec4(pow(col * (0.55 + 0.9 * k), vec3(2.2)) * (1.0 + 1.6 * k) * k, fog);',
         '}'
       ].join('\n')
     });
     scene.add(new THREE.LineSegments(geo, mat));
   })();
+  FX.board(traces, EXT, function(x, z){ return x > -15.5 && x < 19.5 && z > -8.5 && z < 12; });
 
   /* ---------------- The build: browser frame on its pad ---------------- */
   var FW = 16, FH = 10;
@@ -803,8 +790,8 @@
 
   /* ---------------- Hardware: monitor, keyboard and PC towers ---------------- */
   /* rounded shapes so the hardware reads as real objects, not boxes */
-  function roundRect(w, h, r){
-    var sh = new THREE.Shape(), x = -w / 2, y = -h / 2;
+  function roundRect(w, h, r, cx, cy){
+    var sh = new THREE.Shape(), x = (cx || 0) - w / 2, y = (cy || 0) - h / 2;
     sh.moveTo(x + r, y); sh.lineTo(x + w - r, y); sh.quadraticCurveTo(x + w, y, x + w, y + r);
     sh.lineTo(x + w, y + h - r); sh.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
     sh.lineTo(x + r, y + h); sh.quadraticCurveTo(x, y + h, x, y + h - r);
@@ -834,48 +821,98 @@
     });
     return out;
   }
-  var PLASTIC = { color: 0x0d1117, roughness: .5, metalness: .25, envMapIntensity: .8 };
-  var ALU = { color: 0x3e4650, roughness: .42, metalness: .85, envMapIntensity: .9 };
+  /* a frame facing +z: outer w x h with a rounded hole, d deep */
+  function ringGeo(w, h, r, hw, hh, hr, d, bevel, segs, hx, hy){
+    var sh = roundRect(w, h, r), bv = bevel || 0;
+    sh.holes.push(roundRect(hw, hh, hr, hx, hy));
+    var g = new THREE.ExtrudeGeometry(sh, { depth: d, bevelEnabled: bv > 0, bevelSize: bv, bevelThickness: bv, bevelSegments: 2, curveSegments: segs || 6 });
+    g.center(); return g;
+  }
+  /* fine streaks from machining: they break up the reflections the way real anodised metal does */
+  var BRUSHED = (function(){
+    var c = document.createElement('canvas'); c.width = c.height = 256;
+    var g = c.getContext('2d'), im = g.createImageData(256, 256), r = rng(5);
+    for (var y = 0; y < 256; y++){
+      var v = 150 + r() * 80;
+      for (var x = 0; x < 256; x++){
+        v += (r() - .5) * 7; v = Math.max(120, Math.min(245, v));
+        var i = (y * 256 + x) * 4; im.data[i] = im.data[i + 1] = im.data[i + 2] = v; im.data[i + 3] = 255;
+      }
+    }
+    g.putImageData(im, 0, 0);
+    var t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(.3, .9);
+    t.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+    return t;
+  })();
+  var PLASTIC = { color: 0x08090b, roughness: .5, metalness: .1, envMapIntensity: .3 };
+  var ANOD = { color: 0x14161a, roughness: .72, roughnessMap: BRUSHED, metalness: .95, envMapIntensity: .55 };
+  var SILVER = { color: 0x383b3f, roughness: .8, roughnessMap: BRUSHED, metalness: 1, envMapIntensity: .5 };
+  var GLOSS = { color: 0x020203, roughness: .14, metalness: 0, envMapIntensity: .9 };
+  var RUBBER = { color: 0x0a0b0d, roughness: .62, metalness: 0, envMapIntensity: .35 };
   function fadeMat(o){ var m = new THREE.MeshStandardMaterial(o); m.transparent = true; m.opacity = 0; return m; }
+  /* lit only by reflections: black glass in front of a screen or an open case */
+  function glassMat(strength, rough){ return new THREE.MeshStandardMaterial({ color: 0x000000, roughness: rough, metalness: 0, envMapIntensity: strength, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }); }
   /* a warm rim from behind and a cool fill so the hardware has highlights and form */
   var rimLight = new THREE.DirectionalLight(0xffc56a, .2); rimLight.position.set(14, 12, -16); scene.add(rimLight);
   var fillLight = new THREE.DirectionalLight(0x7fd6ff, .3); fillLight.position.set(10, 6, 22); scene.add(fillLight);
 
-  /* the frame becomes a big monitor: thin bezel, a rear shell, an aluminium arm and foot */
-  var HW = FW + .7, HH = FH + .7;
-  var monitorMat = fadeMat(PLASTIC);
-  var standMat = fadeMat(ALU);
-  var monitorEdgeMat = new THREE.LineBasicMaterial({ color: 0x9aa7b4, transparent: true, opacity: 0 });
-  var monitor = new THREE.Group();
+  /* the frame becomes a monitor: metal edge, black glass bezel with a chin, a tapered rear and a stand with a cable hole.
+     The screen layers sit inside the bezel's depth, so the picture no longer floats in front of the body */
+  var SCREEN_Y = 3.2 + FH / 2, HW = FW + .56, HH = FH + .9, MCY = SCREEN_Y - .17;
+  var monitorMats = [], monitor = new THREE.Group();
+  function monMat(o){ var m = fadeMat(o); monitorMats.push(m); return m; }
   (function(){
-    var bezel = new THREE.Mesh(plate(HW, HH, .32, .3, .05), monitorMat);
-    bezel.position.set(0, 3.2 + FH / 2, -.24); monitor.add(bezel);
-    var shell = new THREE.Mesh(plate(HW * .62, HH * .58, .5, .9, .12), monitorMat);
-    shell.position.set(0, 3.2 + FH * .52, -.62); monitor.add(shell);
-    var chin = new THREE.Mesh(plate(HW, .32, .34, .12, .04), monitorMat);
-    chin.position.set(0, 3.2 - .2, -.22); monitor.add(chin);
-    var ring = new THREE.LineSegments(new THREE.EdgesGeometry(bezel.geometry, 40), monitorEdgeMat);
-    ring.position.copy(bezel.position); monitor.add(ring);
-    /* stand: a tilted arm from the shell down to a flat oval foot */
-    var arm = new THREE.Mesh(plate(1.5, 4.4, .2, .2, .04), standMat);
-    arm.position.set(0, 2.15, -1.45); arm.rotation.x = -.28; monitor.add(arm);
-    var foot = new THREE.Mesh(slab(5.4, 3.2, .12, 1.4, .04), standMat);
-    foot.position.set(0, 0, -1.2); monitor.add(foot);
-    /* power light on the chin */
-    var pwr = new THREE.Mesh(new THREE.CircleGeometry(.06, 16), new THREE.MeshBasicMaterial({ color: CYAN, transparent: true, opacity: 0 }));
-    pwr.position.set(HW / 2 - .6, 3.2 - .2, -.04); monitor.add(pwr);
+    var FRAME_T = .38;
+    var frame = new THREE.Mesh(ringGeo(HW, HH, .16, HW - .12, HH - .12, .1, FRAME_T, .025, 8), monMat(ANOD));
+    frame.position.set(0, MCY, -.03); monitor.add(frame);
+    var bezel = new THREE.Mesh(ringGeo(HW - .12, HH - .12, .1, FW + .02, FH + .02, .02, .2, 0, 6, 0, .17), monMat(GLOSS));
+    bezel.position.set(0, MCY, .03); monitor.add(bezel);
+    var bodyMat = monMat(PLASTIC);
+    var body = new THREE.Mesh(plate(HW - .16, HH - .16, .2, .1), bodyMat);
+    body.position.set(0, MCY, -.18); monitor.add(body);
+    var rear = new THREE.Mesh(plate(HW * .84, HH * .78, 1, .9, .42, 10), bodyMat);
+    rear.position.set(0, MCY, -.74); monitor.add(rear);
+    /* stand: a slim leaning column with a cable hole, on a flat brushed foot */
+    var silver = monMat(SILVER);
+    var col = roundRect(2.5, 7, .14);
+    col.holes.push(roundRect(1.1, 1.25, .5, 0, -1.75));
+    var neck = new THREE.ExtrudeGeometry(col, { depth: .2, bevelEnabled: true, bevelSize: .03, bevelThickness: .03, bevelSegments: 2, curveSegments: 10 });
+    neck.center();
+    var neckM = new THREE.Mesh(neck, silver);
+    neckM.position.set(0, 3.55, -1.45); neckM.rotation.x = .128; monitor.add(neckM);
+    var foot = new THREE.Mesh(mergeGeos([slab(7.6, 4.2, .16, .6, .05, 8), slab(3, .9, .24, .14, .04, 4).translate(0, .12, -.5)]), silver);
+    foot.position.set(0, 0, -1.4); monitor.add(foot);
+    /* a small maker's mark and the power light on the chin */
+    var c = document.createElement('canvas'); c.width = 256; c.height = 56;
+    var g = c.getContext('2d'); g.font = '600 34px "Segoe UI", system-ui, Arial, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = '#fff';
+    if ('letterSpacing' in g) g.letterSpacing = '9px';
+    g.fillText('DWB', 128, 29);
+    var mt = new THREE.CanvasTexture(c); mt.anisotropy = 4;
+    var mark = new THREE.Mesh(new THREE.PlaneGeometry(.92, .2), new THREE.MeshBasicMaterial({ map: mt, color: 0x565b61, transparent: true, opacity: 0, depthWrite: false }));
+    mark.position.set(0, MCY - HH / 2 + .34, .14); monitor.add(mark);
+    monitor.userData.mark = mark;
+    var pwr = new THREE.Mesh(new THREE.CircleGeometry(.03, 16), new THREE.MeshBasicMaterial({ color: CYAN, transparent: true, opacity: 0 }));
+    pwr.position.set(HW / 2 - .55, MCY - HH / 2 + .34, .14); monitor.add(pwr);
     monitor.userData.pwr = pwr;
+    /* the glass over the panel: it only adds the reflections of the room */
+    var glass = new THREE.Mesh(new THREE.PlaneGeometry(FW, FH), glassMat(.45, .42));
+    glass.material.opacity = 0; glass.position.set(0, SCREEN_Y, .115); glass.renderOrder = 4; monitor.add(glass);
+    monitor.userData.glass = glass;
   })();
   scene.add(monitor);
 
-  /* the pad underneath becomes a keyboard: aluminium case, staggered keycaps, RGB underglow */
-  var KB_W = 14.4, KB_D = 4.7;
-  var pad = new THREE.Mesh(slab(KB_W, KB_D, .32, .35, .06), fadeMat(ALU));
-  pad.position.set(0, 0, 3.6); pad.rotation.x = .05;
+  /* the pad underneath becomes a keyboard: a machined tray and sculpted caps with printed legends.
+     All the caps are one mesh; a pressed key moves in the vertex shader, so typing costs no extra draw calls */
+  var KB_W = 13.7, KB_D = 4.7;
+  var pad = new THREE.Group();
+  pad.position.set(0, .16, 3.6); pad.rotation.x = .06;
   scene.add(pad);
-  var padEdge = new THREE.LineSegments(new THREE.EdgesGeometry(pad.geometry, 40), new THREE.LineBasicMaterial({ color: 0xc7d0da, transparent: true, opacity: 0 }));
-  padEdge.position.copy(pad.position); padEdge.rotation.copy(pad.rotation);
-  scene.add(padEdge);
+  function pressable(m){
+    m.onBeforeCompile = function(sh){
+      sh.vertexShader = 'attribute float aPress;\n' + sh.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\n  transformed.y -= aPress * .1;');
+    };
+    return m;
+  }
   var keyboard = (function(){
     /* a 60% layout in key units: every row adds up to 15 */
     var ROWS = [
@@ -885,29 +922,138 @@
       [2.25,1,1,1,1,1,1,1,1,1,1,2.75],
       [1.25,1.25,1.25,6.25,1.25,1.25,1.25,1.25]
     ];
-    var U = .88, PZ = .84, layout = [];
-    ROWS.forEach(function(row, r){ var c = 0; row.forEach(function(wu){ layout.push([r, c, wu]); c += wu; }); });
-    var n = layout.length, dummy = new THREE.Object3D(), plateGroup = new THREE.Group();
-    plateGroup.position.copy(pad.position); plateGroup.rotation.copy(pad.rotation);
-    var capGeo = slab(1, .7, .22, .1, .035, 2);
-    var caps = new THREE.InstancedMesh(capGeo, fadeMat({ color: 0x151b23, roughness: .75, metalness: .05, envMapIntensity: .4 }), n);
-    var glyphs = new THREE.InstancedMesh(new THREE.PlaneGeometry(.2, .2), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0, depthWrite: false }), n);
-    var x0 = -15 * U / 2, z0 = -ROWS.length * PZ / 2 + PZ / 2, base = new THREE.Color(0x1e5b66);
-    layout.forEach(function(k, i){
-      var w = k[2] * U - .1, x = x0 + k[1] * U + k[2] * U / 2, z = z0 + k[0] * PZ;
-      dummy.position.set(x, .3, z); dummy.rotation.set(0, 0, 0); dummy.scale.set(w, 1, 1); dummy.updateMatrix();
-      caps.setMatrixAt(i, dummy.matrix);
-      var wide = k[2] > 2;
-      dummy.position.set(wide ? x : x - w / 2 + .2, .525, z - (wide ? 0 : .14)); dummy.rotation.set(-Math.PI / 2, 0, 0);
-      dummy.scale.set(wide ? w * 2.6 : 1, wide ? .2 : 1, 1); dummy.updateMatrix();
-      glyphs.setMatrixAt(i, dummy.matrix);
-      glyphs.setColorAt(i, base);
+    var LABELS = [
+      ['Esc','!|1','@|2','#|3','$|4','%|5','^|6','&|7','*|8','(|9',')|0','_|-','+|=','Bksp'],
+      ['Tab','Q','W','E','R','T','Y','U','I','O','P','{|[','}|]','\\'],
+      ['Caps','A','S','D','F','G','H','J','K','L',':|;','"|\'','Enter'],
+      ['Shift','Z','X','C','V','B','N','M','<|,','>|.','?|/','Shift'],
+      ['Ctrl','Opt','Alt','','Alt','Fn','Menu','Ctrl']
+    ];
+    /* each row is sculpted: taller and tipped towards the hands at the top, as real caps are */
+    var ROW_H = [.44, .39, .35, .36, .39], ROW_TILT = [.17, .08, 0, -.07, -.12];
+    var U = .86, BASE_Y = .2, n = 0, SEGS = SMALL ? 1 : 3;
+    ROWS.forEach(function(r){ n += r.length; });
+    var RINGS = [[0, 0, .04, .22], [.03, .72, .06, .7], [.075, .97, .09, 1], [.095, 1, .1, 1], [.15, .975, .11, 1]];
+    var perRing = 4 * (SEGS + 1), perKey = RINGS.length * perRing + 1;
+    var pos = new Float32Array(n * perKey * 3), col = new Float32Array(n * perKey * 3), press = new Float32Array(n * perKey), idx = [];
+    var lpos = new Float32Array(n * 12), luv = new Float32Array(n * 8), lcol = new Float32Array(n * 12), lpress = new Float32Array(n * 4), lidx = [];
+
+    /* the legends, printed once onto one atlas */
+    var ATL = SMALL ? 512 : 1024, GRID = 10, CELL = ATL / GRID, QUAD = .6;
+    var ac = document.createElement('canvas'); ac.width = ac.height = ATL;
+    var ag = ac.getContext('2d'), cx = 0, cy = 0, FONT = '"Segoe UI", system-ui, Arial, sans-serif';
+    ag.fillStyle = '#fff'; ag.textBaseline = 'middle';
+    function printLegend(text, cells){
+      if (cx + cells > GRID){ cx = 0; cy++; }
+      var x = cx * CELL, y = cy * CELL, parts = text.split('|');
+      if (cells > 1){
+        ag.textAlign = 'left'; ag.font = '500 ' + Math.round(CELL * .24) + 'px ' + FONT;
+        ag.fillText(text, x + 3, y + CELL * .5);
+      } else if (parts.length > 1){
+        ag.textAlign = 'center'; ag.font = '500 ' + Math.round(CELL * .25) + 'px ' + FONT;
+        ag.fillText(parts[0], x + CELL / 2, y + CELL * .3); ag.fillText(parts[1], x + CELL / 2, y + CELL * .7);
+      } else {
+        ag.textAlign = 'center'; ag.font = '500 ' + Math.round(CELL * .36) + 'px ' + FONT;
+        ag.fillText(text, x + CELL / 2, y + CELL * .5);
+      }
+      var cell = [cx, cy, cells]; cx += cells; return cell;
+    }
+
+    var base = new THREE.Color(0xb4bcc4), v = 0, l = 0, k = 0, x0 = -15 * U / 2, z0 = -ROWS.length * U / 2 + U / 2;
+    var ALPHA = new THREE.Color(0x050607), MOD = new THREE.Color(0x0c0d0f), ACCENT = new THREE.Color(0x3c1f02), tint = new THREE.Color();
+    ROWS.forEach(function(row, r){
+      var c = 0, H = ROW_H[r], TILT = ROW_TILT[r];
+      row.forEach(function(wu, q){
+        var label = LABELS[r][q], kx = x0 + (c + wu / 2) * U, kz = z0 + r * U, hw = (wu * U - .07) / 2, hd = (U - .07) / 2;
+        tint.copy(label === 'Esc' || label === 'Enter' ? ACCENT : wu > 1 || label === '' ? MOD : ALPHA);
+        var start = v;
+        RINGS.forEach(function(ring, ri){
+          var ih = hw - ring[0], id = hd - ring[0], rad = Math.min(ring[2], id), top = ring[1] > .5;
+          [[1, 1, 0], [-1, 1, 1], [-1, -1, 2], [1, -1, 3]].forEach(function(q2){
+            for (var a = 0; a <= SEGS; a++){
+              var th = (q2[2] + a / SEGS) * Math.PI / 2;
+              var px = q2[0] * (ih - rad) + Math.cos(th) * rad, pz = q2[1] * (id - rad) + Math.sin(th) * rad;
+              pos[v * 3] = kx + px;
+              pos[v * 3 + 1] = BASE_Y + H * ring[1] - (ri === 4 ? 0 : 0) + (top ? -TILT * pz : 0);
+              pos[v * 3 + 2] = kz + pz;
+              col[v * 3] = tint.r * ring[3]; col[v * 3 + 1] = tint.g * ring[3]; col[v * 3 + 2] = tint.b * ring[3];
+              v++;
+            }
+          });
+          if (ri){
+            for (var j = 0; j < perRing; j++){
+              var A = start + (ri - 1) * perRing + j, D = start + (ri - 1) * perRing + (j + 1) % perRing;
+              var B = start + ri * perRing + j, C = start + ri * perRing + (j + 1) % perRing;
+              idx.push(A, B, C, A, C, D);
+            }
+          }
+        });
+        /* the shallow dish in the middle of the cap */
+        pos[v * 3] = kx; pos[v * 3 + 1] = BASE_Y + H * .96; pos[v * 3 + 2] = kz;
+        col[v * 3] = tint.r; col[v * 3 + 1] = tint.g; col[v * 3 + 2] = tint.b;
+        for (var j2 = 0; j2 < perRing; j2++){
+          var first = start + (RINGS.length - 1) * perRing;
+          idx.push(first + j2, v, first + (j2 + 1) % perRing);
+        }
+        v++;
+
+        /* legend: wide keys print on the left edge, the rest in the middle */
+        var wide = label.length > 1 && label.indexOf('|') < 0, cells = wide ? 2 : 1, cell = printLegend(label, cells);
+        var qw = QUAD * cells, qh = QUAD, lx = wide ? kx - hw + .1 + qw / 2 : kx, lz = kz;
+        var ly = BASE_Y + H + .006, u0 = cell[0] / GRID, u1 = (cell[0] + cells) / GRID, v1 = 1 - cell[1] / GRID, v0 = 1 - (cell[1] + 1) / GRID;
+        [[-1, -1, u0, v1], [-1, 1, u0, v0], [1, 1, u1, v0], [1, -1, u1, v1]].forEach(function(p, i){
+          var pz = p[1] * qh / 2;
+          lpos[l * 3 + i * 3] = lx + p[0] * qw / 2; lpos[l * 3 + i * 3 + 1] = ly - TILT * pz; lpos[l * 3 + i * 3 + 2] = lz + pz;
+          luv[l * 2 + i * 2] = p[2]; luv[l * 2 + i * 2 + 1] = p[3];
+        });
+        lidx.push(l, l + 1, l + 2, l, l + 2, l + 3); l += 4;
+        k++; c += wu;
+      });
     });
+
+    var capGeo = new THREE.BufferGeometry();
+    capGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    capGeo.setAttribute('color', new THREE.BufferAttribute(col, 3));
+    capGeo.setAttribute('aPress', new THREE.BufferAttribute(press, 1));
+    capGeo.setIndex(idx); capGeo.computeVertexNormals();
+    var caps = new THREE.Mesh(capGeo, pressable(fadeMat({ color: 0xffffff, vertexColors: true, roughness: .6, metalness: 0, envMapIntensity: .12 })));
+
+    var legendTex = new THREE.CanvasTexture(ac); legendTex.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+    var legGeo = new THREE.BufferGeometry();
+    legGeo.setAttribute('position', new THREE.BufferAttribute(lpos, 3));
+    legGeo.setAttribute('uv', new THREE.BufferAttribute(luv, 2));
+    legGeo.setAttribute('color', new THREE.BufferAttribute(lcol, 3));
+    legGeo.setAttribute('aPress', new THREE.BufferAttribute(lpress, 1));
+    legGeo.setIndex(lidx);
+    var legends = new THREE.Mesh(legGeo, pressable(new THREE.MeshBasicMaterial({ map: legendTex, vertexColors: true, transparent: true, opacity: 0, depthWrite: false })));
+    legends.renderOrder = 2;
+
+    /* tray: walls around the keys, a base and a dark plate the caps stand on */
+    var WELL_W = 15 * U + .1, WELL_D = 5 * U + .1, TRAY_T = .46;
+    var trayMat = fadeMat(ANOD);
+    var trayGeo = ringGeo(KB_W, KB_D, .22, WELL_W, WELL_D, .06, TRAY_T, .03, 8);
+    trayGeo.rotateX(-Math.PI / 2); trayGeo.translate(0, TRAY_T / 2, 0);
+    var tray = new THREE.Mesh(mergeGeos([trayGeo, slab(KB_W - .12, KB_D - .12, .19, .18)]), trayMat);
+    /* the backlight: only seen in the gaps between the caps */
+    var light = new THREE.Mesh(new THREE.PlaneGeometry(WELL_W, WELL_D), new THREE.MeshBasicMaterial({ color: 0x1b6a77, transparent: true, opacity: 0, depthWrite: false }));
+    light.rotation.x = -Math.PI / 2; light.position.y = .195;
+    pad.add(tray, light, caps, legends);
+
     var glow = new THREE.Mesh(new THREE.PlaneGeometry(KB_W * 1.5, KB_D * 2.2), new THREE.MeshBasicMaterial({ color: CYAN, map: GLOW, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending }));
     glow.rotation.x = -Math.PI / 2; glow.position.set(0, .02, pad.position.z);
-    plateGroup.add(caps, glyphs);
-    scene.add(glow, plateGroup);
-    return { caps: caps, glyphs: glyphs, glow: glow, n: n, base: base, heat: new Float32Array(n), lastKey: 0 };
+    scene.add(glow);
+
+    return {
+      caps: caps, legends: legends, tray: tray, light: light, glow: glow, n: n, base: base, heat: new Float32Array(n), lastKey: 0,
+      /* writes one key's press depth and legend colour; flush() sends them all to the GPU together */
+      paint: function(q, color, amt){
+        var d = Math.min(1, amt * 1.5);
+        press.fill(d, q * perKey, (q + 1) * perKey);
+        lpress.fill(d, q * 4, (q + 1) * 4);
+        for (var i = q * 4; i < (q + 1) * 4; i++){ lcol[i * 3] = color.r; lcol[i * 3 + 1] = color.g; lcol[i * 3 + 2] = color.b; }
+      },
+      flush: function(){ capGeo.attributes.aPress.needsUpdate = legGeo.attributes.aPress.needsUpdate = legGeo.attributes.color.needsUpdate = true; }
+    };
   })();
 
   var backPanel = new THREE.Mesh(new THREE.PlaneGeometry(FW, FH), new THREE.MeshBasicMaterial({ color: 0x060b12, transparent: true, opacity: 0, depthWrite: false }));
@@ -970,6 +1116,7 @@
     var url = textSprite('localhost:3000', '#22d3ee', .34); url.position.set(0, FH - .5, .05); chrome.add(url);
     var urlLive = textSprite('your-site.live', '#ffb224', .34); urlLive.position.set(0, FH - .5, .05); urlLive.material.opacity = 0; chrome.add(urlLive);
     var live = textSprite('● LIVE', '#ffb224', .4); live.position.set(FW / 2 - 1.1, FH - .5, .05); live.material.opacity = 0; chrome.add(live);
+    [url, urlLive, live].forEach(function(sp){ sp.material.depthTest = false; });
     chrome.userData.url = url; chrome.userData.urlLive = urlLive; chrome.userData.live = live;
   })();
   site.add(chrome);
@@ -992,25 +1139,25 @@
   var blocks = BLOCKS.map(function(b, i){
     var w = b.w * FW, h = b.h * FH;
     var g = new THREE.Group();
-    var box = new THREE.BoxGeometry(w, h, .3);
+    var box = new THREE.BoxGeometry(w, h, .05);
     var edges = new THREE.LineSegments(new THREE.EdgesGeometry(box), new THREE.LineBasicMaterial({ color: CYAN, transparent: true }));
     g.add(edges);
     var fillMat = b.k === 'hero'
       ? new THREE.MeshBasicMaterial({ map: heroTexture(), transparent: true, opacity: 0, depthWrite: false })
       : new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0, depthWrite: false });
     var fill = new THREE.Mesh(new THREE.PlaneGeometry(w, h), fillMat);
-    fill.position.z = .16; g.add(fill);
+    fill.position.z = .03; g.add(fill);
     /* content bars: placeholder cyan while framing, real "text" and accents when finished */
     var bars = [];
     function bar(bx, by, bw, bh, accent){
       var m = new THREE.Mesh(new THREE.PlaneGeometry(bw, bh), new THREE.MeshBasicMaterial({ color: CYAN, transparent: true, opacity: .25, depthWrite: false }));
-      m.position.set(-w / 2 + bx + bw / 2, h / 2 - by - bh / 2, .18);
+      m.position.set(-w / 2 + bx + bw / 2, h / 2 - by - bh / 2, .035);
       m.userData.accent = accent; g.add(m); bars.push(m);
     }
     if (b.k === 'hero'){ bar(w * .06, h * .22, w * .5, h * .13); bar(w * .06, h * .44, w * .36, h * .07); bar(w * .06, h * .62, w * .16, h * .15, 'amber'); }
     else if (b.k === 'nav'){ bar(.3, h * .3, w * .1, h * .4); for (var q = 0; q < 3; q++) bar(w * (.62 + q * .11), h * .38, w * .07, h * .24); }
     else { bar(w * .1, h * .16, w * .22, h * .16, i % 2 ? 'cyan' : 'amber'); bar(w * .1, h * .5, w * .7, h * .08); bar(w * .1, h * .66, w * .5, h * .08); }
-    var target = new THREE.Vector3(-FW / 2 + b.x * FW + w / 2, FH - b.y * FH - h / 2, .15);
+    var target = new THREE.Vector3(-FW / 2 + b.x * FW + w / 2, FH - b.y * FH - h / 2, .03);
     var r = rng(40 + i);
     var from = target.clone().add(new THREE.Vector3((r() - .5) * 26, (r() - .2) * 14, 8 + r() * 10));
     var rot = new THREE.Euler((r() - .5) * 2, (r() - .5) * 2.4, (r() - .5) * 1.2);
@@ -1018,6 +1165,64 @@
     site.add(g);
     return { g: g, edges: edges, fill: fill, bars: bars, target: target, from: from, rot: rot, k: b.k, w: w, h: h, hov: 0 };
   });
+
+  /* the finished website, painted once and shown on the monitor when the build is done */
+  var liveScreen = (function(){
+    var c = document.createElement('canvas'); c.width = SMALL ? 1024 : 1600; c.height = c.width * FH / FW;
+    var g = c.getContext('2d'), W = c.width, H = c.height, u = W / 1600;
+    function txt(t, x, y, size, weight, color, family){ g.fillStyle = color; g.font = weight + ' ' + Math.round(size * u) + 'px ' + (family || 'system-ui, "Segoe UI", Arial, sans-serif'); g.fillText(t, x * u, y * u); }
+    function rr(x, y, w, h, r, color){ g.fillStyle = color; g.beginPath(); g.moveTo((x + r) * u, y * u); g.arcTo((x + w) * u, y * u, (x + w) * u, (y + h) * u, r * u); g.arcTo((x + w) * u, (y + h) * u, x * u, (y + h) * u, r * u); g.arcTo(x * u, (y + h) * u, x * u, y * u, r * u); g.arcTo(x * u, y * u, (x + w) * u, y * u, r * u); g.closePath(); g.fill(); }
+    g.textBaseline = 'alphabetic';
+    g.fillStyle = '#f6f3ee'; g.fillRect(0, 0, W, H);
+    /* browser */
+    g.fillStyle = '#e4e2de'; g.fillRect(0, 0, W, 62 * u);
+    ['#ff5f57', '#febc2e', '#28c840'].forEach(function(col, i){ g.fillStyle = col; g.beginPath(); g.arc((34 + i * 28) * u, 31 * u, 9 * u, 0, 7); g.fill(); });
+    rr(420, 14, 760, 34, 17, '#ffffff');
+    txt('your-site.live', 740, 38, 18, '500', '#4a4f55');
+    /* nav */
+    g.fillStyle = '#ffffff'; g.fillRect(0, 62 * u, W, 66 * u);
+    txt('NORTHLINE', 60, 106, 25, '700', '#1b2a33');
+    ['Menu', 'Visit', 'About'].forEach(function(t, i){ txt(t, 1120 + i * 110, 104, 19, '500', '#3b464e'); });
+    rr(1440, 80, 110, 34, 4, '#1b2a33'); txt('Order', 1468, 104, 18, '600', '#ffffff');
+    /* hero: a dusk landscape, the kind of photo a real site leads with */
+    var hy = 128 * u, hh = 500 * u, sky = g.createLinearGradient(0, hy, 0, hy + hh);
+    sky.addColorStop(0, '#26455f'); sky.addColorStop(.45, '#c9805a'); sky.addColorStop(.72, '#f2b66d'); sky.addColorStop(1, '#3d4a48');
+    g.fillStyle = sky; g.fillRect(0, hy, W, hh);
+    var sun = g.createRadialGradient(1120 * u, 470 * u, 4 * u, 1120 * u, 470 * u, 300 * u);
+    sun.addColorStop(0, 'rgba(255,240,205,.95)'); sun.addColorStop(.12, 'rgba(255,214,150,.6)'); sun.addColorStop(1, 'rgba(255,190,120,0)');
+    g.fillStyle = sun; g.fillRect(0, hy, W, hh);
+    var R2 = rng(77);
+    [['#6c6f6e', 470, 36], ['#454f4f', 515, 30], ['#2a3435', 560, 24]].forEach(function(l){
+      g.fillStyle = l[0]; g.beginPath(); g.moveTo(0, (hy + hh));
+      var ph = R2() * 6;
+      for (var x = 0; x <= 1600; x += 18){ g.lineTo(x * u, (l[1] + Math.sin(x * .006 + ph) * l[2] + Math.sin(x * .021 + ph) * l[2] * .35 + R2() * 3) * u); }
+      g.lineTo(W, hy + hh); g.closePath(); g.fill();
+    });
+    txt('Roasted slowly.', 80, 330, 82, '700', '#ffffff', 'Georgia, "Times New Roman", serif');
+    txt('Served close to home.', 80, 418, 82, '700', '#ffffff', 'Georgia, "Times New Roman", serif');
+    txt('Small-batch coffee, a short walk from your door.', 84, 468, 25, '400', 'rgba(255,255,255,.94)');
+    rr(84, 500, 210, 58, 4, '#ffb224'); txt('See the menu', 118, 537, 23, '600', '#1b1407');
+    /* three cards */
+    [['Single origin', '#7b5a3f', '#c9a173'], ['Our cafes', '#3f5a5c', '#8fb0a8'], ['Subscribe', '#5e4a55', '#c0a0a6']].forEach(function(cd, i){
+      var cx = 60 + i * 505;
+      rr(cx, 660, 470, 300, 6, '#ffffff');
+      var im = g.createLinearGradient(cx * u, 660 * u, (cx + 470) * u, 810 * u); im.addColorStop(0, cd[1]); im.addColorStop(1, cd[2]);
+      g.fillStyle = im; g.fillRect(cx * u, 660 * u, 470 * u, 170 * u);
+      txt(cd[0], cx + 24, 874, 28, '600', '#1b2a33');
+      txt('Fresh every week, roasted', cx + 24, 908, 19, '400', '#5b656c');
+      txt('on Tuesday mornings.', cx + 24, 934, 19, '400', '#5b656c');
+    });
+    var t = new THREE.CanvasTexture(c); t.encoding = THREE.sRGBEncoding;
+    t.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+    var m = new THREE.Mesh(new THREE.PlaneGeometry(FW, FH), new THREE.MeshBasicMaterial({ map: t, color: 0xa4a4a4, transparent: true, opacity: 0, depthWrite: false }));
+    m.position.set(0, FH / 2, .09); m.renderOrder = 3; m.visible = false;
+    site.add(m);
+    return m;
+  })();
+  /* what that lit screen throws onto the keyboard and the desk */
+  var screenLight = new THREE.PointLight(0xffe6c8, 0, 26, 1.7);
+  screenLight.position.set(0, 7.5, 3.4);
+  scene.add(screenLight);
 
   /* the empty lot in the hero: a pulsing marker where the site will be built */
   var marker = new THREE.Group();
@@ -1048,121 +1253,281 @@
   scene.add(liveGlow);
 
   /* ---------------- Foundation: server, database, CDN as three PC towers ---------------- */
-  /* front mesh grille texture: a fine dot grid */
-  var MESH_TEX = (function(){
-    var c = document.createElement('canvas'); c.width = c.height = 64;
-    var g = c.getContext('2d'); g.fillStyle = '#0a0e13'; g.fillRect(0, 0, 64, 64); g.fillStyle = '#26303b';
-    for (var y = 4; y < 64; y += 8) for (var x = (y / 8 % 2) * 4 + 4; x < 64; x += 8){ g.beginPath(); g.arc(x, y, 2.2, 0, 7); g.fill(); }
-    var t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(5, 9); t.encoding = THREE.sRGBEncoding; return t;
-  })();
-  function fanMesh(radius, color, glowAmt){
-    var fan = new THREE.Group();
-    fan.add(new THREE.Mesh(new THREE.RingGeometry(radius * .86, radius, 40), new THREE.MeshBasicMaterial({ color: color, transparent: true, opacity: .95, side: THREE.DoubleSide })));
-    var hub = new THREE.Mesh(new THREE.CircleGeometry(radius * .22, 20), new THREE.MeshBasicMaterial({ color: 0x0b0f14, side: THREE.DoubleSide }));
-    hub.position.z = .004; fan.add(hub);
-    /* all seven blades share one mesh, so a fan is three draw calls instead of nine */
-    var parts = [];
-    for (var b = 0; b < 7; b++){
-      var bg = new THREE.PlaneGeometry(radius * .62, radius * .2);
-      bg.rotateX(.5); bg.translate(radius * .5, 0, 0); bg.rotateZ(b / 7 * Math.PI * 2);
-      parts.push(bg);
+  /* built to scale with the monitor and standing beside it. Tempered glass shows a real build inside. The parts of a tower
+     are merged by material and shared between all three, so each tower costs about a dozen draw calls */
+  var TW = 3.4, TH = 7.6, TD = 6.8, TF = .22;
+  var TOWER_AT = MOBILE ? [[-10.8, .5], [10.8, .5], [14.6, -5]] : [[-12.4, 1.6], [12.4, 2.2], [17, -4.2]];
+  var towerParts = (function(){
+    function dots(bg, hole, cut){
+      var c = document.createElement('canvas'); c.width = c.height = 64;
+      var g = c.getContext('2d'); g.fillStyle = bg; g.fillRect(0, 0, 64, 64);
+      if (cut) g.globalCompositeOperation = 'destination-out';
+      g.fillStyle = hole;
+      for (var y = 0; y < 2; y++) for (var x = 0; x < 2; x++){
+        [[8, 8], [40, 24]].forEach(function(p){ g.beginPath(); g.arc((p[0] + x * 32) % 64, (p[1] + y * 32) % 64, 6.4, 0, 7); g.fill(); });
+      }
+      var t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.encoding = THREE.sRGBEncoding;
+      t.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+      return t;
     }
-    var blades = new THREE.Mesh(mergeGeos(parts), new THREE.MeshBasicMaterial({ color: color, transparent: true, opacity: .32, side: THREE.DoubleSide, depthWrite: false }));
-    blades.position.z = .006;
-    fan.add(blades);
-    /* drawn after the grille so the fans never drop out behind it */
-    fan.traverse(function(o){ o.renderOrder = 2; });
-    fan.add(glowSprite(color, radius * 3.2, glowAmt));
-    return { g: fan, blades: blades };
-  }
-  var towers = [];
-  [['SERVER', -7.5], ['DATABASE', 0], ['CDN', 7.5]].forEach(function(t, i){
-    var g = new THREE.Group(), h = 3.3, w = 1.6, d = 3;
-    var side = i === 2 ? -1 : 1, fans = [];
-    /* chassis: matte black body on four feet */
-    var body = new THREE.Mesh(plate(d, h, w, .12, .05), new THREE.MeshStandardMaterial(PLASTIC));
-    body.rotation.y = Math.PI / 2;
-    body.position.y = h / 2 + .12; g.add(body);
-    g.add(new THREE.Mesh(mergeGeos([[-1,-1],[1,-1],[1,1],[-1,1]].map(function(c){
-      return new THREE.CylinderGeometry(.11, .13, .12, 12).translate(c[0] * (w / 2 - .22), .06, c[1] * (d / 2 - .3));
-    })), new THREE.MeshStandardMaterial(ALU)));
-    var edge = new THREE.LineSegments(new THREE.EdgesGeometry(body.geometry, 40), new THREE.LineBasicMaterial({ color: 0x8c99a6, transparent: true, opacity: .18 }));
-    edge.position.copy(body.position); edge.rotation.copy(body.rotation); g.add(edge);
-    /* front: mesh grille with three intake fans glowing through it, a top I/O strip */
-    var fz = d / 2 + .062, top = h + .12;
-    var grille = new THREE.Mesh(new THREE.PlaneGeometry(w - .3, h - .85), new THREE.MeshStandardMaterial({ map: MESH_TEX, roughness: .7, metalness: .4 }));
-    var gy = .12 + (h - .85) / 2 + .2;
-    grille.position.set(0, gy, fz + .01); g.add(grille);
-    /* three fans centred on the grille, evenly spaced, sitting just in front of it */
-    [0, 1, 2].forEach(function(k){
-      var f = fanMesh(.39, k === 1 ? AMBER : CYAN, .28);
-      f.g.position.set(0, gy + (1 - k) * .81, fz + .03); g.add(f.g); fans.push(f.blades);
+    var meshTex = dots('#1a1c20', '#000', true); meshTex.repeat.set(9, 16);
+    var topTex = dots('#17191c', '#020203', false); topTex.repeat.set(7, 14);
+
+    /* motherboard: black PCB, slots, sockets and fine traces, as seen through the glass */
+    var boardTex = (function(){
+      var N = SMALL ? 256 : 768, c = document.createElement('canvas'); c.width = N; c.height = Math.round(N * 5.5 / 4.3);
+      var g = c.getContext('2d'), W = c.width, H = c.height, r = rng(21);
+      g.fillStyle = '#0c0f12'; g.fillRect(0, 0, W, H);
+      g.lineWidth = Math.max(1, N / 512);
+      for (var i = 0; i < 90; i++){
+        var x = r() * W, y = r() * H, turn = r() > .5;
+        g.strokeStyle = r() > .75 ? 'rgba(180,140,70,.32)' : 'rgba(70,100,110,.26)';
+        g.beginPath(); g.moveTo(x, y); g.lineTo(x + (turn ? 0 : (r() - .5) * W * .4), y + (turn ? (r() - .5) * H * .3 : 0)); g.stroke();
+      }
+      function bx(px, py, pw, ph, col){ g.fillStyle = col; g.fillRect(px * W, py * H, pw * W, ph * H); }
+      /* PCIe slots along the lower half */
+      [.57, .73, .86].forEach(function(py, n){ bx(.06, py, .78, .018, n ? '#23262a' : '#7c8287'); bx(.1, py + .004, .7, .009, '#0a0b0d'); });
+      /* the socket and its mounting holes */
+      bx(.33, .14, .3, .24, '#14171a'); bx(.37, .17, .22, .18, '#2b2e32');
+      [[.3, .11], [.66, .11], [.3, .41], [.66, .41]].forEach(function(p){ g.fillStyle = '#b39a58'; g.beginPath(); g.arc(p[0] * W, p[1] * H, W * .012, 0, 7); g.fill(); });
+      /* chipset cover and M.2 shield */
+      bx(.58, .62, .3, .2, '#191c20'); bx(.61, .65, .24, .14, '#26292d');
+      bx(.1, .47, .62, .055, '#24272b');
+      /* power connector, SATA ports and tiny parts */
+      bx(.92, .1, .05, .3, '#2e3034'); bx(.9, .7, .07, .16, '#1c2a33');
+      for (var k = 0; k < 150; k++) bx(r(), r(), .008 + r() * .012, .006 + r() * .01, r() > .5 ? '#2c2f33' : '#3f3424');
+      /* the case LEDs light the top of the board more than the bottom */
+      var sh = g.createLinearGradient(0, 0, 0, H); sh.addColorStop(0, 'rgba(0,0,0,0)'); sh.addColorStop(1, 'rgba(0,0,0,.55)');
+      g.fillStyle = sh; g.fillRect(0, 0, W, H);
+      var t = new THREE.CanvasTexture(c); t.encoding = THREE.sRGBEncoding; t.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+      return t;
+    })();
+
+    /* front I/O: two USB-A, a USB-C and a headset jack */
+    var ioTex = (function(){
+      var c = document.createElement('canvas'); c.width = 256; c.height = 40;
+      var g = c.getContext('2d');
+      function port(x, w, r){
+        g.fillStyle = '#000'; g.strokeStyle = '#4a4e54'; g.lineWidth = 2;
+        g.beginPath(); g.moveTo(x + r, 10); g.arcTo(x + w, 10, x + w, 30, r); g.arcTo(x + w, 30, x, 30, r); g.arcTo(x, 30, x, 10, r); g.arcTo(x, 10, x + w, 10, r); g.closePath(); g.fill(); g.stroke();
+      }
+      port(8, 46, 2); g.fillStyle = '#2b5f9e'; g.fillRect(12, 14, 38, 5);
+      port(62, 46, 2); g.fillStyle = '#2b5f9e'; g.fillRect(66, 14, 38, 5);
+      port(118, 30, 9); g.fillStyle = '#4a4e54'; g.fillRect(124, 18, 18, 4);
+      g.fillStyle = '#000'; g.strokeStyle = '#4a4e54'; g.lineWidth = 2; g.beginPath(); g.arc(172, 20, 9, 0, 7); g.fill(); g.stroke();
+      var t = new THREE.CanvasTexture(c); t.encoding = THREE.sRGBEncoding; t.anisotropy = 4; return t;
+    })();
+
+    function P(geo, x, y, z, rx, ry, rz){
+      if (rx) geo.rotateX(rx); if (ry) geo.rotateY(ry); if (rz) geo.rotateZ(rz);
+      geo.translate(x, y, z); return geo;
+    }
+    function B(w, h, d, x, y, z){ return P(new THREE.BoxGeometry(w, h, d), x, y, z); }
+    function tube(pts, r){ return new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts.map(function(p){ return new THREE.Vector3(p[0], p[1], p[2]); })), SMALL ? 16 : 32, r, SMALL ? 5 : 8, false); }
+
+    var ROUND = SMALL ? 16 : 32, L = -TW / 2, FLOOR = TF + .1, SHROUD = 1.35, CEIL = TF + TH - .16;
+    var FAN_R = .96;
+    var FANS = [
+      { x: 0, y: 1.72, z: TD / 2 - .2, r: FAN_R }, { x: 0, y: 3.8, z: TD / 2 - .2, r: FAN_R }, { x: 0, y: 5.88, z: TD / 2 - .2, r: FAN_R },
+      { x: -.25, y: 5.5, z: -TD / 2 + .22, r: .86 }
+    ];
+    var shell = [], inside = [], glow = [];
+
+    /* chassis */
+    shell.push(B(TW, .1, TD, 0, TF + .05, 0));
+    shell.push(P(slab(TW + .05, TD + .05, .16, .14, .035, 6), 0, CEIL, 0));
+    shell.push(B(TW, TH, .08, 0, TF + TH / 2, -TD / 2 + .04));
+    shell.push(B(.08, TH, TD, L + .04, TF + TH / 2, 0));
+    shell.push(B(.1, TH, .16, TW / 2 - .05, TF + TH / 2, TD / 2 - .1), B(.1, TH, .16, TW / 2 - .05, TF + TH / 2, -TD / 2 + .1));
+    shell.push(B(.1, .16, TD, TW / 2 - .05, CEIL - .06, 0), B(.1, .16, TD, TW / 2 - .05, TF + .1, 0));
+    /* the front: a rounded frame around the perforated section, with a solid band for the buttons */
+    var frontCY = TF + TH / 2, holeH = TH - 1.35, holeCY = (.45 - .9) / 2;
+    shell.push(P(ringGeo(TW + .06, TH + .02, .16, TW - .36, holeH, .08, .18, .04, 6, 0, holeCY), 0, frontCY, TD / 2 + .06));
+    /* the black print around the edge of the glass */
+    var print = ringGeo(TD - .06, TH - .04, .05, TD - .56, TH - .54, .03, .012, 0, 4);
+    shell.push(P(print, TW / 2 + .005, TF + TH / 2, 0, 0, Math.PI / 2, 0));
+    /* thumbscrews holding the glass */
+    [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(function(s){
+      shell.push(P(new THREE.CylinderGeometry(.07, .07, .05, 12), TW / 2 + .03, TF + TH / 2 + s[1] * (TH / 2 - .22), s[0] * (TD / 2 - .22), 0, 0, Math.PI / 2));
     });
-    var strip = new THREE.Mesh(new THREE.PlaneGeometry(w - .3, .035), new THREE.MeshBasicMaterial({ color: CYAN, transparent: true, opacity: .85 }));
-    strip.position.set(0, top - .5, fz + .012); g.add(strip);
-    var power = new THREE.Mesh(new THREE.RingGeometry(.07, .1, 24), new THREE.MeshBasicMaterial({ color: AMBER }));
-    power.position.set(w / 2 - .32, top - .27, fz + .012); g.add(power);
-    var leds = new THREE.InstancedMesh(new THREE.CircleGeometry(.035, 12), new THREE.MeshBasicMaterial(), 4), ld = new THREE.Object3D();
+    /* rubber feet */
+    [[-1, -1], [1, -1], [1, 1], [-1, 1]].forEach(function(c){ shell.push(P(new THREE.CylinderGeometry(.2, .24, TF, 14), c[0] * (TW / 2 - .4), TF / 2, c[1] * (TD / 2 - .6))); });
+    /* power button */
+    shell.push(P(new THREE.CylinderGeometry(.13, .14, .05, 24), TW / 2 - .55, TF + TH - .45, TD / 2 + .215, Math.PI / 2));
+
+    /* fans: a square frame with a round throat, a hub and struts. The blades spin separately */
+    FANS.forEach(function(f){
+      var s = f.r * 2.08, sh = roundRect(s, s, .1), hole = new THREE.Path();
+      hole.absarc(0, 0, f.r * .985, 0, Math.PI * 2, true); sh.holes.push(hole);
+      var fg = new THREE.ExtrudeGeometry(sh, { depth: .24, bevelEnabled: false, curveSegments: ROUND }); fg.center();
+      inside.push(P(fg, f.x, f.y, f.z));
+      inside.push(P(new THREE.CylinderGeometry(f.r * .26, f.r * .26, .18, 18), f.x, f.y, f.z, Math.PI / 2));
+      [0, 1, 2].forEach(function(a){ inside.push(P(new THREE.BoxGeometry(f.r * 2, .03, .03), f.x, f.y, f.z - .1, 0, 0, a * Math.PI / 3)); });
+      glow.push(P(new THREE.RingGeometry(f.r * .95, f.r * .985, ROUND), f.x, f.y, f.z + .125));
+    });
+
+    /* power supply shroud, stopping short of the front fans, with vent slots */
+    inside.push(B(TW - .24, SHROUD, TD - .9, 0, FLOOR + SHROUD / 2, -.32));
+    for (var v = 0; v < 8; v++) inside.push(B(.012, .5, .1, TW / 2 - .23, FLOOR + SHROUD / 2, -2.6 + v * .28));
+
+    /* graphics card: heavy shroud and backplate, standing out from the board */
+    var GY = FLOOR + SHROUD + .68, GZ = -.92;
+    inside.push(B(2.05, .62, 4.7, L + 1.13, GY, GZ));
+    inside.push(B(2, .04, 4.62, L + 1.13, GY + .33, GZ));
+    inside.push(B(.14, 1, .05, L + .25, GY - .05, -TD / 2 + .13));
+    glow.push(B(.012, .035, 3.2, L + 2.165, GY + .17, GZ));
+    for (var fin = 0; fin < 26; fin++) inside.push(B(.03, .3, .05, L + 2.16, GY - .1, GZ - 2.15 + fin * .172));
+    inside.push(B(.03, .03, 4.5, L + 2.165, GY + .08, GZ));
+    for (var sc = 0; sc < 5; sc++) inside.push(P(new THREE.CylinderGeometry(.035, .035, .02, 8), L + .55 + (sc % 2) * .9, GY + .36, GZ - 2 + sc));
+
+    /* water cooler: pump on the socket, tubes up to a radiator under the roof */
+    var PY = 5.5, PZ = -1.3;
+    inside.push(P(new THREE.CylinderGeometry(.58, .6, .34, ROUND), L + .28, PY, PZ, 0, 0, Math.PI / 2));
+    inside.push(P(new THREE.CylinderGeometry(.42, .42, .05, ROUND), L + .47, PY, PZ, 0, 0, Math.PI / 2));
+    glow.push(P(new THREE.RingGeometry(.44, .52, ROUND), L + .452, PY, PZ, 0, Math.PI / 2, 0));
+    inside.push(B(1.7, .46, 4.4, -.1, CEIL - .3, -.72));
+    inside.push(tube([[L + .4, PY + .46, PZ + .24], [L + .68, PY + .85, PZ + .6], [L + .9, CEIL - .54, 1.1]], .055));
+    inside.push(tube([[L + .4, PY + .46, PZ - .24], [L + .85, PY + .95, PZ + .1], [L + 1.15, CEIL - .54, 1.3]], .055));
+
+    /* memory: four sticks, each with a light bar along its top edge */
+    [0, 1, 2, 3].forEach(function(q){
+      inside.push(B(.5, 2.15, .13, L + .35, 5.2, -.22 + q * .21));
+      glow.push(B(.02, 2.05, .045, L + .61, 5.2, -.22 + q * .21));
+    });
+    /* heatsinks round the socket and the big power cables */
+    inside.push(B(.3, 1.8, .4, L + .24, 5.3, -2.65), B(.3, .4, 1.9, L + .24, 6.5, -1.8));
+    inside.push(tube([[L + .16, 5, 1], [L + .85, 4.3, 1.3], [L + .95, 3.25, 1.2], [L + .3, 2.2, 1.6]], .16));
+    inside.push(tube([[L + 2.05, GY + .36, .9], [L + 2.1, GY + .85, 1.2], [L + 1.1, 3.9, 1.7], [L + .2, 2.5, 1.9]], .09));
+
+    /* blades: curved and pitched, swept back along their length */
+    var bladeGeo = (function(){
+      var COUNT = 9, RN = SMALL ? 2 : 4, AN = SMALL ? 2 : 3, p = [], ix = [], vi = 0;
+      for (var b = 0; b < COUNT; b++){
+        var a0 = b / COUNT * Math.PI * 2;
+        for (var i = 0; i <= RN; i++) for (var j = 0; j <= AN; j++){
+          var t = i / RN, s = j / AN, rr = .26 + t * .68;
+          var a = a0 + (s - .5) * (.48 + t * .3) + t * .34;
+          p.push(Math.cos(a) * rr, Math.sin(a) * rr, (s - .5) * .32);
+        }
+        for (var i2 = 0; i2 < RN; i2++) for (var j2 = 0; j2 < AN; j2++){
+          var A = vi + i2 * (AN + 1) + j2, C = A + AN + 1;
+          ix.push(A, C, A + 1, A + 1, C, C + 1);
+        }
+        vi += (RN + 1) * (AN + 1);
+      }
+      var g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(p, 3)); g.setIndex(ix); g.computeVertexNormals();
+      return g;
+    })();
+
+    return {
+      shell: mergeGeos(shell), inside: mergeGeos(inside), glow: mergeGeos(glow), blades: bladeGeo, FANS: FANS,
+      shellMat: new THREE.MeshStandardMaterial({ color: 0x030304, roughness: .48, metalness: .5, envMapIntensity: .34 }),
+      insideMat: new THREE.MeshStandardMaterial({ color: 0x040506, roughness: .46, metalness: .6, envMapIntensity: .3, emissive: 0x1a2428, emissiveIntensity: .05 }),
+      bladeMat: new THREE.MeshStandardMaterial({ color: 0x08090a, roughness: .72, metalness: 0, envMapIntensity: .12, side: THREE.DoubleSide }),
+      meshMat: new THREE.MeshStandardMaterial({ map: meshTex, roughness: .5, metalness: .6, envMapIntensity: .3, transparent: true, depthWrite: false, side: THREE.DoubleSide }),
+      topMat: new THREE.MeshStandardMaterial({ map: topTex, roughness: .55, metalness: .4, envMapIntensity: .2 }),
+      boardMat: new THREE.MeshStandardMaterial({ map: boardTex, roughness: .6, metalness: .2, envMapIntensity: .3, emissive: 0xffffff, emissiveMap: boardTex, emissiveIntensity: .5 }),
+      ioMat: new THREE.MeshBasicMaterial({ map: ioTex, transparent: true, depthWrite: false }),
+      glassMat: glassMat(.32, .1),
+      accent: [[.05, .46, .56], [.62, .27, .03], [.05, .46, .56]].map(function(c){ return new THREE.MeshBasicMaterial({ color: new THREE.Color(c[0], c[1], c[2]) }); }),
+      topGeo: new THREE.PlaneGeometry(TW - .9, TD - 1.5).rotateX(-Math.PI / 2),
+      meshGeo: new THREE.PlaneGeometry(TW - .36, holeH),
+      boardGeo: new THREE.PlaneGeometry(4.3, 5.5).rotateY(Math.PI / 2),
+      glassGeo: new THREE.PlaneGeometry(TD - .1, TH - .06).rotateY(Math.PI / 2),
+      holeCY: holeCY, frontCY: frontCY
+    };
+  })();
+  var towers = [];
+  [['SERVER', 1], ['DATABASE', -1], ['CDN', -1]].forEach(function(t, i){
+    var P = towerParts, g = new THREE.Group(), accent = P.accent[i], at = TOWER_AT[i];
+    /* mirrored so each glass side faces the monitor */
+    var inner = new THREE.Group(); inner.scale.x = t[1]; g.add(inner);
+    inner.add(new THREE.Mesh(P.shell, P.shellMat), new THREE.Mesh(P.inside, P.insideMat), new THREE.Mesh(P.glow, accent));
+    var board = new THREE.Mesh(P.boardGeo, P.boardMat); board.position.set(-TW / 2 + .085, 4.42, -1.15); inner.add(board);
+    var glass = new THREE.Mesh(P.glassGeo, P.glassMat); glass.position.set(TW / 2 + .012, TF + TH / 2, 0); glass.renderOrder = 3; inner.add(glass);
+    /* fan blades share one instanced mesh per tower */
+    var blades = new THREE.InstancedMesh(P.blades, P.bladeMat, P.FANS.length);
+    blades.frustumCulled = false; inner.add(blades);
+    var fans = P.FANS.map(function(f, k){
+      var m = new THREE.Matrix4().makeTranslation(f.x, f.y, f.z + .02).scale(new THREE.Vector3(f.r, f.r, 1));
+      blades.setMatrixAt(k, m); return m;
+    });
+    var top = new THREE.Mesh(P.topGeo, P.topMat); top.position.set(0, TF + TH + .002 - .16 + .16, 0); g.add(top);
+    var mesh = new THREE.Mesh(P.meshGeo, P.meshMat); mesh.position.set(0, P.frontCY + P.holeCY, TD / 2 + .1); mesh.renderOrder = 2; g.add(mesh);
+    /* front band: ports, activity lights, power ring and a thin light down the edge */
+    var fz = TD / 2 + .2, by = TF + TH - .45;
+    var io = new THREE.Mesh(new THREE.PlaneGeometry(1.3, .2), P.ioMat); io.position.set(-.7, by, fz); g.add(io);
+    var ring = new THREE.Mesh(new THREE.RingGeometry(.14, .165, 28), accent); ring.position.set(TW / 2 - .55, by, fz + .002);
+    if (t[1] < 0) ring.position.x = -ring.position.x;
+    g.add(ring);
+    var leds = new THREE.InstancedMesh(new THREE.CircleGeometry(.024, 10), new THREE.MeshBasicMaterial(), 4), ld = new THREE.Object3D();
+    leds.frustumCulled = false;
     for (var k = 0; k < 4; k++){
-      ld.position.set(-w / 2 + .3 + k * .14, top - .27, fz + .012); ld.updateMatrix();
+      ld.position.set(.1 + k * .1, by, fz); ld.updateMatrix();
       leds.setMatrixAt(k, ld.matrix); leds.setColorAt(k, CYAN);
     }
     g.add(leds);
-    /* tempered glass side facing the middle: board, GPU with its own glow, and a rear exhaust fan */
-    var sx = side * (w / 2 + .07);
-    var board = new THREE.Mesh(new THREE.PlaneGeometry(d - .5, h - .6), new THREE.MeshStandardMaterial({ color: 0x0f1a22, roughness: .6, metalness: .3 }));
-    board.rotation.y = side * Math.PI / 2; board.position.set(side * (w / 2 + .055), h / 2 + .15, 0); g.add(board);
-    var gpu = new THREE.Mesh(new THREE.BoxGeometry(.02, .32, d - 1), new THREE.MeshStandardMaterial({ color: 0x232c36, roughness: .35, metalness: .8 }));
-    gpu.position.set(sx, h * .45, .1); g.add(gpu);
-    var gpuLine = new THREE.Mesh(new THREE.PlaneGeometry(d - 1.1, .03), new THREE.MeshBasicMaterial({ color: AMBER }));
-    gpuLine.rotation.y = side * Math.PI / 2; gpuLine.position.set(sx + side * .012, h * .45 - .12, .1); g.add(gpuLine);
-    var rear = fanMesh(.42, CYAN, .22);
-    rear.g.rotation.y = side * Math.PI / 2; rear.g.position.set(sx, h * .78, -d / 2 + .65); g.add(rear.g); fans.push(rear.blades);
-    var glass = new THREE.Mesh(new THREE.PlaneGeometry(d - .2, h - .2), new THREE.MeshStandardMaterial({ color: 0x88b8cc, roughness: .05, metalness: .9, envMapIntensity: 1.6, transparent: true, opacity: .14, side: THREE.DoubleSide, depthWrite: false }));
-    glass.rotation.y = side * Math.PI / 2; glass.position.set(side * (w / 2 + .085), h / 2 + .12, 0); g.add(glass);
-    var lbl = textSprite(t[0], '#ffb224', .38); lbl.position.set(0, h + .75, 0); g.add(lbl);
-    g.position.set(t[1], 0, 7.4);
-    g.scale.set(1, .001, 1);
+    var strip = new THREE.Mesh(new THREE.PlaneGeometry(.03, 5.9), new THREE.MeshBasicMaterial({ color: accent.color, transparent: true, opacity: .85 }));
+    strip.position.set((TW / 2 - .09) * -t[1], P.frontCY + P.holeCY, fz - .02); g.add(strip);
+    /* light from inside, spilling out through the glass and the front */
+    var spill = glowSprite(accent.color, 8, .07); spill.position.set(t[1] * (TW / 2 + .3), 4.6, 0); g.add(spill);
+    var lbl = textSprite(t[0], '#ffb224', .5); lbl.position.set(0, TF + TH + 1, 0); g.add(lbl);
+    g.position.set(at[0], 0, at[1]);
+    g.visible = false;
     scene.add(g);
-    towers.push({ g: g, leds: leds, label: lbl, h: h + .12, fans: fans, strip: strip });
+    towers.push({ g: g, leds: leds, label: lbl, fans: fans, blades: blades, spin: 0, strip: strip, x: at[0], z: at[1] });
   });
+  var spinM = new THREE.Matrix4(), spunM = new THREE.Matrix4();
 
-  /* ---------------- Wiring: cables from towers up into the frame ---------------- */
+  /* ---------------- Wiring: cables from the back of each tower, over the floor and up behind the stand ---------------- */
+  var cableMat = new THREE.MeshStandardMaterial(RUBBER);
   var cables = towers.map(function(t, i){
-    var x0 = t.g.position.x, x1 = -5 + i * 5;
+    var x0 = t.x, zr = t.z - TD / 2, x1 = -.55 + i * .55;
     var curve = new THREE.CatmullRomCurve3([
-      new THREE.Vector3(x0, t.g.position.y + t.h + .02, 7.2),
-      new THREE.Vector3(x0, t.g.position.y + t.h + .35, 6.1),
-      new THREE.Vector3(x1 + (x0 - x1) * .35, 3.05, 2.4),
-      new THREE.Vector3(x1, 3.22, .35)
+      new THREE.Vector3(x0, 1.3, zr - .02),
+      new THREE.Vector3(x0, .55, zr - .55),
+      new THREE.Vector3(x0 * .72, .1, Math.min(zr - 1.2, -4.4)),
+      new THREE.Vector3(x1 * 3, .1, -4.2),
+      new THREE.Vector3(x1 * 1.2, .55, -3.25),
+      new THREE.Vector3(x1, 2.4, -2.45),
+      new THREE.Vector3(x1 * .9, 4.2, -1.8)
     ]);
-    var geo = new THREE.TubeGeometry(curve, 80, .07, 6, false);
-    var mesh = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color: AMBER, transparent: true, opacity: .95 }));
+    var geo = new THREE.TubeGeometry(curve, 96, .085, SMALL ? 6 : 10, false);
+    var mesh = new THREE.Mesh(geo, cableMat);
     geo.setDrawRange(0, 0);
     scene.add(mesh);
     return { curve: curve, mesh: mesh, count: geo.index.count };
   });
+  /* the keyboard's own lead, run along the floor to the nearest tower */
+  (function(){
+    var t = towers[1], zr = t.z - TD / 2;
+    var curve = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(5.4, .48, 1.24), new THREE.Vector3(5.65, .2, .85), new THREE.Vector3(6.9, .07, .2),
+      new THREE.Vector3(t.x - 3, .07, zr + .4), new THREE.Vector3(t.x - 1.2, .07, zr - .35), new THREE.Vector3(t.x, .9, zr - .02)
+    ]);
+    monitor.add(new THREE.Mesh(new THREE.TubeGeometry(curve, 48, .055, SMALL ? 5 : 8, false), monMat(RUBBER)));
+  })();
 
   /* ---------------- Data motes drifting up through the scene ---------------- */
   var MOTES = 700;
   var motePos = new Float32Array(MOTES * 3), moteCol = new Float32Array(MOTES * 3), moteSpd = new Float32Array(MOTES);
   for (var m = 0; m < MOTES; m++){
     motePos[m*3] = (Math.random() * 2 - 1) * 45; motePos[m*3+1] = Math.random() * 30; motePos[m*3+2] = (Math.random() * 2 - 1) * 45;
-    var c = Math.random() < .35 ? AMBER : CYAN;
+    var c = DWBFX.DUST;
     moteCol[m*3] = c.r; moteCol[m*3+1] = c.g; moteCol[m*3+2] = c.b;
     moteSpd[m] = .3 + Math.random() * .9;
   }
   var moteGeo = new THREE.BufferGeometry();
   moteGeo.setAttribute('position', new THREE.BufferAttribute(motePos, 3));
   moteGeo.setAttribute('color', new THREE.BufferAttribute(moteCol, 3));
-  var motes = new THREE.Points(moteGeo, new THREE.PointsMaterial({ size: .32, map: GLOW, vertexColors: true, transparent: true, opacity: .7, depthWrite: false, blending: THREE.AdditiveBlending }));
+  var motes = new THREE.Points(moteGeo, new THREE.PointsMaterial({ size: .1, map: GLOW, vertexColors: true, transparent: true, opacity: .32, depthWrite: false, blending: THREE.AdditiveBlending }));
   scene.add(motes);
 
   /* ---------------- Signal pulses ---------------- */
   var pulses = [], MAX_PULSES = 48;
   var pulsePool = [];
   function getSprite(color){
-    var s = pulsePool.pop() || glowSprite(color, 1.1, 1);
+    var s = pulsePool.pop() || glowSprite(color, .62, .9);
     /* pulses ride the floor, so the floor must not slice them into half-domes */
     s.material.depthTest = false;
     s.material.color.copy(color); s.visible = true; scene.add(s);
@@ -1203,7 +1568,7 @@
     { at: 0.20, pos: [9, 13, 25],    look: [0, 8, 0] },     /* blueprint */
     { at: 0.38, pos: [-15, 6, 19],   look: [0, 3.5, 4] },   /* foundation */
     { at: 0.55, pos: [0, 8.6, 21],   look: [0, 8, 0] },     /* framing, face-on */
-    { at: 0.70, pos: [17, 7, 19],    look: [-1, 5.6, 1] },    /* wiring, low along the cables */
+    { at: 0.70, pos: [13, 8, 25],    look: [-1, 5.6, 1] },    /* wiring, low along the cables */
     { at: 0.88, pos: [-4, 9.5, 27],  look: [0, 7.6, 0] },   /* finishing */
     { at: 1.00, pos: [0, 15, 38],    look: [0, 7, 0] }      /* launch pull-back */
   ];
@@ -1336,7 +1701,7 @@
   ripple.userData.t = 1; ripple.visible = false; site.add(ripple);
   function sendRipple(){
     lastRipple = performance.now();
-    ripple.position.set(screenHit.x, screenHit.y, .42);
+    ripple.position.set(screenHit.x, screenHit.y, .1);
     ripple.userData.t = 0; ripple.visible = true;
   }
   function updateScreen(dt, now){
@@ -1348,7 +1713,7 @@
     }
     screenOn += ((overScreen ? 1 : 0) - screenOn) * Math.min(1, dt * 8);
     if (overScreen){
-      screenGlow.position.set(screenHit.x, screenHit.y, .45);
+      screenGlow.position.set(screenHit.x, screenHit.y, .1);
       if (!calmFx && now - lastRipple > 900 && now - ptr.moveT < 120) sendRipple();
     }
     screenGlow.visible = screenOn > .01;
@@ -1409,46 +1774,60 @@
 
     /* blueprint: dashed outline draws itself around the frame */
     outline.geometry.setDrawRange(0, Math.floor((PER_N + 1) * easeOut(t1)));
-    outline.material.opacity = t1 > 0 ? .9 * (1 - t5 * .7) : 0;
-    bpGroup.children[0].material.opacity = .12 * t1 * (1 - t5);
+    outline.material.opacity = t1 > 0 ? .9 * (1 - t5) : 0;
+    bpGroup.children[0].material.opacity = .12 * t1 * (1 - .7 * t3) * (1 - t5);
     bpGroup.children[1].material.opacity = .6 * t1 * (1 - t5);
     bpGroup.children[2].material.opacity = .9 * t1 * (1 - t5);
-    backPanel.material.opacity = .82 * t1;
+    backPanel.material.opacity = .82 * t1 + .18 * t2;
+    backPanel.material.color.setRGB(.023 - .02 * t2, .043 - .038 * t2, .07 - .064 * t2);
 
     /* foundation: pad pours in, towers rise one after another */
-    pad.material.opacity = .95 * easeOut(t2);
-    padEdge.material.opacity = .25 * t2;
-    monitorMat.opacity = standMat.opacity = .97 * easeOut(t2);
-    monitorEdgeMat.opacity = .22 * t2;
+    var hwFade = easeOut(t2);
+    for (var mi = 0; mi < monitorMats.length; mi++) monitorMats[mi].opacity = hwFade;
+    keyboard.tray.material.opacity = keyboard.caps.material.opacity = hwFade;
+    monitor.userData.mark.material.opacity = hwFade;
+    /* a lit panel washes out whatever the glass reflects */
+    monitor.userData.glass.material.opacity = hwFade * (1 - t5);
+    monitor.userData.glass.visible = t5 < 1;
     monitor.userData.pwr.material.opacity = t2 * (t6 > 0 ? 1 : .5);
-    keyboard.caps.material.opacity = .97 * easeOut(t2);
-    keyboard.glyphs.material.opacity = t2;
-    keyboard.glow.material.opacity = (.035 + .09 * t6) * t2;
+    keyboard.legends.material.opacity = t2;
+    keyboard.light.material.opacity = (.16 + .3 * t6) * t2;
+    keyboard.glow.material.opacity = (.02 + .07 * t6) * t2;
     /* fully faded hardware still costs draw calls, so skip it until the foundation starts */
-    monitor.visible = pad.visible = padEdge.visible = keyboard.glow.visible = keyboard.caps.parent.visible = t2 > 0;
+    monitor.visible = pad.visible = keyboard.glow.visible = t2 > 0;
     screenReady = t3;
+    FX.setShadow(3, 0, -1.4, 3.7, 2.1, 13.4, .85 * t2);
+    FX.setShadow(4, 0, 3.6, 6.85, 2.35, .5, t2);
     /* keys tap away while the site is framed, wired and finished */
     if (!calmFx && t3 > 0 && t6 < 1 && now - keyboard.lastKey > 70){
       keyboard.lastKey = now;
       keyboard.heat[(Math.random() * keyboard.n) | 0] = 1;
     }
-    var kbDirty = t6 > 0 && t6 < 1;
+    var kbDirty = t6 > 0 && t6 < 1, kbWrote = false;
     for (var q = 0; q < keyboard.n; q++){
-      var heat = keyboard.heat[q];
-      if (heat <= 0 && !kbDirty && keyboard.settled) continue;
-      if (heat > 0) keyboard.heat[q] = Math.max(0, heat - dt * 3);
+      var heat = keyboard.heat[q], wasHot = heat > 0;
+      if (!wasHot && !kbDirty && keyboard.settled) continue;
+      if (wasHot) keyboard.heat[q] = heat = Math.max(0, heat - dt * 3);
       kc.copy(keyboard.base).lerp(CYAN, .25 * t6).lerp(q % 7 ? CYAN : AMBER, heat);
-      keyboard.glyphs.setColorAt(q, kc);
+      keyboard.paint(q, kc, heat);
+      kbWrote = true;
     }
-    keyboard.glyphs.instanceColor.needsUpdate = true;
+    if (kbWrote) keyboard.flush();
     keyboard.settled = !kbDirty;
     towers.forEach(function(t, i){
       var local = clamp((t2 - i * .22) / .56, 0, 1);
-      t.g.scale.y = Math.max(.001, easeOutBack(local));
+      /* a real case can't stretch, so each tower rises up out of the board instead */
+      var riseT = easeOut(local);
+      t.g.position.y = -(TH + TF + 1.9) * (1 - riseT);
       t.g.visible = local > 0;
+      FX.setShadow(i, t.x, t.z, TW / 2, TD / 2, 7.8 * riseT, local > 0 ? .9 : 0);
       t.strip.material.opacity = .4 + .5 * (calmFx ? 1 : .5 + .5 * Math.sin(now * .003 + i));
       var spin = (calmFx ? 0 : 2 + 10 * t4) * dt;
-      t.fans.forEach(function(f){ f.rotation.z += spin; });
+      if (t.g.visible && spin > 0){
+        t.spin += spin; spinM.makeRotationZ(t.spin);
+        t.fans.forEach(function(f, k){ t.blades.setMatrixAt(k, spunM.multiplyMatrices(f, spinM)); });
+        t.blades.instanceMatrix.needsUpdate = true;
+      }
       for (var k = 0; k < 4; k++){
         var on = t4 >= 1 || calmFx || Math.sin(now * .007 + i * 2 + k * 1.3) > 0;
         t.leds.setColorAt(k, on ? CYAN : BG);
@@ -1457,11 +1836,14 @@
     });
 
     /* framing: sections fly in and snap into place */
-    chrome.visible = t3 > 0;
+    chrome.visible = t3 > 0 && t5 < 1;
+    liveScreen.visible = t5 > 0;
+    liveScreen.material.opacity = easeInOut(t5);
+    screenLight.intensity = 5 * easeInOut(t5);
     var nb = blocks.length;
     blocks.forEach(function(b, i){
       var local = clamp((t3 - i / (nb + 1)) / (2 / (nb + 1)), 0, 1);
-      b.g.visible = local > 0;
+      b.g.visible = local > 0 && t5 < 1;
       if (!b.g.visible) return;
       var e = easeOutBack(local), e2 = easeOut(local);
       b.g.position.lerpVectors(b.from, b.target, e);
@@ -1502,18 +1884,18 @@
     /* hero marker pulses, then hands over to the blueprint */
     var mk = 1 - seg(p, .08, .22);
     marker.visible = mk > 0;
-    poolA.set(marker.position.x, marker.position.z, 6, .22 * mk);
+    poolA.set(marker.position.x, marker.position.z, 6, .06 * mk);
     if (marker.visible){
       var pulse = calmFx ? .5 : (now * .0006) % 1;
       marker.userData.ring.scale.setScalar(1 + pulse * .25);
-      marker.userData.ring.material.opacity = .8 * (1 - pulse) * mk;
+      marker.userData.ring.material.opacity = .55 * (1 - pulse) * mk;
       marker.userData.ring2.material.opacity = .45 * mk;
       marker.children[2].material.opacity = .8 * mk;
     }
 
     /* launch */
-    outlineLive.material.opacity = t6;
-    liveGlow.material.opacity = .22 * t6;
+    outlineLive.visible = false;
+    liveGlow.material.opacity = .05 * t6;
 
     /* idle signals so the hero board feels alive before anyone touches it */
     if (!calmFx && heroFx > .05 && now - lastIdle > 300){
@@ -1809,6 +2191,11 @@
   camU = pathU(smoothP);
   requestAnimationFrame(function(t){
     lastTime = t;
+    /* one unseen frame with all the hardware showing: the real first frame below paints over it before anything reaches the screen */
+    monitor.visible = pad.visible = liveScreen.visible = true;
+    towers.forEach(function(tw){ tw.g.visible = true; tw.g.position.y = 0; });
+    camera.position.set(0, 15, 38); camera.lookAt(0, 7, 0);
+    FX.render(ground, new THREE.Vector3(0, 7, 0));
     frame(getProgress(), t, 0.016, true);
     requestAnimationFrame(function(){ window.__ready = true; requestAnimationFrame(tick); });
   });
