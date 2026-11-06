@@ -288,47 +288,6 @@
     z-index:6;
   }
 
-  /* ---------- Terminal build log ---------- */
-  .term{
-    position:absolute;z-index:4;
-    /* display only: a finger landing on a log line must not lose its touch when the line is rewritten */
-    pointer-events:none;
-    right:clamp(20px,3vw,48px);bottom:clamp(24px,5vh,56px);
-    width:min(360px,30vw);
-    border:1px solid rgba(34,211,238,.22);border-radius:10px;
-    background:rgba(4,8,13,.86);
-    box-shadow:0 18px 50px rgba(0,0,0,.55);
-    font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.65;
-    overflow:hidden;
-    pointer-events:none;
-    transition:opacity .3s var(--ease-out);
-  }
-  .term-head{
-    display:flex;align-items:center;gap:6px;
-    padding:8px 12px;border-bottom:1px solid rgba(34,211,238,.12);
-    color:var(--ink-dim);font-size:10px;letter-spacing:.08em;
-  }
-  .term-head i{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.14);}
-  .term-head span{margin-left:8px;}
-  .term-body{padding:10px 14px 12px;min-height:calc(1.65em * 6 + 22px);display:flex;flex-direction:column;justify-content:flex-end;}
-  .term-line{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#b9c6d4;}
-  .term-line.cmd{color:var(--amber);}
-  .term-line.ok{color:var(--cyan);}
-  .term-line.live{color:var(--amber);font-weight:700;}
-  .term-line.typing{animation:type .42s steps(24,end) both;}
-  @keyframes type{ from{clip-path:inset(0 100% 0 0);} to{clip-path:inset(0 0 0 0);} }
-  .term-line:last-child::after{
-    content:'';display:inline-block;width:7px;height:13px;margin-left:4px;vertical-align:-2px;
-    background:var(--amber);animation:blink 1s steps(1) infinite;
-  }
-  @keyframes blink{ 50%{opacity:0;} }
-  @media (max-width:760px){
-    .term{left:6vw;right:6vw;width:auto;bottom:auto;top:var(--term-top,60vh);font-size:11px;}
-    .term-head{display:none;}
-    .term-body{min-height:0;padding:8px 12px;}
-    .term-line:not(:nth-last-child(-n+2)){display:none;}
-  }
-
   /* ---------- Beat overlays ---------- */
   .beat{
     position:absolute;left:0;right:0;
@@ -565,10 +524,6 @@
   <div class="film-stage" id="stage" role="img" aria-label="A camera flies through a 3D circuit city as a website is built from blueprint to live launch while you scroll">
     <canvas id="filmCanvas" aria-hidden="true"></canvas>
     <div id="grainVignette"></div>
-    <div class="term" id="term" aria-hidden="true">
-      <div class="term-head"><i></i><i></i><i></i><span>dwb — build</span></div>
-      <div class="term-body" id="termBody"></div>
-    </div>
     <div id="bottomFade"></div>
     <div class="beat beat-1" data-in="-0.1" data-peak="0" data-out="0.13">
       <div class="hero-eyebrow mono"><span class="dot"></span>WEBSITE BUILD STUDIO<span class="opt">&nbsp;· OPEN FOR PROJECTS</span></div>
@@ -657,7 +612,6 @@
   /* phones and tablets only: a laptop at 125-150% Windows scaling reports a screen as short as 720px, so screen size alone misreads it as a phone */
   var SMALL = matchMedia('(pointer: coarse)').matches && !matchMedia('(hover: hover) and (pointer: fine)').matches || Math.min(screen.width, screen.height) < 500;
   var MOBILE = window.innerWidth < 760;
-  if (MOBILE) document.documentElement.style.setProperty('--term-top', '160px');
 
   var CYAN = new THREE.Color('#22d3ee'), AMBER = new THREE.Color('#ffb224'), BG = new THREE.Color('#05080d');
 
@@ -1931,41 +1885,6 @@
   /* debounced: iOS fires resize constantly while its toolbars move */
   window.addEventListener('resize', function(){ clearTimeout(resizeTimer); resizeTimer = setTimeout(resize, 150); });
 
-  /* ---------------- Terminal build log ---------------- */
-  var LOG = [
-    { at: 0.00, t: '$ dwb init your-site', c: 'cmd' },
-    { at: 0.11, t: '→ drafting blueprint…' },
-    { at: 0.25, t: '✓ sitemap + architecture locked', c: 'ok' },
-    { at: 0.29, t: '→ provisioning server, database, cdn…' },
-    { at: 0.43, t: '✓ foundation online', c: 'ok' },
-    { at: 0.46, t: '→ framing layout…' },
-    { at: 0.60, t: '✓ 5 sections placed', c: 'ok' },
-    { at: 0.63, t: '→ wiring apis + forms…' },
-    { at: 0.77, t: '✓ all systems connected', c: 'ok' },
-    { at: 0.80, t: '→ applying design tokens…' },
-    { at: 0.88, t: '$ dwb deploy --prod', c: 'cmd' },
-    { at: 0.93, t: '✓ LIVE. built from scratch.', c: 'live' }
-  ];
-  var termBody = document.getElementById('termBody'), term = document.getElementById('term');
-  var shownLines = -1;
-  function updateTerm(p){
-    var n = 0;
-    while (n < LOG.length && LOG[n].at <= p) n++;
-    if (n !== shownLines){
-      var grew = n === shownLines + 1;
-      termBody.textContent = '';
-      for (var i = Math.max(0, n - 6); i < n; i++){
-        var el = document.createElement('div');
-        el.className = 'term-line' + (LOG[i].c ? ' ' + LOG[i].c : '') + (grew && i === n - 1 && !calmFx ? ' typing' : '');
-        el.textContent = LOG[i].t;
-        termBody.appendChild(el);
-      }
-      shownLines = n;
-    }
-    /* on phones the log sits over the hero headline, so it waits for the first scroll */
-    term.style.opacity = MOBILE ? seg(p, .1, .14) : 1;
-  }
-
   /* ---------------- Beats + readout ---------------- */
   var filmScroll = document.getElementById('filmScroll');
   function getProgress(){
@@ -2062,7 +1981,6 @@
     FX.render(ground, camLook);
     updateBeats(p);
     updateReadout(p);
-    updateTerm(smoothP);
     var fadeP = 0;
     bottomFade.style.opacity = fadeP;
     grainVignette.style.opacity = 1 - fadeP * .85;
