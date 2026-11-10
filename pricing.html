@@ -681,6 +681,12 @@
             <input id="bfBiz" name="business" type="text" autocomplete="organization">
           </div>
           <div class="field">
+            <label for="bfUrl">Current website <span class="opt-tag">optional</span></label>
+            <input id="bfUrl" name="website" type="url" inputmode="url" autocomplete="url" placeholder="yourbusiness.com">
+            <p class="field-hint">No site yet? Leave it blank.</p>
+            <p class="field-err" id="bfUrlErr"></p>
+          </div>
+          <div class="field">
             <label for="bfPages">How many pages?</label>
             <select id="bfPages" name="pages">
               <option>1 page</option>
@@ -697,7 +703,7 @@
               <option>Not yet</option>
             </select>
           </div>
-          <div class="field span2">
+          <div class="field">
             <label for="bfTime">Timeline</label>
             <select id="bfTime" name="timeline">
               <option>About 1 week</option>
@@ -705,6 +711,15 @@
               <option>As soon as possible</option>
             </select>
           </div>
+          <fieldset class="field wide">
+            <legend>What do you need more of? <span class="opt-tag">pick any</span></legend>
+            <div class="need-chips">
+              <label class="need-chip"><input type="checkbox" name="need" value="More calls"><span>More calls<small>Phone ringing</small></span></label>
+              <label class="need-chip"><input type="checkbox" name="need" value="More quote requests"><span>Quote requests<small>Leads in your inbox</small></span></label>
+              <label class="need-chip"><input type="checkbox" name="need" value="More bookings"><span>Bookings<small>Jobs on the calendar</small></span></label>
+              <label class="need-chip"><input type="checkbox" name="need" value="More credibility"><span>Credibility<small>Look established</small></span></label>
+            </div>
+          </fieldset>
           <div class="field wide">
             <label for="bfDetails">What should the site say and do?</label>
             <textarea id="bfDetails" name="details" rows="6" required></textarea>
@@ -743,6 +758,12 @@
             <input id="afBiz" name="business" type="text" autocomplete="organization">
           </div>
           <div class="field">
+            <label for="afUrl">Current website <span class="opt-tag">optional</span></label>
+            <input id="afUrl" name="website" type="url" inputmode="url" autocomplete="url" placeholder="yourbusiness.com">
+            <p class="field-hint">No site yet? Leave it blank.</p>
+            <p class="field-err" id="afUrlErr"></p>
+          </div>
+          <div class="field">
             <label for="afPages">How many pages?</label>
             <select id="afPages" name="pages">
               <option>4–6 pages</option>
@@ -759,7 +780,7 @@
               <option>Not sure yet</option>
             </select>
           </div>
-          <div class="field span2">
+          <div class="field">
             <label for="afTime">Timeline</label>
             <select id="afTime" name="timeline">
               <option>2–3 weeks</option>
@@ -767,6 +788,15 @@
               <option>As soon as possible</option>
             </select>
           </div>
+          <fieldset class="field wide">
+            <legend>What do you need more of? <span class="opt-tag">pick any</span></legend>
+            <div class="need-chips">
+              <label class="need-chip"><input type="checkbox" name="need" value="More calls"><span>More calls<small>Phone ringing</small></span></label>
+              <label class="need-chip"><input type="checkbox" name="need" value="More quote requests"><span>Quote requests<small>Leads in your inbox</small></span></label>
+              <label class="need-chip"><input type="checkbox" name="need" value="More bookings"><span>Bookings<small>Jobs on the calendar</small></span></label>
+              <label class="need-chip"><input type="checkbox" name="need" value="More credibility"><span>Credibility<small>Look established</small></span></label>
+            </div>
+          </fieldset>
           <div class="field wide">
             <label for="afDetails">Describe your brand and site</label>
             <textarea id="afDetails" name="details" rows="6" required></textarea>
@@ -805,6 +835,12 @@
             <input id="cfBiz" name="business" type="text" autocomplete="organization">
           </div>
           <div class="field">
+            <label for="cfUrl">Current website <span class="opt-tag">optional</span></label>
+            <input id="cfUrl" name="website" type="url" inputmode="url" autocomplete="url" placeholder="yourbusiness.com">
+            <p class="field-hint">No site yet? Leave it blank.</p>
+            <p class="field-err" id="cfUrlErr"></p>
+          </div>
+          <div class="field">
             <label for="cfType">What do you need?</label>
             <select id="cfType" name="need">
               <option>A custom website</option>
@@ -823,7 +859,7 @@
               <option>Not sure yet</option>
             </select>
           </div>
-          <div class="field span2">
+          <div class="field">
             <label for="cfTime">Timeline</label>
             <select id="cfTime" name="timeline">
               <option>Flexible</option>
@@ -832,6 +868,15 @@
               <option>3+ months</option>
             </select>
           </div>
+          <fieldset class="field wide">
+            <legend>What do you need more of? <span class="opt-tag">pick any</span></legend>
+            <div class="need-chips">
+              <label class="need-chip"><input type="checkbox" name="need" value="More calls"><span>More calls<small>Phone ringing</small></span></label>
+              <label class="need-chip"><input type="checkbox" name="need" value="More quote requests"><span>Quote requests<small>Leads in your inbox</small></span></label>
+              <label class="need-chip"><input type="checkbox" name="need" value="More bookings"><span>Bookings<small>Jobs on the calendar</small></span></label>
+              <label class="need-chip"><input type="checkbox" name="need" value="More credibility"><span>Credibility<small>Look established</small></span></label>
+            </div>
+          </fieldset>
           <div class="field wide">
             <label for="cfDetails">Describe your build</label>
             <textarea id="cfDetails" name="details" rows="6" required></textarea>
@@ -887,6 +932,7 @@
     checks[p + 'Name'] = function(v){ return v ? '' : 'Add your name so we know who to reply to.'; };
     checks[p + 'Email'] = function(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) ? '' : 'Add an email like name@example.com.'; };
     checks[p + 'Phone'] = function(v){ return !v || v.replace(/\D/g, '').length >= 10 ? '' : 'Add a full number with area code, like 214 555 0123.'; };
+    checks[p + 'Url'] = function(v){ return !v || /^(https?:\/\/)?[^\s.]+\.[^\s]{2,}$/i.test(v) ? '' : 'Add a web address like yourbusiness.com, or leave it blank.'; };
     checks[p + 'Details'] = function(v){ return v.length >= 10 ? '' : 'Add a line or two about what you want built.'; };
     function check(id){
       var el = document.getElementById(id), msg = checks[id](el.value.trim()), err = document.getElementById(id + 'Err');
@@ -909,11 +955,13 @@
       /* every named field goes into the email, labelled the way the visitor saw it */
       var data = { package: pkg + ' (' + form.dataset.price + ')' }, lines = ['Package: ' + data.package];
       Array.from(form.elements).forEach(function(el){
-        if (!el.name || el.name.charAt(0) === '_' || el.name === 'details') return;
+        if (!el.name || el.name.charAt(0) === '_' || el.name === 'details' || el.name === 'need') return;
         var v = el.value.trim() || '-', l = form.querySelector('label[for="' + el.id + '"]');
         var text = l ? l.firstChild.textContent.trim() : el.name;
         data[el.name] = v; lines.push(text + ': ' + v);
       });
+      var needs = Array.from(form.querySelectorAll('input[name=need]:checked')).map(function(c){ return c.value; }).join(', ') || '-';
+      data.needs = needs; lines.push('Needs more: ' + needs);
       data.details = form.elements.details.value.trim();
       data._subject = pkg + ' site request: ' + data.name;
       data._template = 'table';
