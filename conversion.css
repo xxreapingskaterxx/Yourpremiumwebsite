@@ -1,0 +1,103 @@
+/* Shared by all four pages: the free-review call to action, the example-builds section (home)
+   and the short free-review form (contact). Uses each page's own tokens (--cyan, --amber, ...). */
+
+/* nav button: full label on wide screens, short label where the header is tight */
+.nav-cta .cta-short{ display:none; }
+@media (max-width:1100px){ .nav-cta .cta-long{ display:none; } .nav-cta .cta-short{ display:inline; } }
+
+/* hero: main button, a quiet second button, and a text link for buyers ready to start */
+.hero-actions{ display:flex;flex-wrap:wrap;align-items:center;gap:12px 14px;margin-top:26px; }
+.beat-1 .hero-actions .cta{ margin-top:0; }
+.cta-ghost{
+  display:inline-flex;align-items:center;min-height:44px;padding:0 22px;border-radius:999px;
+  border:1px solid rgba(255,255,255,.28);background:rgba(5,8,13,.45);color:var(--ink);font-size:13px;font-weight:600;
+  transition:border-color var(--dur-ui) ease,color var(--dur-ui) ease,transform var(--dur-press) var(--ease-out);
+}
+.cta-ghost:active{ transform:scale(.97); }
+.cta-link{ flex-basis:100%;font-size:13px;color:#c3c8d6;text-decoration:underline;text-underline-offset:3px;text-decoration-color:rgba(255,255,255,.3);width:fit-content; }
+@media (hover:hover) and (pointer:fine){
+  .cta-ghost:hover{ border-color:var(--cyan);color:var(--cyan); }
+  .cta-link:hover{ color:var(--amber);text-decoration-color:var(--amber); }
+}
+@media (max-width:720px){ .beat-1 .hero-actions .cta, .cta-ghost{ min-height:46px;display:inline-flex;align-items:center; } }
+
+/* ---------- Example builds (home, right after the film) ---------- */
+.work-grid{ display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px; }
+@media (max-width:1020px){ .work-grid{ grid-template-columns:1fr 1fr; } }
+@media (max-width:680px){ .work-grid{ grid-template-columns:1fr; } }
+.work-card{
+  display:flex;flex-direction:column;gap:14px;padding:16px 16px 22px;border-radius:16px;
+  border:1px solid rgba(255,255,255,.09);background:#080b12;min-width:0;
+}
+.work-shot{ aspect-ratio:16/10;border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,.08);background:#0b111a; }
+.work-shot img{ width:100%;height:100%;object-fit:cover;object-position:top left;display:block; }
+.work-tag{ font-size:10px;font-weight:700;letter-spacing:.14em;padding:5px 9px;border-radius:999px;width:fit-content;margin-top:4px; }
+.work-tag.live{ color:#071a10;background:#4ade80; }
+.work-tag.demo{ color:#1d1402;background:var(--amber); }
+.work-tag.next{ color:#04161a;background:var(--cyan); }
+.work-card h3{ font-size:22px;font-weight:600;line-height:1.2; }
+.work-card .work-sub{ font-size:14px;color:var(--ink-dim);line-height:1.55;margin-top:-6px; }
+.work-facts{ display:flex;flex-direction:column;gap:10px;margin:2px 0 0; }
+.work-facts div{ display:grid;grid-template-columns:72px 1fr;gap:10px;font-size:13px;line-height:1.5; }
+.work-facts dt{ font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.12em;color:var(--cyan);padding-top:3px; }
+.work-facts dd{ margin:0;color:#c3c8d6; }
+.work-link{ margin-top:auto;padding-top:6px;font-size:12px;font-weight:700;letter-spacing:.1em;color:var(--amber);width:fit-content; }
+.work-link:hover{ text-decoration:underline;text-underline-offset:3px; }
+.work-next-panel{
+  aspect-ratio:16/10;border-radius:10px;border:1px dashed rgba(34,211,238,.35);
+  background:radial-gradient(ellipse at 30% 20%,rgba(34,211,238,.10),transparent 60%),#0b111a;
+  display:flex;flex-direction:column;justify-content:center;gap:10px;padding:18px 20px;
+}
+.work-next-panel li{ list-style:none;font-size:13px;color:#c3c8d6;display:flex;gap:10px;align-items:baseline; }
+.work-next-panel li::before{ content:'✓';color:var(--cyan);font-weight:700;flex:none; }
+.work-card .cta, .contact-wrap .cta{
+  margin-top:auto;display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:0 24px;border-radius:999px;
+  background:var(--amber);color:#120c02;font-size:13px;font-weight:600;width:fit-content;
+  transition:transform var(--dur-press) var(--ease-out),background var(--dur-ui) ease;
+}
+@media (hover:hover) and (pointer:fine){ .work-card .cta:hover, .contact-wrap .cta:hover{ background:#ffc457; } }
+.contact-wrap .cta{ margin-top:26px; }
+.work-honesty{ margin-top:22px;font-size:13px;color:var(--ink-dim);max-width:70ch; }
+
+/* ---------- Free website review form (contact) ---------- */
+.review-wrap{ max-width:980px; }
+.review-form{ display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px 22px; }
+.review-form .field{ display:flex;flex-direction:column;gap:8px;min-width:0; }
+.review-form .field.wide{ grid-column:1 / -1; }
+.review-form label, .review-form legend{ font-size:13px;font-weight:600;color:var(--ink); }
+.review-form .opt-tag{ font-weight:400;color:var(--ink-dim);margin-left:4px; }
+.review-form input[type=text], .review-form input[type=email], .review-form input[type=tel], .review-form input[type=url], .review-form textarea{
+  width:100%;font:inherit;font-size:16px;color:var(--ink);
+  background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.14);border-radius:10px;
+  padding:12px 14px;transition:border-color var(--dur-ui) ease,background var(--dur-ui) ease;
+}
+.review-form textarea{ resize:vertical;min-height:96px;line-height:1.5; }
+.review-form input:focus, .review-form textarea:focus{ outline:none;border-color:var(--cyan);background:rgba(34,211,238,.04); }
+.review-form [aria-invalid="true"]{ border-color:#ff6b6b; }
+.review-form fieldset{ border:0;padding:0;margin:0;min-width:0; }
+.review-form legend{ margin-bottom:10px;padding:0; }
+.need-chips{ display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px; }
+@media (max-width:760px){ .need-chips{ grid-template-columns:1fr 1fr; } }
+.need-chip{ position:relative;display:block;cursor:pointer; }
+.need-chip input{ position:absolute;opacity:0;inset:0;margin:0;cursor:pointer; }
+.need-chip span{
+  display:flex;flex-direction:column;gap:3px;min-height:64px;justify-content:center;padding:10px 14px;border-radius:12px;
+  border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.03);font-size:14px;font-weight:600;color:var(--ink);
+  transition:border-color var(--dur-ui) ease,background var(--dur-ui) ease;
+}
+.need-chip small{ font-size:12px;font-weight:400;color:var(--ink-dim); }
+.need-chip input:checked + span{ border-color:var(--amber);background:rgba(255,178,36,.10); }
+.need-chip input:focus-visible + span{ outline:2px solid var(--cyan);outline-offset:2px; }
+.need-chips[aria-invalid="true"] .need-chip span{ border-color:#ff6b6b; }
+.review-form .field-err{ font-size:13px;color:#ff8a8a; }
+.review-form .field-err:empty{ display:none; }
+.review-form .field-hint{ font-size:13px;color:var(--ink-dim); }
+.review-form .form-foot{ flex-direction:row;align-items:center;gap:20px;flex-wrap:wrap;margin-top:6px; }
+.review-form .form-send{
+  display:inline-block;border:0;padding:15px 28px;border-radius:999px;background:var(--amber);color:#050608;cursor:pointer;
+  font:inherit;font-size:15px;font-weight:600;transition:background var(--dur-ui) ease,transform var(--dur-press) var(--ease-out);
+}
+.review-form .form-send:active{ transform:scale(.97); }
+.review-form .form-send:disabled{ opacity:.7;cursor:progress; }
+@media (hover:hover) and (pointer:fine){ .review-form .form-send:hover{ background:#ffc457; } .need-chip:hover span{ border-color:rgba(255,255,255,.3); } }
+@media (max-width:760px){ .review-form{ grid-template-columns:1fr; } }

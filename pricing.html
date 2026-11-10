@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<link rel="canonical" href="https://dawebsitebuilder.com/pricing.html">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Pricing — Da Website Builder</title>
 <link rel="icon" href="brand/favicon-32.png" type="image/png" sizes="32x32">
@@ -527,6 +528,9 @@
     .cue-line::after{ animation:none; }
   }
 </style>
+<link rel="stylesheet" href="conversion.css">
+<script defer src="/_vercel/insights/script.js"></script>
+<script defer src="track.js"></script>
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -540,7 +544,7 @@
     <a class="nav-link" href="services.html">Services</a>
     <a class="nav-link" href="pricing.html" aria-current="page">Pricing</a>
     <a class="nav-link" href="contact.html">Contact</a>
-    <a class="nav-cta" href="#pricing">Start a project</a>
+    <a class="nav-cta" href="contact.html#review" data-track="cta_free_review" data-track-where="nav"><span class="cta-long">Get my free website review</span><span class="cta-short">Free review</span></a>
     <button class="menu-btn" id="menuBtn" type="button" aria-expanded="false" aria-controls="siteMenu"><span class="menu-ico" aria-hidden="true"><i></i><i></i></span><span class="menu-lbl mono">MENU</span></button>
   </nav>
 </header>
@@ -924,6 +928,7 @@
         body: JSON.stringify(data)
       }).then(function(r){ return r.json(); }).then(function(res){
         if (String(res.success) !== 'true') throw new Error(res.message || 'not sent');
+        if (window.dwbTrack) dwbTrack('form_sent', { form: 'package_' + pkg.toLowerCase() });
         form.reset();
         status.textContent = 'Sent. Thanks, ' + data.name + ". We'll reply to " + data.email + ' within one business day.';
       }).catch(fallback).then(function(){ btn.disabled = false; btn.textContent = label; });

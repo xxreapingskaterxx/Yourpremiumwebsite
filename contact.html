@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<link rel="canonical" href="https://dawebsitebuilder.com/contact.html">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Contact — Da Website Builder</title>
 <link rel="icon" href="brand/favicon-32.png" type="image/png" sizes="32x32">
@@ -516,6 +517,9 @@
     .cue-line::after{ animation:none; }
   }
 </style>
+<link rel="stylesheet" href="conversion.css">
+<script defer src="/_vercel/insights/script.js"></script>
+<script defer src="track.js"></script>
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -529,7 +533,7 @@
     <a class="nav-link" href="services.html">Services</a>
     <a class="nav-link" href="pricing.html">Pricing</a>
     <a class="nav-link" href="contact.html" aria-current="page">Contact</a>
-    <a class="nav-cta" href="pricing.html#pricing">Start a project</a>
+    <a class="nav-cta" href="contact.html#review" data-track="cta_free_review" data-track-where="nav"><span class="cta-long">Get my free website review</span><span class="cta-short">Free review</span></a>
     <button class="menu-btn" id="menuBtn" type="button" aria-expanded="false" aria-controls="siteMenu"><span class="menu-ico" aria-hidden="true"><i></i><i></i></span><span class="menu-lbl mono">MENU</span></button>
   </nav>
 </header>
@@ -554,7 +558,8 @@
     <div class="beat beat-1" data-in="-0.1" data-peak="0" data-out="0.12">
       <div class="hero-eyebrow mono"><span class="dot"></span>CONTACT<span class="opt">&nbsp;· OPEN FOR PROJECTS</span></div>
       <h1 class="split" aria-label="Start a build"><span class="w">Start</span> <span class="w">a</span> <span class="w">build</span></h1>
-      <p class="hero-sub">Tell us what you're building. One email starts the whole process.</p>
+      <p class="hero-sub">Tell us about your business and we'll review your website for free. One short form, a reply within one business day.</p>
+      <div class="hero-actions"><a class="cta" href="#review" data-track="cta_free_review" data-track-where="contact_hero">Get my free website review</a></div>
       <div class="scroll-cue mono" aria-hidden="true"><span class="cue-line"></span>SCROLL TO SEND</div>
     </div>
     <div class="beat beat-mid" data-in="0.14" data-peak="0.24" data-out="0.36">
@@ -574,8 +579,8 @@
     </div>
     <div class="beat beat-5" data-in="0.88" data-peak="0.95" data-out="2">
       <h2>Your move.</h2>
-      <p>dbetts@dawebsitebuilder.com</p>
-      <a class="cta" href="mailto:dbetts@dawebsitebuilder.com">Email us</a>
+      <p>One short form. We'll reply with a free review within one business day.</p>
+      <a class="cta" href="#review" data-track="cta_free_review" data-track-where="film_end">Get my free website review</a>
     </div>
     <div class="readout" id="readout">
       <div class="chapter-name mono" id="readoutName">00 — CONTACT</div>
@@ -585,9 +590,66 @@
   </div>
 </div>
 <main id="main">
+  <section id="review">
+    <div class="review-wrap">
+      <div class="section-head reveal">
+        <div class="eyebrow mono">// FREE WEBSITE REVIEW</div>
+        <h2>Get my free website review.</h2>
+        <p>One short form. We'll look at your site the way a new customer would and send back what's costing you calls and what we'd fix first. No obligation. Ready to buy a package instead? <a href="pricing.html#custom" style="color:var(--amber);text-decoration:underline;text-underline-offset:3px" data-track="cta_packages" data-track-where="review">Go straight to the package forms</a>.</p>
+      </div>
+      <form class="review-form reveal" id="reviewForm" novalidate>
+        <div class="field">
+          <label for="rvBiz">Business name</label>
+          <input id="rvBiz" name="business" type="text" autocomplete="organization" required>
+          <p class="field-err" id="rvBizErr"></p>
+        </div>
+        <div class="field">
+          <label for="rvUrl">Current website <span class="opt-tag">optional</span></label>
+          <input id="rvUrl" name="website" type="url" inputmode="url" autocomplete="url" placeholder="yourbusiness.com">
+          <p class="field-hint">No site yet? Leave it blank.</p>
+          <p class="field-err" id="rvUrlErr"></p>
+        </div>
+        <div class="field">
+          <label for="rvName">Your name</label>
+          <input id="rvName" name="name" type="text" autocomplete="name" required>
+          <p class="field-err" id="rvNameErr"></p>
+        </div>
+        <div class="field">
+          <label for="rvEmail">Email</label>
+          <input id="rvEmail" name="email" type="email" autocomplete="email" required>
+          <p class="field-err" id="rvEmailErr"></p>
+        </div>
+        <div class="field">
+          <label for="rvPhone">Phone <span class="opt-tag">optional</span></label>
+          <input id="rvPhone" name="phone" type="tel" autocomplete="tel" inputmode="tel">
+          <p class="field-hint">If you'd rather we call or text.</p>
+          <p class="field-err" id="rvPhoneErr"></p>
+        </div>
+        <fieldset class="field wide">
+          <legend>What do you need more of? <span class="opt-tag">pick any</span></legend>
+          <div class="need-chips" id="rvNeed">
+            <label class="need-chip"><input type="checkbox" name="need" value="More calls"><span>More calls<small>Phone ringing</small></span></label>
+            <label class="need-chip"><input type="checkbox" name="need" value="More quote requests"><span>Quote requests<small>Leads in your inbox</small></span></label>
+            <label class="need-chip"><input type="checkbox" name="need" value="More bookings"><span>Bookings<small>Jobs on the calendar</small></span></label>
+            <label class="need-chip"><input type="checkbox" name="need" value="More credibility"><span>Credibility<small>Look established</small></span></label>
+          </div>
+          <p class="field-err" id="rvNeedErr"></p>
+        </fieldset>
+        <div class="field wide">
+          <label for="rvNote">Anything else? <span class="opt-tag">optional</span></label>
+          <textarea id="rvNote" name="note" rows="3"></textarea>
+        </div>
+        <input type="text" name="_honey" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
+        <div class="field wide form-foot">
+          <button class="form-send" type="submit">Get my free website review</button>
+          <p class="field-hint" id="rvStatus" role="status">Goes straight to our inbox. We reply within one business day.</p>
+        </div>
+      </form>
+    </div>
+  </section>
   <section id="contact">
     <div class="contact-wrap">
-      <div class="reveal"><div class="eyebrow mono">// START A BUILD</div><h2>Let's build your website.</h2></div>
+      <div class="reveal"><div class="eyebrow mono">// RATHER TALK?</div><h2>Email, call or text.</h2></div>
       <div class="contact-links reveal" style="--i:1">
         <a class="big-link" href="mailto:dbetts@dawebsitebuilder.com">
           <span>dbetts@dawebsitebuilder.com</span>
@@ -1399,6 +1461,78 @@
       b.style.translate = ((x - r.width / 2) * .18).toFixed(1) + 'px ' + ((y - r.height / 2) * .3).toFixed(1) + 'px';
     });
     b.addEventListener('pointerleave', function(){ b.style.translate = ''; });
+  });
+})();
+</script>
+<script>
+/* free website review: validates, sends to the inbox through FormSubmit, falls back to the visitor's mail app */
+(function(){
+  var INBOX = 'dbetts@dawebsitebuilder.com';
+  var form = document.getElementById('reviewForm');
+  if (!form) return;
+  var need = document.getElementById('rvNeed');
+  var checks = {
+    rvBiz: function(v){ return v ? '' : 'Add your business name.'; },
+    rvUrl: function(v){ return !v || /^(https?:\/\/)?[^\s.]+\.[^\s]{2,}$/i.test(v) ? '' : 'Add a web address like yourbusiness.com, or leave it blank.'; },
+    rvName: function(v){ return v ? '' : 'Add your name so we know who to reply to.'; },
+    rvEmail: function(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) ? '' : 'Add an email like name@example.com.'; },
+    rvPhone: function(v){ return !v || v.replace(/\D/g, '').length >= 10 ? '' : 'Add a full number with area code, like 214 555 0123.'; }
+  };
+  function checked(){ return Array.from(form.querySelectorAll('input[name=need]:checked')).map(function(c){ return c.value; }); }
+  function checkNeed(){
+    var msg = checked().length ? '' : 'Pick at least one so we know what to focus on.';
+    document.getElementById('rvNeedErr').textContent = msg;
+    need.setAttribute('aria-invalid', msg ? 'true' : 'false');
+    return !msg;
+  }
+  function check(id){
+    var el = document.getElementById(id), msg = checks[id](el.value.trim()), err = document.getElementById(id + 'Err');
+    err.textContent = msg;
+    el.setAttribute('aria-invalid', msg ? 'true' : 'false');
+    if (msg) el.setAttribute('aria-describedby', id + 'Err'); else el.removeAttribute('aria-describedby');
+    return !msg;
+  }
+  Object.keys(checks).forEach(function(id){
+    var el = document.getElementById(id);
+    el.addEventListener('blur', function(){ if (el.value.trim()) check(id); });
+    el.addEventListener('input', function(){ if (el.getAttribute('aria-invalid') === 'true') check(id); });
+  });
+  need.addEventListener('change', function(){ if (need.getAttribute('aria-invalid') === 'true') checkNeed(); });
+  var started = false;
+  form.addEventListener('input', function(){ if (!started){ started = true; if (window.dwbTrack) dwbTrack('form_start', { form: 'free_review' }); } });
+  var btn = form.querySelector('.form-send'), label = btn.textContent, status = document.getElementById('rvStatus');
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    var bad = Object.keys(checks).filter(function(id){ return !check(id); });
+    var needOk = checkNeed();
+    if (bad.length){ document.getElementById(bad[0]).focus(); return; }
+    if (!needOk){ need.querySelector('input').focus(); return; }
+    if (form.elements._honey.value) return;
+    var v = function(n){ return form.elements[n].value.trim(); };
+    var data = {
+      request: 'Free website review',
+      business: v('business'), website: v('website') || 'No website yet', name: v('name'), email: v('email'),
+      phone: v('phone') || '-', needs: checked().join(', '), note: v('note') || '-',
+      _subject: 'Free website review: ' + v('business'), _template: 'table'
+    };
+    var lines = ['Free website review request', '', 'Business: ' + data.business, 'Website: ' + data.website, 'Name: ' + data.name,
+      'Email: ' + data.email, 'Phone: ' + data.phone, 'Needs more: ' + data.needs, '', data.note];
+    function fallback(){
+      location.href = 'mailto:' + INBOX + '?subject=' + encodeURIComponent(data._subject) + '&body=' + encodeURIComponent(lines.join('\n'));
+      status.textContent = "We couldn't send it from here, so your email app should open with the request filled in. If it didn't, email " + INBOX + ' directly.';
+    }
+    btn.disabled = true; btn.textContent = 'Sending…'; status.textContent = 'Sending your request…';
+    fetch('https://formsubmit.co/ajax/' + INBOX, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify(data)
+    }).then(function(r){ return r.json(); }).then(function(res){
+      if (String(res.success) !== 'true') throw new Error(res.message || 'not sent');
+      if (window.dwbTrack) dwbTrack('form_sent', { form: 'free_review', needs: data.needs });
+      form.reset();
+      status.textContent = 'Sent. Thanks, ' + data.name + ". We'll send your review to " + data.email + ' within one business day.';
+    }).catch(function(){ if (window.dwbTrack) dwbTrack('form_fallback', { form: 'free_review' }); fallback(); })
+      .then(function(){ btn.disabled = false; btn.textContent = label; });
   });
 })();
 </script>
