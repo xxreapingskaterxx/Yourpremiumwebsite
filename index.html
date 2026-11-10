@@ -3,14 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Da Website Builder — Custom-Built Websites</title>
+<title>Dallas Websites for Service Businesses | Da Website Builder</title>
+<link rel="canonical" href="https://dawebsitebuilder.com/">
 <link rel="icon" href="brand/favicon-32.png" type="image/png" sizes="32x32">
 <link rel="apple-touch-icon" href="brand/apple-touch-icon.png">
-<meta name="description" content="Da Website Builder builds custom websites from the ground up — no templates, no shortcuts.">
+<meta name="description" content="Custom websites for Dallas service businesses, built to turn local visitors into calls, quote requests and booked work. Get a free website review.">
 <meta name="theme-color" content="#05080d">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Da Website Builder — Custom-Built Websites">
-<meta property="og:description" content="Custom websites built from the ground up — no templates, no shortcuts.">
+<meta property="og:title" content="Websites that turn local visitors into calls, quotes and booked work">
+<meta property="og:url" content="https://dawebsitebuilder.com/">
+<meta property="og:description" content="Custom websites for Dallas service businesses. Get a free website review from Da Website Builder.">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -310,9 +312,9 @@
   }
   .beat h1, .beat h2{ text-shadow:0 2px 26px rgba(5,8,13,.75); }
   .beat-1{ top:0;height:100%;display:flex;flex-direction:column;justify-content:center;align-items:flex-start; }
-  .beat-1 h1{ font-size:clamp(40px,7.2vw,108px); max-width:14ch; }
+  .beat-1 h1{ font-size:clamp(30px,4.6vw,68px); max-width:17ch; line-height:1.05; }
   .beat p{ color:#c3c8d6 !important; text-shadow:0 1px 14px rgba(0,0,0,.85),0 0 2px rgba(0,0,0,.6); }
-  .beat-1 p{ margin-top:22px;font-size:clamp(15px,1.5vw,19px);color:var(--ink-dim);max-width:36ch; }
+  .beat-1 p{ margin-top:22px;font-size:clamp(15px,1.5vw,19px);color:var(--ink-dim);max-width:44ch; }
   .beat-1 h1 .amber{ color:var(--amber); }
   .hero-eyebrow{
     display:inline-flex;align-items:center;gap:10px;margin-bottom:26px;
@@ -328,7 +330,7 @@
   .cue-line::after{content:'';position:absolute;inset:0;background:var(--cyan);transform:translateX(-100%);animation:cue 2.2s var(--ease-in-out) infinite;}
   @keyframes cue{ 60%,100%{transform:translateX(100%);} }
   /* hero wordmark: characters rise in on load (chars wrapped by JS; text stays whole without it) */
-  .split .ch{display:inline-block;transform:translateY(105%);opacity:0;animation:rise .9s var(--ease-out) forwards;animation-delay:calc(var(--c) * 28ms + 120ms);}
+  .split .ch{display:inline-block;transform:translateY(105%);opacity:0;animation:rise .9s var(--ease-out) forwards;animation-delay:calc(var(--c) * 12ms + 120ms);}
   .split .w{display:inline-block;overflow:hidden;padding-bottom:.08em;margin-bottom:-.08em;white-space:nowrap;}
   @keyframes rise{ to{transform:none;opacity:1;} }
   .js .hero-eyebrow, .js .hero-sub, .js .hero-actions, .js .scroll-cue{opacity:0;animation:fadeUp .8s var(--ease-out) forwards;}
@@ -517,6 +519,9 @@
     .cue-line::after{ animation:none; }
   }
 </style>
+<link rel="stylesheet" href="conversion.css">
+<script defer src="/_vercel/insights/script.js"></script>
+<script defer src="track.js"></script>
 </head>
 <body>
 
@@ -530,7 +535,7 @@
     <a class="nav-link" href="services.html">Services</a>
     <a class="nav-link" href="pricing.html">Pricing</a>
     <a class="nav-link" href="contact.html">Contact</a>
-    <a class="nav-cta" href="pricing.html#pricing">Start a project</a>
+    <a class="nav-cta" href="contact.html#review" data-track="cta_free_review" data-track-where="nav"><span class="cta-long">Get my free website review</span><span class="cta-short">Free review</span></a>
     <button class="menu-btn" id="menuBtn" type="button" aria-expanded="false" aria-controls="siteMenu"><span class="menu-ico" aria-hidden="true"><i></i><i></i></span><span class="menu-lbl mono">MENU</span></button>
   </nav>
 </header>
@@ -553,10 +558,10 @@
     <div id="grainVignette"></div>
     <div id="bottomFade"></div>
     <div class="beat beat-1" data-in="-0.1" data-peak="0" data-out="0.13">
-      <div class="hero-eyebrow mono"><span class="dot"></span>WEBSITE BUILD STUDIO<span class="opt">&nbsp;· OPEN FOR PROJECTS</span></div>
-      <h1 class="split" aria-label="Da Website Builder"><span class="w">Da</span> <span class="w">Website</span> <span class="w">Builder</span></h1>
-      <p class="hero-sub">Custom websites engineered from the ground up. Blueprint to launch, no templates.</p>
-      <div class="hero-actions"><a class="cta" href="pricing.html#pricing">Start a project</a></div>
+      <div class="hero-eyebrow mono"><span class="dot"></span>DALLAS SERVICE BUSINESSES<span class="opt">&nbsp;· FREE WEBSITE REVIEW</span></div>
+      <h1 class="split" aria-label="Websites that turn local visitors into calls, quote requests, and booked work."><span class="w">Websites</span> <span class="w">that</span> <span class="w">turn</span> <span class="w">local</span> <span class="w">visitors</span> <span class="w">into</span> <span class="w hl">calls,</span> <span class="w hl">quote</span> <span class="w hl">requests,</span> <span class="w hl">and</span> <span class="w hl">booked</span> <span class="w hl">work.</span></h1>
+      <p class="hero-sub">Custom-built sites for Dallas contractors, cleaners, detailers and other local service businesses. Fast on phones, clear about what you do, and built to get you contacted.</p>
+      <div class="hero-actions"><a class="cta" href="contact.html#review" data-track="cta_free_review" data-track-where="hero">Get my free website review</a><a class="cta-ghost" href="#work" data-track="cta_see_work" data-track-where="hero">See example builds</a><a class="cta-link" href="pricing.html#custom" data-track="cta_packages" data-track-where="hero">Ready to start? See packages →</a></div>
       <div class="scroll-cue mono" aria-hidden="true"><span class="cue-line"></span>SCROLL TO BUILD</div>
     </div>
     <div class="beat beat-mid" data-in="0.13" data-peak="0.2" data-out="0.31">
@@ -573,8 +578,8 @@
     </div>
     <div class="beat beat-5" data-in="0.78" data-peak="0.88" data-out="2">
       <h2>Built. Deployed. Live.</h2>
-      <p>See what we can build for you.</p>
-      <a class="cta" href="pricing.html#pricing">Start a project</a>
+      <p>Want to know what your current site is costing you? We'll look it over for free.</p>
+      <a class="cta" href="contact.html#review" data-track="cta_free_review" data-track-where="film_end">Get my free website review</a>
     </div>
     <div class="readout" id="readout">
       <div class="chapter-name mono" id="readoutName">01 — BLUEPRINT</div>
@@ -584,9 +589,56 @@
   </div>
 </div>
 <main id="main">
+  <section id="work">
+    <div class="section-head reveal">
+      <div class="eyebrow mono">// EXAMPLE BUILDS</div>
+      <h2>See the work before you call.</h2>
+      <p>Every card says exactly what it is: a live site, a concept demo, or the next build. No made-up clients and no made-up numbers.</p>
+    </div>
+    <div class="work-grid">
+      <article class="work-card spot reveal" style="--i:0">
+        <div class="work-shot"><img src="work/this-site.jpg" width="960" height="600" loading="lazy" alt="The Da Website Builder home page: a 3D circuit city behind the headline and free review button"></div>
+        <div class="work-tag live mono">LIVE · OUR OWN SITE</div>
+        <h3>Da Website Builder</h3>
+        <p class="work-sub">The site you're on, designed and coded in-house.</p>
+        <dl class="work-facts">
+          <div><dt>SCOPE</dt><dd>Four pages, each with its own 3D scroll scene. Package request forms and a free-review form.</dd></div>
+          <div><dt>OUTCOME</dt><dd>Live at dawebsitebuilder.com. Every form request goes straight to our inbox, with a phone fallback to call or text.</dd></div>
+        </dl>
+        <a class="work-link mono" href="pricing.html#custom" data-track="work_live_site" data-track-where="work">SEE THE REQUEST FORMS →</a>
+      </article>
+      <article class="work-card spot reveal" style="--i:1">
+        <div class="work-shot"><img src="work/demo-booking.jpg" width="960" height="573" loading="lazy" alt="Owner dashboard from a car wash booking concept: weekly calendar and today's bookings, filled with sample data"></div>
+        <div class="work-tag demo mono">CONCEPT DEMO · NOT A CLIENT SITE</div>
+        <h3>Car wash booking site</h3>
+        <p class="work-sub">A pitch mock-up we built for a South Dallas car wash. Bookings shown are sample data.</p>
+        <dl class="work-facts">
+          <div><dt>SCOPE</dt><dd>Online booking, owner calendar with crew logins, and a chat or voice assistant that books a slot.</dd></div>
+          <div><dt>OUTCOME</dt><dd>Not launched, so there are no results to report yet. Ask us and we'll walk you through it.</dd></div>
+        </dl>
+        <a class="work-link mono" href="contact.html#review" data-track="work_demo_walkthrough" data-track-where="work">ASK FOR A WALKTHROUGH →</a>
+      </article>
+      <article class="work-card spot reveal" style="--i:2">
+        <ul class="work-next-panel">
+          <li>Is your phone number one tap away?</li>
+          <li>Can a visitor ask for a quote in under a minute?</li>
+          <li>Does it load fast on a phone?</li>
+          <li>Would a stranger trust it enough to call?</li>
+        </ul>
+        <div class="work-tag next mono">NEXT BUILD · YOURS</div>
+        <h3>Your business</h3>
+        <p class="work-sub">Send us your site, or tell us you don't have one yet.</p>
+        <dl class="work-facts">
+          <div><dt>SCOPE</dt><dd>A free review of your current site against the four questions above.</dd></div>
+          <div><dt>OUTCOME</dt><dd>A short list of what's costing you calls and what we'd fix first. Within one business day, no obligation.</dd></div>
+        </dl>
+        <a class="cta" href="contact.html#review" data-track="cta_free_review" data-track-where="work">Get my free website review</a>
+      </article>
+    </div>
+  </section>
   <section id="contact">
     <div class="contact-wrap">
-      <div class="reveal"><div class="eyebrow mono">// START A BUILD</div><h2>Let's build your website.</h2></div>
+      <div class="reveal"><div class="eyebrow mono">// START HERE</div><h2>Get a free review of your website.</h2><a class="cta" href="contact.html#review" data-track="cta_free_review" data-track-where="home_contact">Get my free website review</a></div>
       <div class="contact-links reveal" style="--i:1">
         <a class="big-link" href="mailto:dbetts@dawebsitebuilder.com">
           <span>dbetts@dawebsitebuilder.com</span>
@@ -624,7 +676,7 @@
       w.setAttribute('aria-hidden', 'true');
       for (var i = 0; i < txt.length; i++){
         var s = document.createElement('span');
-        s.className = 'ch' + (wi === all.length - 1 ? ' amber' : '');
+        s.className = 'ch' + (w.classList.contains('hl') ? ' amber' : '');
         s.style.setProperty('--c', c++);
         s.textContent = txt[i];
         w.appendChild(s);
