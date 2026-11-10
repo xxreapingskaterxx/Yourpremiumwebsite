@@ -74,8 +74,9 @@
 .review-form textarea{ resize:vertical;min-height:96px;line-height:1.5; }
 .review-form input:focus, .review-form textarea:focus{ outline:none;border-color:var(--cyan);background:rgba(34,211,238,.04); }
 .review-form [aria-invalid="true"]{ border-color:#ff6b6b; }
-.review-form fieldset{ border:0;padding:0;margin:0;min-width:0; }
-.review-form legend{ margin-bottom:10px;padding:0; }
+.review-form fieldset, .custom-form fieldset{ border:0;padding:0;margin:0;min-width:0; }
+.review-form legend, .custom-form legend{ margin-bottom:10px;padding:0;font-size:13px;font-weight:600;color:var(--ink); }
+.custom-form legend .opt-tag{ font-weight:400;color:var(--ink-dim);margin-left:4px; }
 .need-chips{ display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px; }
 @media (max-width:760px){ .need-chips{ grid-template-columns:1fr 1fr; } }
 .need-chip{ position:relative;display:block;cursor:pointer; }
